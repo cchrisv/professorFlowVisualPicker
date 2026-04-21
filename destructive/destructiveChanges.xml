@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>demoWidgetsDirect</members>
+        <members>demoWidgetsDirectCpe</members>
+        <members>pflowAtomCornerOrnament</members>
+        <members>pflowAtomPickerCard</members>
+        <members>pflowAtomPill</members>
+        <members>pflowAtomPresetTile</members>
+        <members>pflowAtomSurfaceTexture</members>
+        <members>pflowMoleculeCardDetailModal</members>
+        <members>pflowUtilityPickerRecipes</members>
+        <members>pflowUtilityPresetRegistry</members>
+        <name>LightningComponentBundle</name>
+    </types>
+</Package>

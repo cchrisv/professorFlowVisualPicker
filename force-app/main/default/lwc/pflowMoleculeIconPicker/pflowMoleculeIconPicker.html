@@ -1,0 +1,165 @@
+<template>
+    <div class="pflow-icon-picker">
+        <template lwc:if={isCombobox}>
+            <label class="slds-form-element__label" for="combobox-trigger">
+                <template lwc:if={required}>
+                    <abbr title="required" class="slds-required">*</abbr>
+                </template>
+                {label}
+            </label>
+            <div class="slds-form-element__control">
+                <div class="pflow-combobox" onblur={handleBlur}>
+                    <button
+                        type="button"
+                        class="pflow-combobox__trigger slds-button slds-button_neutral"
+                        id="combobox-trigger"
+                        aria-haspopup="listbox"
+                        aria-expanded={_isOpen}
+                        aria-label={label}
+                        disabled={disabled}
+                        onclick={handleOpen}
+                    >
+                        <template lwc:if={hasSelection}>
+                            <lightning-icon icon-name={_value} size="x-small" alternative-text=""></lightning-icon>
+                        </template>
+                        <span class="pflow-combobox__label">{placeholderLabel}</span>
+                        <template lwc:if={hasSelection}>
+                            <span
+                                class="pflow-combobox__clear"
+                                role="button"
+                                tabindex="0"
+                                aria-label="Clear selection"
+                                onclick={handleClear}
+                            >
+                                <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Clear"></lightning-icon>
+                            </span>
+                        </template>
+                        <lightning-icon icon-name="utility:down" size="x-small" alternative-text=""></lightning-icon>
+                    </button>
+
+                    <div class={comboboxPanelClass} role="dialog" aria-label="Icon picker">
+                        <ul
+                            class="slds-tabs_default__nav pflow-tabs"
+                            role="tablist"
+                            onkeydown={handleTabKeydown}
+                        >
+                            <template for:each={setTabs} for:item="t">
+                                <li
+                                    key={t.key}
+                                    class={t.liClass}
+                                    role="presentation"
+                                >
+                                    <button
+                                        type="button"
+                                        class={t.buttonClass}
+                                        role="tab"
+                                        aria-selected={t.ariaSelected}
+                                        tabindex={t.tabIndex}
+                                        data-set={t.key}
+                                        onclick={handleTabClick}
+                                    >{t.label}</button>
+                                </li>
+                            </template>
+                        </ul>
+
+                        <div class="pflow-search">
+                            <lightning-icon icon-name="utility:search" size="x-small" alternative-text=""></lightning-icon>
+                            <input
+                                type="search"
+                                class="pflow-search__input"
+                                placeholder="Search icons..."
+                                value={_searchTerm}
+                                oninput={handleSearchInput}
+                                aria-label="Search icons"
+                            />
+                        </div>
+
+                        <div class="pflow-grid" role="listbox" aria-label="Icons">
+                            <template for:each={visibleIcons} for:item="entry">
+                                <button
+                                    key={entry.id}
+                                    type="button"
+                                    class={entry.buttonClass}
+                                    role="option"
+                                    aria-selected={entry.selected}
+                                    aria-label={entry.iconName}
+                                    title={entry.iconName}
+                                    data-icon={entry.iconName}
+                                    onclick={handleIconClick}
+                                    onkeydown={handleIconKeydown}
+                                >
+                                    <lightning-icon icon-name={entry.iconName} size="small" alternative-text=""></lightning-icon>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template lwc:if={isTabs}>
+            <fieldset class="slds-form-element">
+                <legend class="slds-form-element__legend slds-form-element__label">
+                    <template lwc:if={required}>
+                        <abbr title="required" class="slds-required">*</abbr>
+                    </template>
+                    {label}
+                </legend>
+                <ul
+                    class="slds-tabs_default__nav pflow-tabs"
+                    role="tablist"
+                    onkeydown={handleTabKeydown}
+                >
+                    <template for:each={setTabs} for:item="t">
+                        <li
+                            key={t.key}
+                            class={t.liClass}
+                            role="presentation"
+                        >
+                            <button
+                                type="button"
+                                class={t.buttonClass}
+                                role="tab"
+                                aria-selected={t.ariaSelected}
+                                tabindex={t.tabIndex}
+                                data-set={t.key}
+                                onclick={handleTabClick}
+                            >{t.label}</button>
+                        </li>
+                    </template>
+                </ul>
+
+                <div class="pflow-search">
+                    <lightning-icon icon-name="utility:search" size="x-small" alternative-text=""></lightning-icon>
+                    <input
+                        type="search"
+                        class="pflow-search__input"
+                        placeholder="Search icons..."
+                        value={_searchTerm}
+                        oninput={handleSearchInput}
+                        aria-label="Search icons"
+                    />
+                </div>
+
+                <div class="pflow-grid pflow-grid_wide" role="radiogroup" aria-label="Icons">
+                    <template for:each={visibleIcons} for:item="entry">
+                        <button
+                            key={entry.id}
+                            type="button"
+                            class={entry.buttonClass}
+                            role="radio"
+                            aria-checked={entry.selected}
+                            aria-label={entry.iconName}
+                            title={entry.iconName}
+                            data-icon={entry.iconName}
+                            onclick={handleIconClick}
+                            onkeydown={handleIconKeydown}
+                        >
+                            <lightning-icon icon-name={entry.iconName} size="small" alternative-text=""></lightning-icon>
+                        </button>
+                    </template>
+                </div>
+            </fieldset>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,127 @@
+<template>
+    <div class="pflow-group-wrapper">
+        <!-- Search bar — tile variants only. Dropdown has its own built-in
+             filtering; radio renders the full set and is typically shorter. -->
+        <template lwc:if={enableSearch}>
+            <template lwc:if={isTileVariant}>
+                <div class="pflow-search-bar">
+                    <c-pflow-atom-icon name="utility:search" size="sm"></c-pflow-atom-icon>
+                    <input
+                        type="search"
+                        class="pflow-search-bar__input"
+                        placeholder="Search"
+                        value={_searchTerm}
+                        oninput={handleSearch}
+                        aria-label="Filter items"
+                    />
+                </div>
+            </template>
+        </template>
+
+        <template lwc:if={showToolbar}>
+            <div class="pflow-toolbar">
+                <template lwc:if={showSelectAll}>
+                    <button
+                        type="button"
+                        class="slds-button slds-button_neutral pflow-toolbar__btn"
+                        onclick={handleSelectAll}
+                    >Select all</button>
+                    <button
+                        type="button"
+                        class="slds-button slds-button_neutral pflow-toolbar__btn"
+                        onclick={handleClearAll}
+                    >Clear all</button>
+                </template>
+                <span class="pflow-toolbar__counter">{counterLabel}</span>
+            </div>
+        </template>
+
+        <!-- Tile-based variants (grid, list, horizontal) -->
+        <template lwc:if={isTileVariant}>
+            <div
+                class={groupClass}
+                style={groupStyle}
+                role={groupRole}
+                oncardselect={handleCardSelect}
+            >
+                <template for:each={decoratedItems} for:item="item">
+                    <c-pflow-atom-visual-pick
+                        key={item.id}
+                        item={item}
+                        variant={atomVariant}
+                        selected={item._selected}
+                        disabled={item._disabled}
+                        selection-mode={selectionMode}
+                        group-name={_groupName}
+                        size={size}
+                        aspect-ratio={aspectRatio}
+                        badge-position={badgePosition}
+                        badge-variant={badgeVariant}
+                        badge-shape={badgeShape}
+                        selection-indicator={selectionIndicator}
+                        elevation={elevation}
+                        pattern={pattern}
+                        pattern-tone={patternTone}
+                        corner-style={cornerStyle}
+                        corner-tone={cornerTone}
+                        surface-style={surfaceStyle}
+                        surface-tone={surfaceTone}
+                        icon-decor={iconDecor}
+                        icon-shape={iconShape}
+                        icon-style={iconStyle}
+                        icon-shading={iconShading}
+                        icon-tone={iconTone}
+                        icon-tone-hex={iconToneHex}
+                        icon-glyph-tone={iconGlyphTone}
+                        icon-glyph-tone-hex={iconGlyphToneHex}
+                        icon-size={iconSize}
+                        pattern-tone-hex={patternToneHex}
+                        corner-tone-hex={cornerToneHex}
+                        surface-tone-hex={surfaceToneHex}
+                        badge-variant-hex={badgeVariantHex}
+                        show-icons={showIcons}
+                        show-badges={showBadges}
+                    ></c-pflow-atom-visual-pick>
+                </template>
+                <template lwc:if={isEmpty}>
+                    <div class="pflow-empty">
+                        <c-pflow-atom-icon name="utility:search" size="sm"></c-pflow-atom-icon>
+                        <p>No items to display.</p>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- Rich dropdown (combobox). Single-select only; min/max/selectAll
+             aren't meaningful. Search lives inside the combobox itself. -->
+        <template lwc:if={isDropdown}>
+            <div class="pflow-group pflow-group_dropdown">
+                <c-pflow-molecule-rich-combobox
+                    items={items}
+                    value={singleSelectedValue}
+                    enable-search={enableSearch}
+                    badge-variant={badgeVariant}
+                    badge-shape={badgeShape}
+                    onchange={handleDropdownChange}
+                ></c-pflow-molecule-rich-combobox>
+            </div>
+        </template>
+
+        <!-- Native radio group. Single-select; vertical stack by default.
+             Label is supplied by the organism's field wrapper, so we hide
+             the one lightning-radio-group renders. -->
+        <template lwc:if={isRadio}>
+            <div class="pflow-group pflow-group_radio">
+                <lightning-radio-group
+                    name="pflow-radio"
+                    variant="label-hidden"
+                    label="Options"
+                    options={nativeOptions}
+                    value={singleSelectedValue}
+                    type="radio"
+                    onchange={handleRadioChange}
+                ></lightning-radio-group>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,2208 @@
+/* =============================================================================
+   pflowFlowPickerConfigModal — SLDS 2 two-panel studio
+   Left panel (nav + live preview) | splitter | right panel (section controls)
+   ============================================================================= */
+
+:host {
+    --pflow-studio-left-w: 20rem;
+
+    --pflow-studio-surface: var(--slds-g-color-neutral-base-100, #ffffff);
+    --pflow-studio-surface-alt: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    --pflow-studio-surface-sunk: var(--slds-g-color-neutral-base-90, #ececec);
+    --pflow-studio-ink: var(--slds-g-color-neutral-base-10, #181818);
+    --pflow-studio-ink-weak: var(--slds-g-color-neutral-base-40, #5c5c5c);
+    --pflow-studio-border: var(--slds-g-color-border-base-1, #c9c9c9);
+    --pflow-studio-hairline: var(--slds-g-color-border-base-1, #e5e5e5);
+    --pflow-studio-brand: var(--slds-g-color-brand-base-50, #0176d3);
+    --pflow-studio-brand-weak: var(--slds-g-color-brand-base-95, #eaf3ff);
+    --pflow-studio-radius: var(--slds-g-radius-border-2, 0.25rem);
+    --pflow-studio-radius-lg: var(--slds-g-radius-border-3, 0.5rem);
+    --pflow-studio-shadow: var(--slds-g-shadow-1, 0 1px 2px rgba(0, 0, 0, 0.06));
+    --pflow-studio-shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --pflow-studio-error: var(--slds-g-color-error-base-50, #ba0517);
+    --pflow-studio-warn: var(--slds-g-color-warning-base-60, #9a5b02);
+    --pflow-studio-success: var(--slds-g-color-success-base-50, #3baa6f);
+    --pflow-studio-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Modal body: no default padding, flex column, no outer scroll — panels scroll. */
+.pflow-studio__body {
+    --slds-c-modal-body-spacing-inline: 0;
+    --slds-c-modal-body-spacing-block-start: 0;
+    --slds-c-modal-body-spacing-block-end: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 3-column grid: left (45%) | splitter | controls (55%).
+   Using fr units keeps the ratio stable across modal widths. The splitter
+   sits between them as a thin fixed-width column. */
+.pflow-studio {
+    display: grid;
+    grid-template-columns: minmax(0, 45fr) 0.375rem minmax(0, 55fr);
+    height: 78vh;
+    min-height: 34rem;
+    background: var(--pflow-studio-surface);
+    overflow: hidden;
+}
+
+/* =============================================================================
+   LEFT PANEL · tab nav (top) + live preview (fills below)
+   ============================================================================= */
+
+.pflow-studio__left {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--pflow-studio-surface-alt);
+    border-right: 1px solid var(--pflow-studio-hairline);
+    overflow: hidden;
+}
+
+/* =============================================================================
+   CHAPTER NAV RAIL
+   Vertical table-of-contents down the left preview pane. Each row claims its
+   own chapter hue (same palette as the section cards & CPE summary):
+     01 DATA        blue    #0176d3
+     02 CONTENT     green   #3baa6f
+     03 BEHAVIOR    amber   #b25900
+     04 APPEARANCE  violet  #6d42c1
+   Idle rows are neutral; active row asserts the chapter hue via a full-height
+   left stripe, a tinted surface, strong label, and a filled glyph chip.
+   ============================================================================= */
+
+.pflow-studio__nav {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: var(--slds-g-spacing-3, 0.75rem) 0;
+    border-bottom: 1px solid var(--pflow-studio-hairline);
+    background: var(--pflow-studio-surface-alt);
+}
+
+/* Chapter hue — per-row CSS var consumed by stripe, numeral, chip. Defaults
+   per data-chapter so the hue is inherited even without an active state. */
+.pflow-studio__nav-btn[data-chapter="data"]       { --_nav-hue: var(--slds-g-color-brand-base-50, #0176d3); }
+.pflow-studio__nav-btn[data-chapter="content"]    { --_nav-hue: var(--slds-g-color-success-base-50, #3baa6f); }
+.pflow-studio__nav-btn[data-chapter="behavior"]   { --_nav-hue: var(--slds-g-color-warning-base-50, #b25900); }
+.pflow-studio__nav-btn[data-chapter="appearance"] { --_nav-hue: #6d42c1; }
+
+/* Row grid: stripe | numeral | glyph | label | status? */
+.pflow-studio__nav-btn {
+    position: relative;
+    display: grid;
+    grid-template-columns: 0.1875rem 1.375rem 1.5rem minmax(0, 1fr) auto;
+    column-gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem var(--slds-g-spacing-4, 1rem) 0.5rem 0;
+    background: transparent;
+    border: 0;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    text-align: left;
+    color: var(--pflow-studio-ink-weak, #5c5c5c);
+    cursor: pointer;
+    width: 100%;
+    font: inherit;
+    transition:
+        background-color 160ms var(--pflow-studio-ease),
+        color 160ms var(--pflow-studio-ease),
+        border-color 160ms var(--pflow-studio-ease);
+}
+
+/* Left stripe — slim vertical bar at the row's left edge, tinted to the
+   chapter hue. Only becomes visible on hover + active. */
+.pflow-studio__nav-stripe {
+    align-self: stretch;
+    background: transparent;
+    transition: background-color 160ms var(--pflow-studio-ease);
+}
+
+/* Chapter numeral — monospace, subtle. Picks up hue on hover/active. */
+.pflow-studio__nav-numeral {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.04em;
+    color: var(--pflow-studio-ink-soft, #9a9a9a);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    transition: color 160ms var(--pflow-studio-ease);
+}
+
+/* Glyph chip — 1.5rem tinted square. Subtle hue tint on idle, full hue on
+   active. Echoes the chapter card glyphs in the right pane. */
+.pflow-studio__nav-glyph {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--pflow-studio-radius, 0.25rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in oklab, var(--_nav-hue, currentColor) 10%, transparent);
+    color: var(--_nav-hue, currentColor);
+    transition:
+        background-color 160ms var(--pflow-studio-ease),
+        color 160ms var(--pflow-studio-ease),
+        box-shadow 160ms var(--pflow-studio-ease);
+}
+
+.pflow-studio__nav-glyph lightning-icon {
+    --slds-c-icon-color-foreground-default: currentColor;
+    --slds-c-icon-color-foreground: currentColor;
+}
+
+.pflow-studio__nav-label {
+    font-size: 0.8125rem;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: var(--pflow-studio-ink, #181818);
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    transition: font-weight 160ms var(--pflow-studio-ease), color 160ms var(--pflow-studio-ease);
+}
+
+/* Hover — gently warm up the row in the chapter hue. */
+.pflow-studio__nav-btn:hover {
+    background: color-mix(in oklab, var(--_nav-hue) 5%, transparent);
+}
+
+.pflow-studio__nav-btn:hover .pflow-studio__nav-stripe {
+    background: color-mix(in oklab, var(--_nav-hue) 30%, transparent);
+}
+
+.pflow-studio__nav-btn:hover .pflow-studio__nav-numeral {
+    color: var(--_nav-hue);
+}
+
+.pflow-studio__nav-btn:hover .pflow-studio__nav-glyph {
+    background: color-mix(in oklab, var(--_nav-hue) 20%, transparent);
+}
+
+.pflow-studio__nav-btn:focus-visible {
+    outline: 2px solid var(--_nav-hue);
+    outline-offset: -2px;
+}
+
+/* Active — this chapter is open. Full stripe, tinted surface, filled chip,
+   strong label + numeral in hue. */
+.pflow-studio__nav-btn_active {
+    background: color-mix(in oklab, var(--_nav-hue) 8%, transparent);
+    border-top-color: color-mix(in oklab, var(--_nav-hue) 18%, transparent);
+    border-bottom-color: color-mix(in oklab, var(--_nav-hue) 18%, transparent);
+}
+
+.pflow-studio__nav-btn_active .pflow-studio__nav-stripe {
+    background: var(--_nav-hue);
+    box-shadow: 0 0 0 1px var(--_nav-hue);
+}
+
+.pflow-studio__nav-btn_active .pflow-studio__nav-numeral {
+    color: var(--_nav-hue);
+}
+
+.pflow-studio__nav-btn_active .pflow-studio__nav-glyph {
+    background: var(--_nav-hue);
+    color: #ffffff;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        0 0 0 3px color-mix(in oklab, var(--_nav-hue) 18%, transparent);
+}
+
+.pflow-studio__nav-btn_active .pflow-studio__nav-label {
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-studio-ink, #181818);
+}
+
+/* Status pip — only appears when there's an issue (warn/error). Sits at the
+   right edge of the row so it doesn't fight the chapter hue. */
+.pflow-studio__nav-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 999px;
+    flex: 0 0 auto;
+    position: relative;
+}
+
+.pflow-studio__nav-status::before {
+    content: '';
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 22%, transparent);
+}
+
+.pflow-studio__nav-status_warn  { color: var(--pflow-studio-warn,  #b25900); }
+.pflow-studio__nav-status_error { color: var(--pflow-studio-error, #ba0517); }
+
+/* When a chapter needs attention, pulse the pip gently to draw the eye. */
+@keyframes pflow-nav-pulse {
+    0%, 100% { transform: scale(1);   opacity: 1; }
+    50%      { transform: scale(1.15); opacity: 0.7; }
+}
+
+.pflow-studio__nav-status::before {
+    animation: pflow-nav-pulse 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pflow-studio__nav-btn { transition: none; }
+    .pflow-studio__nav-stripe,
+    .pflow-studio__nav-numeral,
+    .pflow-studio__nav-glyph,
+    .pflow-studio__nav-label { transition: none; }
+    .pflow-studio__nav-status::before { animation: none; }
+}
+
+/* Preview pane (below nav, fills remaining height) */
+.pflow-studio__preview {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-4, 1rem);
+}
+
+/* Preview header — title block on the left, state toggle segmented control
+   on the right. Stacks on narrow widths. */
+.pflow-studio__preview-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    flex-wrap: wrap;
+}
+
+.pflow-studio__preview-head-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    min-width: 0;
+}
+
+.pflow-studio__preview-title {
+    color: var(--pflow-studio-ink);
+    margin: 0;
+}
+
+/* State toggle — segmented control, sits in the preview header.
+   Glass-morphism touch so it reads as a control affixed to the preview
+   canvas, not a form field. */
+.pflow-studio__preview-states {
+    display: inline-flex;
+    align-items: stretch;
+    padding: 0.1875rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--pflow-studio-ink, #181818) 5%, var(--pflow-studio-surface, #ffffff));
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline, #e5e5e5);
+    gap: 0.125rem;
+    flex: 0 0 auto;
+}
+
+.pflow-studio__preview-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    padding: 0.25rem 0.625rem;
+    border: 0;
+    background: transparent;
+    color: var(--pflow-studio-ink-weak, #5c5c5c);
+    font-size: 0.75rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    letter-spacing: 0.01em;
+    line-height: 1;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.pflow-studio__preview-state lightning-icon {
+    --slds-c-icon-color-foreground-default: currentColor;
+    --slds-c-icon-color-foreground: currentColor;
+}
+
+.pflow-studio__preview-state:hover {
+    color: var(--pflow-studio-ink, #181818);
+    background: color-mix(in oklab, var(--pflow-studio-ink, #181818) 4%, transparent);
+}
+
+.pflow-studio__preview-state:focus-visible {
+    outline: 2px solid var(--pflow-studio-brand, #0176d3);
+    outline-offset: 1px;
+}
+
+/* Active state — the selected segment pops forward with a white chip, sharp
+   shadow. Feels like a physical toggle. */
+.pflow-studio__preview-state[aria-selected="true"],
+.pflow-studio__preview-state[aria-pressed="true"] {
+    background: var(--pflow-studio-surface, #ffffff);
+    color: var(--pflow-studio-brand, #0176d3);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.08),
+        0 0 0 1px color-mix(in oklab, var(--pflow-studio-brand, #0176d3) 25%, transparent);
+}
+
+/* Specialized tones per state: error goes red when active, empty goes amber.
+   Populated (default/brand) needs no override. */
+.pflow-studio__preview-state[data-state="error"][aria-selected="true"],
+.pflow-studio__preview-state[data-state="error"][aria-pressed="true"] {
+    color: var(--slds-g-color-error-base-40, #8e030f);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.08),
+        0 0 0 1px color-mix(in oklab, var(--slds-g-color-error-base-40, #8e030f) 30%, transparent);
+}
+
+.pflow-studio__preview-state[data-state="empty"][aria-selected="true"],
+.pflow-studio__preview-state[data-state="empty"][aria-pressed="true"] {
+    color: var(--slds-g-color-warning-base-30, #7a4500);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.08),
+        0 0 0 1px color-mix(in oklab, var(--slds-g-color-warning-base-50, #b25900) 30%, transparent);
+}
+
+.pflow-studio__preview-frame {
+    flex: 1 1 auto;
+    background: var(--pflow-studio-surface);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    border-radius: var(--pflow-studio-radius-lg);
+    padding: var(--slds-g-spacing-4, 1rem);
+    overflow-y: auto;
+    min-height: 14rem;
+    box-shadow: var(--pflow-studio-shadow);
+    transition: border-color 160ms var(--pflow-studio-ease);
+}
+
+.pflow-studio__preview-frame:hover,
+.pflow-studio__preview-frame:focus-within {
+    border-color: var(--pflow-studio-brand-weak);
+}
+
+.pflow-studio__preview-frame c-pflow-organism-data-picker,
+.pflow-studio__preview-frame c-pflow-molecule-picker-group {
+    --pflow-group-min-w: 7rem;
+}
+
+/* Fallback preview (collection mode) — renders the molecule directly so we
+   synthesize the label + help text manually above it. Matches the organism's
+   baked-in heading styles. */
+.pflow-studio__preview-label {
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-studio-ink);
+    margin: 0 0 var(--slds-g-spacing-1, 0.25rem);
+    line-height: var(--slds-g-font-line-height-2, 1.25);
+}
+
+.pflow-studio__preview-help {
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    color: var(--pflow-studio-ink-weak);
+    margin: 0 0 var(--slds-g-spacing-3, 0.75rem);
+    line-height: 1.4;
+}
+
+/* =============================================================================
+   FORCE-STATE PREVIEW BUTTONS · inside the Runtime messages card.
+   Click a button to make the live preview pretend it's in that state.
+   Click the same button again to toggle back to the real (populated) state.
+   ============================================================================= */
+
+.pflow-studio__state-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    padding-top: var(--slds-g-spacing-2, 0.5rem);
+    border-top: 1px dashed var(--pflow-studio-hairline);
+}
+
+.pflow-studio__state-eyebrow {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--pflow-studio-ink-weak);
+}
+
+.pflow-studio__state-group {
+    display: inline-flex;
+    gap: 0;
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    border-radius: var(--pflow-studio-radius);
+    overflow: hidden;
+    background: var(--pflow-studio-surface);
+    align-self: flex-start;
+}
+
+.pflow-studio__state-btn {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--pflow-studio-ink-weak);
+    background: transparent;
+    transition:
+        color 120ms var(--pflow-studio-ease),
+        background-color 120ms var(--pflow-studio-ease);
+    border-right: 1px solid var(--pflow-studio-hairline);
+}
+
+.pflow-studio__state-group .pflow-studio__state-btn:last-child {
+    border-right: 0;
+}
+
+.pflow-studio__state-btn:hover {
+    color: var(--pflow-studio-ink);
+    background: var(--pflow-studio-surface-alt);
+}
+
+.pflow-studio__state-btn:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--pflow-studio-brand);
+    outline-offset: -2px;
+}
+
+.pflow-studio__state-btn_active {
+    color: #ffffff;
+    background: var(--pflow-studio-brand);
+}
+
+.pflow-studio__state-btn_active lightning-icon {
+    --slds-c-icon-color-foreground-default: #ffffff;
+    --slds-c-icon-color-foreground: #ffffff;
+}
+
+/* =============================================================================
+   COLUMN-COUNT CHIP ROW · compact, segmented selector
+   Auto · 1 · 2 · 3 · 4 · 5 · 6
+   ============================================================================= */
+
+.pflow-studio__col-row {
+    display: inline-flex;
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    border-radius: var(--pflow-studio-radius);
+    overflow: hidden;
+    background: var(--pflow-studio-surface);
+}
+
+.pflow-studio__col-chip {
+    all: unset;
+    cursor: pointer;
+    min-width: 2.5rem;
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: var(--slds-g-font-scale-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-studio-ink-weak);
+    text-align: center;
+    border-right: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    transition:
+        color 120ms var(--pflow-studio-ease),
+        background-color 120ms var(--pflow-studio-ease);
+}
+
+.pflow-studio__col-row .pflow-studio__col-chip:last-child {
+    border-right: 0;
+}
+
+.pflow-studio__col-chip:hover {
+    color: var(--pflow-studio-ink);
+    background: var(--pflow-studio-surface-alt);
+}
+
+.pflow-studio__col-chip:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--pflow-studio-brand);
+    outline-offset: calc(-1 * var(--slds-g-sizing-border-2, 2px));
+}
+
+.pflow-studio__col-chip_active {
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    background: var(--pflow-studio-brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pflow-studio__col-chip { transition: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pflow-studio__state-btn { transition: none; }
+}
+
+.pflow-studio__preview-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-8, 2rem);
+    text-align: center;
+    height: 100%;
+    min-height: 12rem;
+}
+
+.pflow-studio__preview-caption {
+    margin: 0;
+    font-style: italic;
+}
+
+/* =============================================================================
+   SPLITTER · draggable vertical separator (single splitter now)
+   ============================================================================= */
+
+.pflow-studio__splitter {
+    position: relative;
+    cursor: col-resize;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    border: 0;
+    padding: 0;
+}
+
+.pflow-studio__splitter-grip {
+    display: block;
+    width: var(--slds-g-sizing-border-1, 1px);
+    height: 100%;
+    background: var(--pflow-studio-hairline);
+    transition: background-color 120ms ease, width 120ms ease;
+    pointer-events: none;
+}
+
+.pflow-studio__splitter:hover .pflow-studio__splitter-grip,
+.pflow-studio__splitter:focus-visible .pflow-studio__splitter-grip,
+.pflow-studio__splitter:active .pflow-studio__splitter-grip {
+    background: var(--pflow-studio-brand);
+    width: 2px;
+}
+
+.pflow-studio__splitter:focus-visible {
+    outline: none;
+}
+
+.pflow-studio__splitter:focus-visible .pflow-studio__splitter-grip {
+    box-shadow: 0 0 0 2px var(--pflow-studio-brand-weak);
+}
+
+/* Two-dot grip affordance */
+.pflow-studio__splitter::before,
+.pflow-studio__splitter::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: var(--slds-g-sizing-border-3, 3px);
+    height: var(--slds-g-sizing-border-3, 3px);
+    border-radius: 50%;
+    background: var(--pflow-studio-brand);
+    transform: translateX(-50%) scale(0);
+    transition: transform 160ms var(--pflow-studio-ease);
+    pointer-events: none;
+}
+.pflow-studio__splitter::before { top: calc(50% - 8px); }
+.pflow-studio__splitter::after  { top: calc(50% + 5px); }
+
+.pflow-studio__splitter:hover::before,
+.pflow-studio__splitter:hover::after,
+.pflow-studio__splitter:focus-visible::before,
+.pflow-studio__splitter:focus-visible::after,
+.pflow-studio__splitter:active::before,
+.pflow-studio__splitter:active::after {
+    transform: translateX(-50%) scale(1);
+}
+
+/* =============================================================================
+   RIGHT PANEL · section controls (scrollable)
+   Container queries enable tile-group layouts that adapt to pane width.
+   ============================================================================= */
+
+.pflow-studio__controls {
+    overflow-y: auto;
+    padding: var(--slds-g-spacing-5, 1.25rem) var(--slds-g-spacing-6, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4, 1rem);
+    min-height: 0;
+    container-type: inline-size;
+    container-name: pflow-studio-controls;
+}
+
+/* Section-level header — consistent across all sections */
+.pflow-studio__section-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    padding-bottom: var(--slds-g-spacing-3, 0.75rem);
+    border-bottom: 1px solid var(--pflow-studio-hairline);
+    animation: pflow-fade-in 240ms var(--pflow-studio-ease);
+}
+
+.pflow-studio__eyebrow {
+    color: var(--pflow-studio-ink-weak);
+    margin: 0;
+}
+
+.pflow-studio__title {
+    color: var(--pflow-studio-ink);
+    margin: 0;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: -0.01em;
+}
+
+.pflow-studio__section-sub {
+    margin: 0;
+}
+
+/* =============================================================================
+   CHAPTER DIVIDER · single-page publication rhythm
+   Each chapter opens with a numeral mark + eyebrow + title. The four chapters
+   share the same geometry for symmetry; only the accent hue shifts to signal
+   the chapter you're in (data/content/behavior/appearance).
+   ============================================================================= */
+
+.pflow-chapter {
+    --_chapter-accent: var(--pflow-studio-brand);
+    --_chapter-accent-soft: color-mix(in oklab, var(--pflow-studio-brand) 14%, transparent);
+
+    display: grid;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    align-items: start;
+    padding: var(--slds-g-spacing-5, 1.25rem) 0 var(--slds-g-spacing-3, 0.75rem);
+    margin-top: var(--slds-g-spacing-6, 1.5rem);
+    position: relative;
+    scroll-margin-top: var(--slds-g-spacing-3, 0.75rem);
+    animation: pflow-fade-in 260ms var(--pflow-studio-ease);
+}
+
+.pflow-chapter:first-of-type {
+    margin-top: 0;
+    padding-top: var(--slds-g-spacing-2, 0.5rem);
+}
+
+/* Chapter hue rotation — subtle, keeps SLDS brand as the dominant tone but
+   shifts for orientation. */
+.pflow-chapter_01 {
+    --_chapter-accent: var(--slds-g-color-brand-base-50, #0176d3);
+    --_chapter-accent-soft: color-mix(in oklab, var(--slds-g-color-brand-base-50, #0176d3) 14%, transparent);
+}
+.pflow-chapter_02 {
+    --_chapter-accent: var(--slds-g-color-success-base-50, #3baa6f);
+    --_chapter-accent-soft: color-mix(in oklab, var(--slds-g-color-success-base-50, #3baa6f) 14%, transparent);
+}
+.pflow-chapter_03 {
+    --_chapter-accent: var(--slds-g-color-warning-base-50, #b25900);
+    --_chapter-accent-soft: color-mix(in oklab, var(--slds-g-color-warning-base-50, #b25900) 14%, transparent);
+}
+.pflow-chapter_04 {
+    --_chapter-accent: #6d42c1;
+    --_chapter-accent-soft: color-mix(in oklab, #6d42c1 14%, transparent);
+}
+
+/* Numeral + rule mark (left column) */
+.pflow-chapter__mark {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding-top: 0.125rem;
+}
+
+.pflow-chapter__numeral {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 2.25rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    line-height: var(--slds-g-font-line-height-1, 1);
+    letter-spacing: -0.04em;
+    color: var(--_chapter-accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.pflow-chapter__rule {
+    width: var(--slds-g-sizing-border-1, 1px);
+    flex: 1 1 auto;
+    min-height: var(--slds-g-sizing-6, 1.25rem);
+    background: linear-gradient(
+        to bottom,
+        var(--_chapter-accent) 0%,
+        color-mix(in oklab, var(--_chapter-accent) 25%, transparent) 70%,
+        transparent 100%
+    );
+}
+
+/* Heading block (right column) */
+.pflow-chapter__head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-top: 0.375rem;
+    position: relative;
+}
+
+.pflow-chapter__head::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--slds-g-sizing-border-1, 1px);
+    background: linear-gradient(
+        to right,
+        var(--_chapter-accent) 0%,
+        var(--_chapter-accent-soft) 25%,
+        transparent 90%
+    );
+    transform-origin: left center;
+    transform: scaleX(1);
+    transition: transform 320ms var(--pflow-studio-ease);
+}
+
+.pflow-chapter__eyebrow {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--_chapter-accent);
+    line-height: var(--slds-g-font-line-height-1, 1);
+}
+
+.pflow-chapter__title {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: -0.015em;
+    color: var(--pflow-studio-ink);
+    line-height: 1.2;
+    padding-bottom: var(--slds-g-spacing-3, 0.75rem);
+}
+
+/* =============================================================================
+   CARD HEAD · normalized glyph chip + title + help icon
+   Every card follows the same anatomy. The glyph chip is 2.25rem square with
+   a 10% tint of the chapter accent. Info glyph sits at the right edge.
+   ============================================================================= */
+
+.pflow-card__head {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) 1.25rem;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.pflow-card__glyph {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--pflow-studio-radius);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in oklab, var(--_card-accent, var(--pflow-studio-brand)) 12%, transparent);
+    color: var(--_card-accent, var(--pflow-studio-brand));
+    flex: 0 0 auto;
+}
+
+.pflow-card__glyph lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--_card-accent, var(--pflow-studio-brand));
+    --slds-c-icon-color-foreground: var(--_card-accent, var(--pflow-studio-brand));
+}
+
+/* Chapter-matched accents for each card so the chip hue orients you to its
+   chapter at a glance (symmetry through color-coding). */
+.pflow-card__glyph_data       { --_card-accent: var(--slds-g-color-brand-base-50, #0176d3); }
+.pflow-card__glyph_content    { --_card-accent: var(--slds-g-color-success-base-50, #3baa6f); }
+.pflow-card__glyph_behavior   { --_card-accent: var(--slds-g-color-warning-base-50, #b25900); }
+.pflow-card__glyph_appearance { --_card-accent: #6d42c1; }
+
+.pflow-card__headings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+/* Target by tag — avoids naming a second class on every heading block. */
+.pflow-card__headings > h3 {
+    margin: 0;
+    line-height: 1.2;
+}
+
+.pflow-card__headings > p {
+    margin: 0;
+    line-height: 1.35;
+}
+
+/* Help slot — renders an SLDS lightning-helptext component. It brings its own
+   info icon + popover tooltip; we only need to position it in the card-head
+   grid's right-most slot. */
+.pflow-card__help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+/* Inline issues banner */
+.pflow-studio__issues {
+    list-style: none;
+    margin: 0;
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    background: var(--slds-g-color-warning-base-95, #fef1e1);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-warning-base-60, #9a5b02);
+    border-radius: var(--pflow-studio-radius);
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    font-size: var(--slds-g-font-scale-base, 0.8125rem);
+}
+
+.pflow-studio__issues li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__issues li.error { color: var(--pflow-studio-error); }
+.pflow-studio__issues li.warn  { color: var(--pflow-studio-warn); }
+
+/* =============================================================================
+   CARDS · consistent rhythm across every section
+   ============================================================================= */
+
+.pflow-studio__card {
+    box-shadow: var(--pflow-studio-shadow);
+    border-radius: var(--pflow-studio-radius-lg);
+    animation: pflow-rise-in 280ms var(--pflow-studio-ease);
+}
+
+/* Tag + child selectors so the rule doesn't reference SLDS class names. */
+.pflow-studio__card > header {
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+}
+
+.pflow-studio__card > div {
+    padding: var(--slds-g-spacing-4, 1rem);
+}
+
+.pflow-studio__card > footer {
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    border-top: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+}
+
+.pflow-studio__field-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.pflow-studio__field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: var(--slds-g-spacing-3, 0.75rem);
+}
+
+/* 2×2 spacing picker — used for unlinked margin/padding directional comboboxes */
+.pflow-studio__spacing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+}
+
+/* =============================================================================
+   VISUAL TILE PICKERS · host the pflowAtomVisualPick atom.
+   2-tile / 3-tile groups flex-wrap at 7.5rem each.
+   4-tile groups use a grid that flips 4×1 ↔ 2×2 via container query.
+   ============================================================================= */
+
+.pflow-studio__pickgroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.pflow-studio__pickgroup > c-pflow-atom-visual-pick {
+    flex: 0 0 7.5rem;
+    max-width: 100%;
+}
+
+/* Fixed-width tile grid — fits as many 7.5rem columns as the container allows
+   and wraps naturally when they don't fit. Works for any tile count (4 aspect
+   ratios, 5 data sources, future growth). Previously hardcoded to 4 columns,
+   which caused the 5th tile to wrap to its own row even when there was room. */
+.pflow-studio__pickgroup_2x2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 7.5rem);
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    justify-content: start;
+}
+
+.pflow-studio__pickgroup_2x2 > c-pflow-atom-visual-pick {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Compact variant for dense spacing-token grids (11 tiles per row area). */
+.pflow-studio__pickgroup_compact {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.75rem, 1fr));
+    gap: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-studio__pickgroup_compact > c-pflow-atom-visual-pick {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Axis row = directional header (icon + label) + tile group below. */
+/* Axis = one labeled lane inside a spacing card. Intentionally NOT a nested
+   card — no border, no background, no padding — so its left edge aligns with
+   everything else in the right pane. Think of it as an eyebrow + group. */
+.pflow-studio__axis {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__axis + .pflow-studio__axis {
+    padding-top: var(--slds-g-spacing-3, 0.75rem);
+    border-top: 1px dashed var(--pflow-studio-hairline);
+}
+
+.pflow-studio__axis-head {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__axis-head lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--pflow-studio-brand);
+    --slds-c-icon-color-foreground: var(--pflow-studio-brand);
+    flex: 0 0 auto;
+}
+
+.pflow-studio__axis-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.pflow-studio__axis-title {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-studio-ink);
+    letter-spacing: 0.02em;
+    line-height: var(--slds-g-font-line-height-1, 1);
+}
+
+.pflow-studio__axis-sub {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    color: var(--pflow-studio-ink-weak);
+    line-height: 1.3;
+}
+
+/* Card header with a leading icon. */
+.pflow-studio__card-head-icon {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.pflow-studio__card-head-icon lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--pflow-studio-brand);
+    --slds-c-icon-color-foreground: var(--pflow-studio-brand);
+    flex: 0 0 auto;
+    margin-top: 0.125rem;
+}
+
+/* =============================================================================
+   CUSTOM ITEM EDITOR
+   ============================================================================= */
+
+/* =============================================================================
+   CUSTOM ITEM ROW · mirrors the item-overrides row geometry for consistency.
+   Always-visible editor (no collapse) with left accent stripe (brand-blue —
+   custom items are always "yours").
+   ============================================================================= */
+
+.pflow-studio__custom-row {
+    position: relative;
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    border-radius: var(--pflow-studio-radius);
+    background: var(--pflow-studio-surface);
+    overflow: hidden;
+    animation: pflow-rise-in 220ms var(--pflow-studio-ease);
+}
+
+/* Left accent stripe — brand-blue. Matches the override row stripe language. */
+.pflow-studio__custom-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--pflow-studio-brand);
+    pointer-events: none;
+}
+
+.pflow-studio__custom-row-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem)
+             var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem);
+    border-bottom: 1px dashed var(--pflow-studio-hairline);
+    background: var(--pflow-studio-surface-alt);
+}
+
+.pflow-studio__custom-row-head h4 {
+    margin: 0;
+    color: var(--pflow-studio-ink-weak);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+/* Custom item body — icon featured full-width at top, 2×2 text grid middle,
+   help text full-width bottom. Same rhythm as the override row expand panel. */
+.pflow-studio__custom-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--slds-g-spacing-4, 1rem);
+    row-gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-4, 1rem)
+             var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.25rem);
+    background: color-mix(in oklab, var(--pflow-studio-brand-weak) 25%, var(--pflow-studio-surface));
+}
+
+/* Icon picker + the help-text field span full width as visual bookends.
+   Icon is structurally different (a picker, not text), so it headlines.
+   Help text is the longest content and benefits from full width. */
+.pflow-studio__custom-grid > c-pflow-molecule-icon-picker {
+    grid-column: 1 / -1;
+}
+.pflow-studio__custom-grid > c-pflow-organism-resource-picker[name="helpText"] {
+    grid-column: 1 / -1;
+}
+
+/* Stagger reveal for each field so the row doesn't pop in all at once. */
+.pflow-studio__custom-grid > c-pflow-organism-resource-picker {
+    animation: pflow-overrides-field 260ms var(--pflow-studio-ease) both;
+}
+.pflow-studio__custom-grid > c-pflow-organism-resource-picker:nth-of-type(1) { animation-delay:  40ms; }
+.pflow-studio__custom-grid > c-pflow-organism-resource-picker:nth-of-type(2) { animation-delay:  80ms; }
+.pflow-studio__custom-grid > c-pflow-organism-resource-picker:nth-of-type(3) { animation-delay: 120ms; }
+.pflow-studio__custom-grid > c-pflow-organism-resource-picker:nth-of-type(4) { animation-delay: 160ms; }
+.pflow-studio__custom-grid > c-pflow-organism-resource-picker:nth-of-type(5) { animation-delay: 200ms; }
+
+/* =============================================================================
+   SPEC SHEET · reusable subsection inside a source-setup card.
+   Used for the collection / sobject field-mapping groups: wraps the 6 field
+   pickers in a 2×2 (×3 rows) grid with an eyebrow label and left accent
+   stripe. Visually echoes the override-row expansion and custom-item body.
+   ============================================================================= */
+
+.pflow-studio__spec-sheet {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem)
+             var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.25rem);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    border-radius: var(--pflow-studio-radius);
+    background: color-mix(in oklab, var(--pflow-studio-brand-weak) 20%, var(--pflow-studio-surface));
+    overflow: hidden;
+}
+
+.pflow-studio__spec-sheet::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--pflow-studio-brand);
+    pointer-events: none;
+}
+
+.pflow-studio__spec-sheet-eyebrow {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--pflow-studio-brand);
+    line-height: var(--slds-g-font-line-height-1, 1);
+    margin: 0;
+}
+
+.pflow-studio__spec-sheet-title {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-studio-ink);
+    line-height: var(--slds-g-font-line-height-2, 1.25);
+    letter-spacing: -0.005em;
+}
+
+.pflow-studio__spec-sheet-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+/* 2×2 grid of fields inside a spec sheet. */
+.pflow-studio__spec-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--slds-g-spacing-4, 1rem);
+    row-gap: var(--slds-g-spacing-3, 0.75rem);
+}
+
+/* Stagger reveal for spec-sheet field pickers too. */
+.pflow-studio__spec-grid > * {
+    animation: pflow-overrides-field 280ms var(--pflow-studio-ease) both;
+}
+.pflow-studio__spec-grid > *:nth-of-type(1) { animation-delay:  40ms; }
+.pflow-studio__spec-grid > *:nth-of-type(2) { animation-delay:  80ms; }
+.pflow-studio__spec-grid > *:nth-of-type(3) { animation-delay: 120ms; }
+.pflow-studio__spec-grid > *:nth-of-type(4) { animation-delay: 160ms; }
+.pflow-studio__spec-grid > *:nth-of-type(5) { animation-delay: 200ms; }
+.pflow-studio__spec-grid > *:nth-of-type(6) { animation-delay: 240ms; }
+
+/* =============================================================================
+   OVERRIDES (picklist / sobject)
+   ============================================================================= */
+
+.pflow-studio__bulk {
+    border-color: var(--pflow-studio-brand);
+    background: var(--pflow-studio-brand-weak);
+}
+
+.pflow-studio__bulk-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__overrides-toolbar {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    align-items: flex-end;
+    margin-bottom: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__search {
+    flex: 1 1 auto;
+    margin: 0;
+}
+
+.pflow-studio__overrides {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+/* =============================================================================
+   OVERRIDES ROW · printer's spec-sheet aesthetic.
+   Each row opens into a 2×2 grid of text fields with the icon picker featured
+   full-width on top. A left accent stripe lights up when the row is customized
+   or selected, carrying the chapter's color language into the detail view.
+   ============================================================================= */
+
+.pflow-overrides__row {
+    position: relative;
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    border-radius: var(--pflow-studio-radius);
+    background: var(--pflow-studio-surface);
+    overflow: hidden;
+    transition:
+        border-color 180ms var(--pflow-studio-ease),
+        box-shadow 200ms var(--pflow-studio-ease);
+}
+
+/* Left accent stripe — 3px. Transparent by default, brand-blue when
+   customized, warning-amber when selected for bulk. Sits flush with the
+   row edge because the row is `overflow: hidden`. */
+.pflow-overrides__row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: transparent;
+    transition: background-color 180ms var(--pflow-studio-ease);
+    pointer-events: none;
+}
+
+.pflow-overrides__row:hover {
+    border-color: var(--pflow-studio-border);
+}
+
+.pflow-overrides__row_expanded {
+    box-shadow: var(--pflow-studio-shadow-lift);
+    border-color: var(--pflow-studio-border);
+}
+
+.pflow-overrides__row_customized::before {
+    background: var(--pflow-studio-brand);
+}
+
+.pflow-overrides__row_selected::before {
+    background: var(--slds-g-color-warning-base-50, #b25900);
+}
+
+.pflow-overrides__row_selected {
+    background: var(--pflow-studio-brand-weak);
+    border-color: var(--pflow-studio-brand);
+}
+
+/* Header · [checkbox] [name+id stack] [spacer] [actions] [chevron] */
+.pflow-studio__overrides-head {
+    display: grid;
+    grid-template-columns: 1.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem)
+             var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem);
+}
+
+.pflow-studio__overrides-trigger {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+}
+
+.pflow-studio__overrides-trigger:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--pflow-studio-brand);
+    outline-offset: var(--slds-g-sizing-border-2, 2px);
+    border-radius: var(--pflow-studio-radius);
+}
+
+.pflow-studio__overrides-name {
+    font-size: var(--slds-g-font-scale-1, 0.875rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-studio-ink);
+    line-height: var(--slds-g-font-line-height-2, 1.25);
+    letter-spacing: -0.005em;
+    overflow-wrap: anywhere;
+}
+
+.pflow-studio__overrides-value {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pflow-studio-ink-weak);
+    line-height: var(--slds-g-font-line-height-1, 1);
+}
+
+.pflow-overrides__row_customized .pflow-studio__overrides-value {
+    color: var(--pflow-studio-brand);
+}
+
+/* Trailing actions — reset button + chevron — sit tight on the right edge. */
+.pflow-studio__overrides-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-studio__overrides-chev {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--pflow-studio-ink-weak);
+    transition: transform 220ms var(--pflow-studio-ease), color 160ms ease;
+    pointer-events: none;
+}
+
+.pflow-overrides__row_expanded .pflow-studio__overrides-chev {
+    transform: rotate(180deg);
+    color: var(--pflow-studio-brand);
+}
+
+/* =============================================================================
+   EXPANDED BODY · icon featured on top, 2×2 grid of text fields below.
+   Subtle tinted background distinguishes it from the row header; a dashed
+   hairline separates the two. Fields reveal with a soft slide-in.
+   ============================================================================= */
+
+.pflow-studio__overrides-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--slds-g-spacing-4, 1rem);
+    row-gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-4, 1rem)
+             var(--slds-g-spacing-4, 1rem) var(--slds-g-spacing-5, 1.25rem);
+    border-top: 1px dashed var(--pflow-studio-hairline);
+    background: color-mix(in oklab, var(--pflow-studio-brand-weak) 35%, var(--pflow-studio-surface));
+    animation: pflow-overrides-reveal 240ms var(--pflow-studio-ease);
+}
+
+/* Icon picker spans full width — it's visually different from text fields
+   and deserves the hero slot. */
+.pflow-studio__overrides-grid > c-pflow-molecule-icon-picker {
+    grid-column: 1 / -1;
+}
+
+/* Stagger the text fields' fade-in so they don't all pop at once. */
+.pflow-studio__overrides-grid > c-pflow-organism-resource-picker {
+    animation: pflow-overrides-field 260ms var(--pflow-studio-ease) both;
+}
+.pflow-studio__overrides-grid > c-pflow-organism-resource-picker:nth-of-type(1) { animation-delay:  40ms; }
+.pflow-studio__overrides-grid > c-pflow-organism-resource-picker:nth-of-type(2) { animation-delay:  80ms; }
+.pflow-studio__overrides-grid > c-pflow-organism-resource-picker:nth-of-type(3) { animation-delay: 120ms; }
+.pflow-studio__overrides-grid > c-pflow-organism-resource-picker:nth-of-type(4) { animation-delay: 160ms; }
+
+@keyframes pflow-overrides-reveal {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pflow-overrides-field {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pflow-studio__overrides-chev,
+    .pflow-studio__overrides-grid,
+    .pflow-studio__overrides-grid > c-pflow-organism-resource-picker {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* =============================================================================
+   SPACING SLIDERS (Layout tab)
+   ============================================================================= */
+
+.pflow-studio__slider-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4, 1rem);
+}
+
+.pflow-studio__slider {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-studio__slider-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__slider-label {
+    font-size: var(--slds-g-font-scale-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--pflow-studio-ink);
+}
+
+.pflow-studio__slider-value {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: var(--slds-g-font-scale-base, 0.8125rem);
+    color: var(--pflow-studio-brand);
+    background: var(--pflow-studio-brand-weak);
+    border-radius: var(--pflow-studio-radius);
+    padding: 0.0625rem var(--slds-g-spacing-2, 0.5rem);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+}
+
+.pflow-studio__slider-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    color: var(--pflow-studio-ink-weak);
+    font-variant-numeric: tabular-nums;
+    margin-top: -0.25rem;
+}
+
+/* =============================================================================
+   MICRO-MOTION · subtle reveal animations for fresh content
+   ============================================================================= */
+
+@keyframes pflow-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes pflow-rise-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pflow-studio__card,
+    .pflow-studio__section-head,
+    .pflow-studio__custom-row,
+    .pflow-studio__custom-grid > c-pflow-organism-resource-picker,
+    .pflow-studio__spec-grid > * {
+        animation: none;
+    }
+    .pflow-studio__nav-btn,
+    .pflow-studio__splitter-grip,
+    .pflow-overrides__row,
+    .pflow-studio__preview-frame {
+        transition: none;
+    }
+}
+
+/* =============================================================================
+   BADGE CARD · editorial precision — the hero card of the Layout section.
+   Live atom preview on top, then three small control lanes. Chips are custom
+   (not atom-based) so the schematic position dots and real colored pills can
+   live side-by-side without subcomponent round-trips.
+   ============================================================================= */
+
+.pflow-badge-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4, 1rem);
+}
+
+/* ── Control lanes ─────────────────────────────────────────────────────── */
+
+.pflow-badge-card__control {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-badge-card__eyebrow {
+    font-size: var(--slds-g-font-scale-neg-2, 0.6875rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--pflow-studio-ink-weak);
+    line-height: var(--slds-g-font-line-height-1, 1);
+}
+
+/* ── Position chips · custom schematic tile + dot in the matching corner ─ */
+
+.pflow-badge-card__pos-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-badge-pos-chip {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem);
+    border-radius: var(--pflow-studio-radius);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    background: var(--pflow-studio-surface);
+    text-align: center;
+    transition:
+        border-color 160ms var(--pflow-studio-ease),
+        background-color 160ms var(--pflow-studio-ease),
+        box-shadow 160ms var(--pflow-studio-ease),
+        transform 160ms var(--pflow-studio-ease);
+}
+
+.pflow-badge-pos-chip:hover {
+    border-color: var(--pflow-studio-brand);
+    background: var(--pflow-studio-brand-weak);
+    transform: translateY(-1px);
+}
+
+.pflow-badge-pos-chip:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--pflow-studio-brand);
+    outline-offset: var(--slds-g-sizing-border-2, 2px);
+}
+
+.pflow-badge-pos-chip_active {
+    border-color: var(--pflow-studio-brand);
+    border-width: var(--slds-g-sizing-border-2, 2px);
+    background: var(--pflow-studio-brand-weak);
+    box-shadow: 0 4px 12px rgba(1, 94, 170, 0.16);
+}
+
+.pflow-badge-pos-chip__canvas {
+    position: relative;
+    width: var(--slds-g-sizing-9, 2rem);
+    height: var(--slds-g-sizing-9, 2rem);
+    border-radius: var(--pflow-studio-radius);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-ink-weak);
+    background: var(--pflow-studio-surface);
+}
+
+.pflow-badge-pos-chip__dot {
+    position: absolute;
+    width: 0.625rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: var(--pflow-studio-brand);
+}
+
+.pflow-badge-pos-chip__dot_top-left      { top: 0.1875rem; left: 0.1875rem; }
+.pflow-badge-pos-chip__dot_top-right     { top: 0.1875rem; right: 0.1875rem; }
+.pflow-badge-pos-chip__dot_bottom-left   { bottom: 0.1875rem; left: 0.1875rem; }
+.pflow-badge-pos-chip__dot_bottom-right  { bottom: 0.1875rem; right: 0.1875rem; }
+.pflow-badge-pos-chip__dot_bottom-inline {
+    left: 50%;
+    bottom: 0.1875rem;
+    transform: translateX(-50%);
+}
+
+.pflow-badge-pos-chip__label {
+    font-size: var(--slds-g-font-scale-neg-2, 0.6875rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--pflow-studio-ink);
+    line-height: 1.2;
+}
+
+/* ── Variant chips · the actual colored pill IS the chip ────────────────── */
+
+.pflow-badge-card__variant-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-badge-variant-chip {
+    all: unset;
+    cursor: pointer;
+    padding: 0.375rem var(--slds-g-spacing-3, 0.75rem);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: var(--slds-g-font-line-height-1, 1);
+    position: relative;
+    transition:
+        box-shadow 160ms var(--pflow-studio-ease),
+        transform 160ms var(--pflow-studio-ease);
+}
+
+.pflow-badge-variant-chip:hover {
+    transform: translateY(-1px);
+}
+
+.pflow-badge-variant-chip:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--pflow-studio-brand);
+    outline-offset: var(--slds-g-sizing-border-2, 2px);
+}
+
+.pflow-badge-variant-chip_active {
+    box-shadow:
+        inset 0 0 0 1px var(--_badge-ring),
+        0 0 0 3px var(--pflow-studio-brand),
+        0 4px 10px rgba(1, 94, 170, 0.2);
+}
+
+/* Chips reuse the atom's badge variant tokens — same source of truth. They're
+   passed the same class names as the real badge element. */
+.pflow-badge-variant-chip.pflow-vpick__badge_variant-neutral {
+    --_badge-bg: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    --_badge-ink: var(--slds-g-color-neutral-base-30, #444444);
+    --_badge-ring: var(--slds-g-color-border-base-1, #e5e5e5);
+    background: var(--_badge-bg);
+    color: var(--_badge-ink);
+    box-shadow: inset 0 0 0 1px var(--_badge-ring);
+}
+.pflow-badge-variant-chip.pflow-vpick__badge_variant-brand {
+    --_badge-bg: var(--slds-g-color-brand-base-95, #eaf3ff);
+    --_badge-ink: var(--slds-g-color-brand-base-30, #014486);
+    --_badge-ring: var(--slds-g-color-brand-base-60, #0b5cab);
+    background: var(--_badge-bg);
+    color: var(--_badge-ink);
+    box-shadow: inset 0 0 0 1px var(--_badge-ring);
+}
+.pflow-badge-variant-chip.pflow-vpick__badge_variant-success {
+    --_badge-bg: var(--slds-g-color-success-base-95, #e8f7ee);
+    --_badge-ink: var(--slds-g-color-success-base-30, #2e7d56);
+    --_badge-ring: var(--slds-g-color-success-base-60, #3baa6f);
+    background: var(--_badge-bg);
+    color: var(--_badge-ink);
+    box-shadow: inset 0 0 0 1px var(--_badge-ring);
+}
+.pflow-badge-variant-chip.pflow-vpick__badge_variant-warning {
+    --_badge-bg: var(--slds-g-color-warning-base-95, #fff6e6);
+    --_badge-ink: var(--slds-g-color-warning-base-30, #7a4500);
+    --_badge-ring: var(--slds-g-color-warning-base-60, #9a5b02);
+    background: var(--_badge-bg);
+    color: var(--_badge-ink);
+    box-shadow: inset 0 0 0 1px var(--_badge-ring);
+}
+.pflow-badge-variant-chip.pflow-vpick__badge_variant-error {
+    --_badge-bg: var(--slds-g-color-error-base-95, #fdeef0);
+    --_badge-ink: var(--slds-g-color-error-base-30, #8e030f);
+    --_badge-ring: var(--slds-g-color-error-base-60, #ba0517);
+    background: var(--_badge-bg);
+    color: var(--_badge-ink);
+    box-shadow: inset 0 0 0 1px var(--_badge-ring);
+}
+.pflow-badge-variant-chip.pflow-vpick__badge_variant-inverse {
+    --_badge-bg: var(--slds-g-color-neutral-base-10, #181818);
+    --_badge-ink: #ffffff;
+    --_badge-ring: var(--slds-g-color-neutral-base-10, #181818);
+    background: var(--_badge-bg);
+    color: var(--_badge-ink);
+    box-shadow: inset 0 0 0 1px var(--_badge-ring);
+}
+
+.pflow-badge-variant-chip.pflow-vpick__badge_shape-pill {
+    border-radius: 999px;
+}
+
+/* Active ring layers on top of the baseline variant ring. */
+.pflow-badge-variant-chip_active.pflow-vpick__badge_variant-neutral,
+.pflow-badge-variant-chip_active.pflow-vpick__badge_variant-brand,
+.pflow-badge-variant-chip_active.pflow-vpick__badge_variant-success,
+.pflow-badge-variant-chip_active.pflow-vpick__badge_variant-warning,
+.pflow-badge-variant-chip_active.pflow-vpick__badge_variant-error,
+.pflow-badge-variant-chip_active.pflow-vpick__badge_variant-inverse {
+    box-shadow:
+        inset 0 0 0 1px var(--_badge-ring),
+        0 0 0 2px var(--pflow-studio-brand),
+        0 4px 10px rgba(1, 94, 170, 0.2);
+}
+
+/* ── Shape chips · real sample badge + label ───────────────────────────── */
+
+.pflow-badge-card__shape-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-badge-shape-chip {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-3, 0.75rem);
+    border-radius: var(--pflow-studio-radius);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline);
+    background: var(--pflow-studio-surface);
+    transition:
+        border-color 160ms var(--pflow-studio-ease),
+        background-color 160ms var(--pflow-studio-ease),
+        box-shadow 160ms var(--pflow-studio-ease),
+        transform 160ms var(--pflow-studio-ease);
+}
+
+.pflow-badge-shape-chip:hover {
+    border-color: var(--pflow-studio-brand);
+    background: var(--pflow-studio-brand-weak);
+    transform: translateY(-1px);
+}
+
+.pflow-badge-shape-chip:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--pflow-studio-brand);
+    outline-offset: var(--slds-g-sizing-border-2, 2px);
+}
+
+.pflow-badge-shape-chip_active {
+    border-color: var(--pflow-studio-brand);
+    border-width: var(--slds-g-sizing-border-2, 2px);
+    background: var(--pflow-studio-brand-weak);
+    box-shadow: 0 4px 12px rgba(1, 94, 170, 0.16);
+}
+
+.pflow-badge-shape-chip__label {
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--pflow-studio-ink);
+}
+
+/* The sample badge inside the shape chip reuses atom variant/shape classes;
+   it's identical to the real element. */
+.pflow-badge-shape-chip .pflow-vpick__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1875rem var(--slds-g-spacing-2, 0.5rem);
+    font-size: var(--slds-g-font-scale-neg-2, 0.6875rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: var(--slds-g-font-line-height-1, 1);
+    background: var(--_badge-bg);
+    color: var(--_badge-ink);
+    box-shadow: inset 0 0 0 1px var(--_badge-ring);
+}
+.pflow-badge-shape-chip .pflow-vpick__badge_variant-neutral {
+    --_badge-bg: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    --_badge-ink: var(--slds-g-color-neutral-base-30, #444444);
+    --_badge-ring: var(--slds-g-color-border-base-1, #e5e5e5);
+}
+.pflow-badge-shape-chip .pflow-vpick__badge_variant-brand {
+    --_badge-bg: var(--slds-g-color-brand-base-95, #eaf3ff);
+    --_badge-ink: var(--slds-g-color-brand-base-30, #014486);
+    --_badge-ring: var(--slds-g-color-brand-base-60, #0b5cab);
+}
+.pflow-badge-shape-chip .pflow-vpick__badge_variant-success {
+    --_badge-bg: var(--slds-g-color-success-base-95, #e8f7ee);
+    --_badge-ink: var(--slds-g-color-success-base-30, #2e7d56);
+    --_badge-ring: var(--slds-g-color-success-base-60, #3baa6f);
+}
+.pflow-badge-shape-chip .pflow-vpick__badge_variant-warning {
+    --_badge-bg: var(--slds-g-color-warning-base-95, #fff6e6);
+    --_badge-ink: var(--slds-g-color-warning-base-30, #7a4500);
+    --_badge-ring: var(--slds-g-color-warning-base-60, #9a5b02);
+}
+.pflow-badge-shape-chip .pflow-vpick__badge_variant-error {
+    --_badge-bg: var(--slds-g-color-error-base-95, #fdeef0);
+    --_badge-ink: var(--slds-g-color-error-base-30, #8e030f);
+    --_badge-ring: var(--slds-g-color-error-base-60, #ba0517);
+}
+.pflow-badge-shape-chip .pflow-vpick__badge_variant-inverse {
+    --_badge-bg: var(--slds-g-color-neutral-base-10, #181818);
+    --_badge-ink: #ffffff;
+    --_badge-ring: var(--slds-g-color-neutral-base-10, #181818);
+}
+.pflow-badge-shape-chip .pflow-vpick__badge_shape-pill {
+    border-radius: 999px;
+}
+.pflow-badge-shape-chip .pflow-vpick__badge_shape-square {
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pflow-badge-pos-chip,
+    .pflow-badge-shape-chip,
+    .pflow-badge-variant-chip {
+        transition: none;
+        transform: none;
+    }
+    .pflow-badge-pos-chip:hover,
+    .pflow-badge-shape-chip:hover,
+    .pflow-badge-variant-chip:hover {
+        transform: none;
+    }
+}
+
+/* =============================================================================
+   STRING COLLECTION · RESOLVED VALUE PREVIEW
+   Read-only pill cluster that surfaces the bound variable's actual strings
+   so the admin can confirm what's flowing in without configuring anything.
+   Mirrors the spec-sheet dieline — left accent stripe + mono eyebrow.
+   ============================================================================= */
+
+.pflow-string-preview {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-3, 0.75rem)
+             var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline, #e5e5e5);
+    border-radius: var(--pflow-studio-radius, 0.5rem);
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    overflow: hidden;
+}
+
+.pflow-string-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    background: var(--slds-g-color-success-base-50, #3baa6f);
+    pointer-events: none;
+}
+
+.pflow-string-preview__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-string-preview__eyebrow {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-success-base-40, #2e8855);
+    line-height: 1;
+}
+
+.pflow-string-preview__count {
+    font-size: 0.6875rem;
+    color: var(--slds-g-color-neutral-base-40, #5c5c5c);
+    font-variant-numeric: tabular-nums;
+}
+
+.pflow-string-preview__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.pflow-string-preview__pill {
+    display: inline-block;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    letter-spacing: 0.01em;
+    padding: 0.1875rem 0.4375rem;
+    border-radius: 999px;
+    background: var(--slds-g-color-neutral-base-100, #ffffff);
+    color: var(--slds-g-color-neutral-base-10, #181818);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline, #e5e5e5);
+    line-height: 1.3;
+    white-space: nowrap;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =============================================================================
+   TONE CHIP ROW — appears under pattern/corner/surface/icon-decor pickers.
+   Each chip has a color-dot glyph + label. Wraps gracefully on narrow panels.
+   ============================================================================= */
+
+.pflow-tone-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding-top: var(--slds-g-spacing-2, 0.5rem);
+    border-top: var(--slds-g-sizing-border-1, 1px) dashed var(--pflow-studio-hairline, #e5e5e5);
+    margin-top: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-tone-row__eyebrow {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-neutral-base-40, #5c5c5c);
+    padding-right: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-tone-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.1875rem var(--slds-g-spacing-2, 0.5rem);
+    background: var(--slds-g-color-neutral-base-100, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline, #e5e5e5);
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-neutral-base-20, #2e2e2e);
+    cursor: pointer;
+    line-height: 1.3;
+    transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 80ms ease;
+    user-select: none;
+}
+
+.pflow-tone-chip:hover:not(.pflow-tone-chip_disabled) {
+    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
+    border-color: var(--slds-g-color-border-base-2, #c9c9c9);
+}
+
+.pflow-tone-chip:active:not(.pflow-tone-chip_disabled) {
+    transform: translateY(0.5px);
+}
+
+.pflow-tone-chip_active {
+    background: var(--slds-g-color-neutral-base-10, #181818);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    border-color: var(--slds-g-color-neutral-base-10, #181818);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.pflow-tone-chip_disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pflow-tone-chip:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--pflow-studio-brand, #0176d3);
+    outline-offset: var(--slds-g-sizing-border-2, 2px);
+}
+
+/* Color dot — matches the tone palette exactly. */
+.pflow-tone-chip__dot {
+    display: inline-block;
+    width: var(--slds-g-sizing-3, 0.5rem);
+    height: var(--slds-g-sizing-3, 0.5rem);
+    border-radius: var(--slds-g-radius-border-circle, 50%);
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.pflow-tone-chip__dot_neutral { background: var(--slds-g-color-neutral-base-40, #5c5c5c); }
+.pflow-tone-chip__dot_brand   { background: var(--slds-g-color-brand-base-50, #0176d3); }
+.pflow-tone-chip__dot_success { background: var(--slds-g-color-success-base-50, #3baa6f); }
+.pflow-tone-chip__dot_warning { background: var(--slds-g-color-warning-base-50, #b25900); }
+.pflow-tone-chip__dot_error   { background: var(--slds-g-color-error-base-50, #ba0517); }
+.pflow-tone-chip__dot_violet  { background: var(--slds-g-color-palette-purple-50, #6d42c1); }
+.pflow-tone-chip__dot_pink    { background: var(--slds-g-color-palette-pink-50, #c9257b); }
+.pflow-tone-chip__dot_teal    { background: var(--slds-g-color-palette-teal-50, #0f7b82); }
+/* Inverse — dark chip for dark-mode badges. */
+.pflow-tone-chip__dot_inverse { background: var(--slds-g-color-neutral-base-10, #181818); }
+/* Custom — conic rainbow gradient reads as "this can be any color". */
+/* Glyph-only special tones. Auto = inherit; contrast = white on dark. */
+.pflow-tone-chip__dot_auto {
+    background: repeating-conic-gradient(
+        from 0deg,
+        var(--slds-g-color-neutral-base-60, #9a9a9a) 0deg 90deg,
+        var(--slds-g-color-neutral-base-100, #ffffff) 90deg 180deg
+    );
+}
+.pflow-tone-chip__dot_contrast {
+    background: linear-gradient(
+        135deg,
+        var(--slds-g-color-neutral-base-10, #181818) 0 50%,
+        var(--slds-g-color-on-accent-1, #ffffff) 50% 100%
+    );
+    box-shadow: 0 0 0 1px var(--slds-g-color-border-base-2, #c9c9c9);
+}
+
+.pflow-tone-chip__dot_custom {
+    background: conic-gradient(
+        from 90deg,
+        var(--slds-g-color-error-base-50, #ba0517),
+        var(--slds-g-color-warning-base-50, #b25900),
+        var(--slds-g-color-success-base-50, #3baa6f),
+        var(--slds-g-color-palette-teal-50, #0f7b82),
+        var(--slds-g-color-brand-base-50, #0176d3),
+        var(--slds-g-color-palette-purple-50, #6d42c1),
+        var(--slds-g-color-palette-pink-50, #c9257b),
+        var(--slds-g-color-error-base-50, #ba0517)
+    );
+}
+
+/* =============================================================================
+   CUSTOM HEX ROW — appears below a tone row when "Custom" chip is active.
+   Compact input group: color-picker square + hex text input.
+   ============================================================================= */
+
+.pflow-hex-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding-top: var(--slds-g-spacing-2, 0.5rem);
+    flex-wrap: wrap;
+}
+
+.pflow-hex-row__label {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-neutral-base-40, #5c5c5c);
+    padding-right: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-hex-row__picker {
+    appearance: none;
+    -webkit-appearance: none;
+    width: var(--slds-g-sizing-9, 2.25rem);
+    height: var(--slds-g-sizing-8, 1.75rem);
+    padding: 0;
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline, #e5e5e5);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    background: transparent;
+    cursor: pointer;
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+/* Strip default swatch chrome in all browsers. */
+.pflow-hex-row__picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.pflow-hex-row__picker::-webkit-color-swatch {
+    border: 0;
+    border-radius: calc(var(--slds-g-radius-border-2, 0.25rem) - 1px);
+}
+.pflow-hex-row__picker::-moz-color-swatch {
+    border: 0;
+    border-radius: calc(var(--slds-g-radius-border-2, 0.25rem) - 1px);
+}
+
+.pflow-hex-row__picker:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--pflow-studio-brand, #0176d3);
+    outline-offset: var(--slds-g-sizing-border-2, 2px);
+}
+
+.pflow-hex-row__input {
+    flex: 1 1 8rem;
+    min-width: 0;
+    padding: 0.25rem var(--slds-g-spacing-2, 0.5rem);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-neutral-base-10, #181818);
+    background: var(--slds-g-color-neutral-base-100, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-hairline, #e5e5e5);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    line-height: 1.4;
+}
+
+.pflow-hex-row__input:focus {
+    outline: none;
+    border-color: var(--pflow-studio-brand, #0176d3);
+    box-shadow: 0 0 0 1px var(--pflow-studio-brand, #0176d3);
+}
+
+/* =============================================================================
+   APPEARANCE SUB-CHAPTER DIVIDER
+   Slim banner that groups related cards within the Appearance chapter.
+   Inline layout: [label] ╱╱╱╱╱╱ [optional toggle control]
+   The diagonal-stripe rule signals a section break without dominating the
+   visual rhythm — continues the printer's-spec-sheet dieline aesthetic.
+   ============================================================================= */
+
+.pflow-studio__subchapter {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-3, 0.75rem) 0 var(--slds-g-spacing-2, 0.5rem);
+    margin-top: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__subchapter:first-of-type {
+    margin-top: 0;
+    padding-top: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-studio__subchapter-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__subchapter-numeral {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.08em;
+    color: var(--pflow-studio-ink-soft, #9a9a9a);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.pflow-studio__subchapter-title {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--pflow-studio-ink, #181818);
+    line-height: 1;
+}
+
+/* Diagonal stripe rule — gives each sub-chapter divider its own signature. */
+.pflow-studio__subchapter-rule {
+    height: var(--slds-g-sizing-border-2, 2px);
+    background: repeating-linear-gradient(
+        -45deg,
+        color-mix(in oklab, var(--pflow-studio-ink, #181818) 18%, transparent) 0,
+        color-mix(in oklab, var(--pflow-studio-ink, #181818) 18%, transparent) 4px,
+        transparent 4px,
+        transparent 8px
+    );
+    opacity: 0.9;
+    border-radius: var(--slds-g-radius-border-1, 0.125rem);
+}
+
+/* Inline toggle control — used for the "Show icons" / "Show badges" switches
+   on the ICON and BADGE sub-chapter headers. */
+.pflow-studio__subchapter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--pflow-studio-ink-weak, #5c5c5c);
+}
+
+.pflow-studio__subchapter-toggle lightning-input {
+    --slds-c-input-color-background: var(--pflow-studio-surface, #ffffff);
+}
+
+/* When a sub-chapter is globally disabled (icons/badges hidden), fade the
+   title and color the diagonal rule warning-amber so the admin can see at
+   a glance that this group is off. */
+.pflow-studio__subchapter_off .pflow-studio__subchapter-title {
+    color: var(--pflow-studio-ink-weak, #5c5c5c);
+}
+
+.pflow-studio__subchapter_off .pflow-studio__subchapter-rule {
+    background: repeating-linear-gradient(
+        -45deg,
+        color-mix(in oklab, var(--pflow-studio-warn, #b25900) 28%, transparent) 0,
+        color-mix(in oklab, var(--pflow-studio-warn, #b25900) 28%, transparent) 4px,
+        transparent 4px,
+        transparent 8px
+    );
+}
+
+/* Empty-state notice shown when a section (icons / badges) is toggled off. */
+.pflow-studio__subchapter-off-note {
+    margin: 0 0 var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    font-size: 0.75rem;
+    color: var(--pflow-studio-ink-weak, #5c5c5c);
+    background: color-mix(in oklab, var(--pflow-studio-warn, #b25900) 6%, var(--pflow-studio-surface, #ffffff));
+    border-left: var(--slds-g-sizing-border-2, 2px) solid color-mix(in oklab, var(--pflow-studio-warn, #b25900) 45%, transparent);
+    border-radius: var(--pflow-studio-radius, 0.25rem);
+    line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pflow-tone-chip { transition: none; }
+    .pflow-tone-chip:active { transform: none; }
+}
+

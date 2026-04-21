@@ -1,0 +1,16 @@
+<template>
+    <div class={cbClass}>
+        <lightning-input
+            type="toggle"
+            label={label}
+            name={name}
+            data-name={name}
+            field-level-help={fieldLevelHelp}
+            message-toggle-active=""
+            message-toggle-inactive=""
+            checked={isChecked}
+            disabled={disabled}
+            onchange={handleCheckboxChange}
+        ></lightning-input>
+    </div>
+</template>

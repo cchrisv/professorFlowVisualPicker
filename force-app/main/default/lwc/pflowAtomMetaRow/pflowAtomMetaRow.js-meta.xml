@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Pflow Meta Row</masterLabel>
+    <description>Structured metadata row with 5 display modes and 6 separator variants.</description>
+</LightningComponentBundle>

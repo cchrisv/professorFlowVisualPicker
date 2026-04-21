@@ -1,0 +1,64 @@
+<template>
+    <div class={wrapperClass} style={customColorStyle}>
+        <input
+            type={inputType}
+            id={inputId}
+            name={inputName}
+            value={item.value}
+            checked={selected}
+            disabled={isDisabled}
+            aria-describedby={helpId}
+            class="pflow-vpick__input"
+            onchange={handleChange}
+        />
+        <label for={inputId} class="pflow-vpick__label">
+            <span class="pflow-vpick__figure">
+                <template lwc:if={hasPattern}>
+                    <span class="pflow-vpick__pattern" aria-hidden="true"></span>
+                </template>
+                <template lwc:if={hasCornerDecor}>
+                    <span class="pflow-vpick__corner pflow-vpick__corner_tl" aria-hidden="true"></span>
+                    <span class="pflow-vpick__corner pflow-vpick__corner_tr" aria-hidden="true"></span>
+                    <span class="pflow-vpick__corner pflow-vpick__corner_bl" aria-hidden="true"></span>
+                    <span class="pflow-vpick__corner pflow-vpick__corner_br" aria-hidden="true"></span>
+                </template>
+                <template lwc:if={hasShape}>
+                    <span class="pflow-vpick__shape" style={shapeStyle} aria-hidden="true"></span>
+                </template>
+                <template lwc:if={hasIcon}>
+                    <span class={iconWrapClass}>
+                        <template lwc:if={hasIconDecor}>
+                            <span class="pflow-vpick__icon-decor" aria-hidden="true"></span>
+                        </template>
+                        <lightning-icon
+                            icon-name={item.icon}
+                            size={resolvedIconSize}
+                            variant={iconVariant}
+                            class="pflow-vpick__icon"
+                        ></lightning-icon>
+                    </span>
+                </template>
+                <span class="pflow-vpick__text">
+                    <span class="pflow-vpick__title">{item.label}</span>
+                    <template lwc:if={hasSublabel}>
+                        <span class="pflow-vpick__sub">{item.sublabel}</span>
+                    </template>
+                </span>
+                <template lwc:if={hasBadge}>
+                    <span class={badgeClass}>{item.badge}</span>
+                </template>
+                <span class="pflow-vpick__check" aria-hidden="true">
+                    <lightning-icon
+                        icon-name="utility:check"
+                        size="xx-small"
+                        variant="inverse"
+                        class="pflow-vpick__check-icon"
+                    ></lightning-icon>
+                </span>
+            </span>
+            <template lwc:if={hasHelp}>
+                <span id={helpId} class="pflow-vpick__help">{item.helpText}</span>
+            </template>
+        </label>
+    </div>
+</template>

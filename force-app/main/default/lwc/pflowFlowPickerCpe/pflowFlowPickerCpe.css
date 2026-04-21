@@ -1,0 +1,271 @@
+/* =============================================================================
+   pflowFlowPickerCpe — Flow Builder inline sidebar
+   Quiet editorial summary: section headings + plain-language lines. Readable
+   at a glance. No cryptic abbreviations, no color-coded chapter numerals.
+   One brand accent; typography does the hierarchy.
+   ============================================================================= */
+
+:host {
+    display: block;
+
+    /* Surface + ink */
+    --pflow-cpe-surface: var(--slds-g-color-neutral-base-100, #ffffff);
+    --pflow-cpe-ink-strong: var(--slds-g-color-neutral-base-10, #181818);
+    --pflow-cpe-ink-body: var(--slds-g-color-neutral-base-20, #2e2e2e);
+    --pflow-cpe-ink-muted: var(--slds-g-color-neutral-base-50, #747474);
+    --pflow-cpe-ink-soft: var(--slds-g-color-neutral-base-60, #9a9a9a);
+    --pflow-cpe-hairline: var(--slds-g-color-border-base-1, #e5e5e5);
+    --pflow-cpe-line: var(--slds-g-color-border-base-2, #d9d9d9);
+
+    /* Brand + status */
+    --pflow-cpe-brand: var(--slds-g-color-brand-base-50, #0176d3);
+    --pflow-cpe-brand-deep: var(--slds-g-color-brand-base-40, #014486);
+    --pflow-cpe-brand-weak: var(--slds-g-color-brand-base-95, #eaf3ff);
+
+    /* Shape */
+    --pflow-cpe-radius: var(--slds-g-radius-border-2, 0.25rem);
+    --pflow-cpe-radius-lg: var(--slds-g-radius-border-3, 0.5rem);
+    --pflow-cpe-shadow: var(--slds-g-shadow-1, 0 1px 2px rgba(0, 0, 0, 0.06));
+
+    /* Mono kept ONLY for API-style strings (Lead.Rating, {!myVar}) — not for
+       eyebrows or chips. Makes api-code visually distinct from prose. */
+    --pflow-cpe-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.pflow-cpe {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    padding: var(--slds-g-spacing-3, 0.75rem);
+}
+
+/* =============================================================================
+   VALIDATION ERRORS
+   ============================================================================= */
+
+.pflow-cpe__errors {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-error-base-50, #ba0517);
+    background: var(--slds-g-color-error-base-95, #fdeef0);
+    color: var(--slds-g-color-error-base-30, #8e030f);
+    border-radius: var(--pflow-cpe-radius);
+    align-items: flex-start;
+}
+
+.pflow-cpe__errors-list {
+    list-style: disc;
+    margin: 0;
+    padding: 0 0 0 var(--slds-g-spacing-4, 1rem);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    line-height: 1.45;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.pflow-cpe__errors-list li { list-style: disc; }
+
+/* =============================================================================
+   SUMMARY CARD — a single sheet with quiet section dividers
+   ============================================================================= */
+
+.pflow-cpe__card {
+    background: var(--pflow-cpe-surface);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-cpe-hairline);
+    border-radius: var(--pflow-cpe-radius-lg);
+    box-shadow: var(--pflow-cpe-shadow);
+    padding: var(--slds-g-spacing-4, 1rem);
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4, 1rem);
+}
+
+.pflow-cpe__card-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding-bottom: var(--slds-g-spacing-3, 0.75rem);
+    border-bottom: 1px solid var(--pflow-cpe-hairline);
+}
+
+.pflow-cpe__card-eyebrow {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pflow-cpe-brand);
+}
+
+.pflow-cpe__card-title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-cpe-ink-strong);
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+}
+
+/* =============================================================================
+   SECTIONS — heading + stacked plain lines
+   ============================================================================= */
+
+.pflow-cpe__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1875rem;
+}
+
+.pflow-cpe__section-title {
+    margin: 0 0 0.1875rem 0;
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--pflow-cpe-ink-muted);
+}
+
+/* First line in data-source section renders as the "kind" (Picklist, SOQL,
+   etc.) with slightly stronger weight — it's the primary identifier. */
+.pflow-cpe__section-kind {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-cpe-ink-strong);
+    line-height: 1.3;
+}
+
+.pflow-cpe__line {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: var(--pflow-cpe-ink-body);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+/* First line of each non-data section renders stronger — it's the primary
+   statement (e.g., "Single select, required"). */
+.pflow-cpe__section > .pflow-cpe__line:first-of-type {
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--pflow-cpe-ink-strong);
+    font-size: 0.875rem;
+}
+
+/* Muted = supporting detail / secondary info */
+.pflow-cpe__line[data-muted="true"] {
+    font-size: 0.75rem;
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: var(--pflow-cpe-ink-muted);
+    line-height: 1.4;
+}
+
+/* Mono = API reference (Lead.Rating, {!myVariable}). Visually separates code
+   from prose without resorting to chip pills. */
+.pflow-cpe__line[data-mono="true"] {
+    font-family: var(--pflow-cpe-mono);
+    font-size: 0.75rem;
+    color: var(--pflow-cpe-ink-body);
+    word-break: break-all;
+}
+
+/* =============================================================================
+   CTA BUTTON
+   ============================================================================= */
+
+.pflow-cpe__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: 0.5rem var(--slds-g-spacing-3, 0.75rem);
+    background: var(--pflow-cpe-brand);
+    color: #ffffff;
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-cpe-brand);
+    border-radius: var(--pflow-cpe-radius);
+    font-size: 0.8125rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.pflow-cpe__cta:hover {
+    background: var(--pflow-cpe-brand-deep);
+    border-color: var(--pflow-cpe-brand-deep);
+    box-shadow: var(--pflow-cpe-shadow);
+}
+
+.pflow-cpe__cta:active {
+    transform: translateY(0.5px);
+}
+
+.pflow-cpe__cta:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--slds-g-color-brand-base-60, #0b5cab);
+    outline-offset: var(--slds-g-sizing-border-2, 2px);
+}
+
+.pflow-cpe__cta lightning-icon {
+    --slds-c-icon-color-foreground-default: #ffffff;
+    --slds-c-icon-color-foreground: #ffffff;
+}
+
+.pflow-cpe__cta_primary {
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+    font-size: 0.875rem;
+}
+
+/* =============================================================================
+   EMPTY STATE
+   ============================================================================= */
+
+.pflow-cpe__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    padding: var(--slds-g-spacing-6, 1.5rem) var(--slds-g-spacing-3, 0.75rem);
+    border: var(--slds-g-sizing-border-1, 1px) dashed var(--pflow-cpe-line);
+    border-radius: var(--pflow-cpe-radius-lg);
+    background: var(--pflow-cpe-surface);
+    text-align: center;
+}
+
+.pflow-cpe__empty-glyph {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    background: var(--pflow-cpe-brand-weak);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pflow-cpe-brand);
+    margin-bottom: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-cpe__empty-glyph lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--pflow-cpe-brand);
+    --slds-c-icon-color-foreground: var(--pflow-cpe-brand);
+}
+
+.pflow-cpe__empty-title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--pflow-cpe-ink-strong);
+}
+
+.pflow-cpe__empty-copy {
+    margin: 0 0 var(--slds-g-spacing-1, 0.25rem);
+    font-size: 0.8125rem;
+    color: var(--pflow-cpe-ink-muted);
+    line-height: 1.45;
+    max-width: 16rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pflow-cpe__cta { transition: none; }
+    .pflow-cpe__cta:active { transform: none; }
+}

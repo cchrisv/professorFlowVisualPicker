@@ -1,0 +1,55 @@
+<template>
+    <span class={rootClass} role="list">
+        <template for:each={normalizedEntries} for:item="entry">
+            <span key={entry.key} class={entry.itemClass} role="listitem">
+                <template lwc:if={entry.hasIcon}>
+                    <c-pflow-atom-icon name={entry.icon} size="xs" class="pflow-meta-row__icon"></c-pflow-atom-icon>
+                </template>
+
+                <template lwc:if={entry.isProgress}>
+                    <span class="pflow-meta-row__bar" aria-hidden="true">
+                        <span class="pflow-meta-row__bar-fill" style={entry.barFillStyle}></span>
+                    </span>
+                    <span class="pflow-meta-row__bar-label">{entry.value}</span>
+                </template>
+
+                <template lwc:elseif={entry.isAvatars}>
+                    <span class="pflow-meta-row__avatars" aria-hidden="true">
+                        <template for:each={entry.visibleAvatars} for:item="av">
+                            <span key={av.key} class={av.className}>
+                                <template lwc:if={av.isUrl}>
+                                    <img src={av.url} alt="" loading="lazy" />
+                                </template>
+                                <template lwc:else>
+                                    <span class="pflow-meta-row__avatar-initials">{av.initials}</span>
+                                </template>
+                            </span>
+                        </template>
+                        <template lwc:if={entry.overflow}>
+                            <span class="pflow-meta-row__avatar-overflow">+{entry.overflow}</span>
+                        </template>
+                    </span>
+                </template>
+
+                <template lwc:elseif={entry.isEyebrow}>
+                    <span class="pflow-meta-row__eyebrow">{entry.value}</span>
+                </template>
+
+                <template lwc:elseif={entry.isStarRating}>
+                    <span class="pflow-meta-row__stars">{entry.value}</span>
+                </template>
+
+                <template lwc:elseif={entry.isTabular}>
+                    <span class="pflow-meta-row__tabular">{entry.value}</span>
+                </template>
+
+                <template lwc:else>
+                    <template lwc:if={entry.hasLabel}>
+                        <span class="pflow-meta-row__label">{entry.label}</span>
+                    </template>
+                    <span class="pflow-meta-row__value">{entry.value}</span>
+                </template>
+            </span>
+        </template>
+    </span>
+</template>

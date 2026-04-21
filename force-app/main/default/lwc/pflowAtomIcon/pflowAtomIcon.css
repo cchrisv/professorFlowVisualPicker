@@ -1,0 +1,25 @@
+:host {
+    display: inline-flex;
+    line-height: var(--slds-g-font-line-height-1, 1);
+}
+
+.pflow-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    flex-shrink: 0;
+}
+
+.pflow-icon__svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Size tokens mirror Lightning's size scale so existing `size="medium"` etc. call sites keep working. */
+.pflow-icon_size-xs { width: var(--slds-g-sizing-4, 0.75rem); height: var(--slds-g-sizing-4, 0.75rem); }
+.pflow-icon_size-sm { width: var(--slds-g-sizing-5, 1rem);    height: var(--slds-g-sizing-5, 1rem); }
+.pflow-icon_size-md { width: var(--slds-g-sizing-7, 1.5rem);  height: var(--slds-g-sizing-7, 1.5rem); }
+.pflow-icon_size-lg { width: var(--slds-g-sizing-9, 2rem);    height: var(--slds-g-sizing-9, 2rem); }
+.pflow-icon_size-xl { width: var(--slds-g-sizing-10, 3rem);    height: var(--slds-g-sizing-10, 3rem); }

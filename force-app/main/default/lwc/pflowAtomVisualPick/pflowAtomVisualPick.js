@@ -1,0 +1,477 @@
+import { LightningElement, api } from 'lwc';
+
+const MODE_SINGLE = 'single';
+const MODE_MULTI = 'multi';
+const VARIANT_GRID = 'grid';
+const VARIANT_LIST = 'list';
+const VALID_VARIANTS = new Set([VARIANT_GRID, VARIANT_LIST]);
+const VALID_SIZES = new Set(['small', 'medium', 'large']);
+const VALID_ASPECTS = new Set(['1:1', '4:3', '3:2', '16:9', '3:4', '2:3']);
+const DEFAULT_ASPECT = '1:1';
+
+// Badge presentation axes — configurable globally on the picker. The actual
+// badge text still comes from `item.badge`; these props decide how it looks.
+const VALID_BADGE_POSITIONS = new Set([
+    'top-left', 'top-right', 'bottom-left', 'bottom-right', 'bottom-inline'
+]);
+const DEFAULT_BADGE_POSITION = 'bottom-inline';
+// Badge variant doubles as a tone — the picker's badge color axis follows
+// the same palette as every other tone axis (pattern/corner/surface/icon):
+// the 8 SLDS presets + 'custom' (hex) + 'inverse' for dark-theme contrast.
+const VALID_BADGE_VARIANTS = new Set([
+    'neutral', 'brand', 'success', 'warning', 'error',
+    'violet', 'pink', 'teal', 'inverse', 'custom'
+]);
+const DEFAULT_BADGE_VARIANT = 'neutral';
+const VALID_BADGE_SHAPES = new Set(['pill', 'square']);
+const DEFAULT_BADGE_SHAPE = 'pill';
+
+// Selection indicator style — how the "this tile is picked" state is shown.
+//   checkmark — floating circle badge top-right (default / historical)
+//   fill      — tile surface fills with brand-weak, check hidden
+//   bar       — thick brand-colored bar on the leading edge (left in grid,
+//               bottom in list)
+const VALID_SELECTION_INDICATORS = new Set(['checkmark', 'fill', 'bar']);
+const DEFAULT_SELECTION_INDICATOR = 'checkmark';
+
+// Elevation / card style.
+//   outlined — 1px border, shadow only on hover (default)
+//   flat     — no border, subtle surface tint
+//   elevated — 1px border + permanent drop shadow
+const VALID_ELEVATIONS = new Set(['outlined', 'flat', 'elevated']);
+const DEFAULT_ELEVATION = 'outlined';
+
+// Pattern — decorative overlay inspired by the empty/error state
+// backgrounds. `none` leaves the surface clean; the others layer a subtle
+// pattern tinted by patternTone.
+//   none     — no overlay (default)
+//   dots     — fine dotted grid (from empty-state)
+//   lines    — horizontal scanlines (from error-state)
+//   diagonal — 45deg stripes
+//   grid     — crosshatch
+//   glow     — soft radial gradient at top
+const VALID_PATTERNS = new Set([
+    'none', 'dots', 'lines', 'diagonal', 'grid', 'glow', 'noise', 'paper', 'waves'
+]);
+const DEFAULT_PATTERN = 'none';
+
+// Surface gradient — sits *behind* the pattern on the tile figure surface.
+// Patterns and gradients compose: e.g. brand radial gradient + neutral dots.
+//   solid            — no gradient (default)
+//   gradient-top     — vertical linear, tinted top → clean bottom
+//   gradient-radial  — radial from top, like a stage spotlight
+//   gradient-diagonal— 45deg linear tint
+//   tint             — flat solid tint (brand-weak style)
+const VALID_SURFACES = new Set([
+    'solid', 'gradient-top', 'gradient-radial', 'gradient-diagonal', 'tint'
+]);
+const DEFAULT_SURFACE = 'solid';
+
+// Legacy icon decoration — kept for back-compat. New configs should use
+// `iconShape` + `iconStyle` instead. We auto-map legacy values below.
+const VALID_ICON_DECORS = new Set([
+    'none', 'ring', 'halo', 'badge', 'square'
+]);
+const DEFAULT_ICON_DECOR = 'none';
+
+// Icon shape — the silhouette of the decoration behind the glyph.
+//   none           — no decoration
+//   circle         — classic round badge
+//   square         — subtle rounded square
+//   squircle       — heavily rounded square (iOS app-icon feel)
+//   pill           — wide horizontal rounded rectangle
+//   hexagon        — regular 6-sided polygon (tech / dashboard feel)
+//   diamond        — rotated square
+const VALID_ICON_SHAPES = new Set([
+    'none', 'circle', 'square', 'squircle', 'pill', 'hexagon', 'diamond'
+]);
+const DEFAULT_ICON_SHAPE = 'none';
+
+// Icon style — how the shape is rendered.
+//   filled     — solid fill in tone color (icon renders white for contrast)
+//   outlined   — transparent fill + tone-colored outline, icon in tone color
+//   soft       — low-opacity dashed outline, dimmed icon — "empty space" feel
+//   glow       — soft radial gradient (halo), icon in tone color
+const VALID_ICON_STYLES = new Set([
+    'filled', 'outlined', 'soft', 'glow'
+]);
+const DEFAULT_ICON_STYLE = 'filled';
+
+// Icon shading — surface treatment applied to filled shapes. Ignored for
+// outlined/soft/glow styles.
+//   flat       — solid color (default)
+//   gradient   — linear gradient from tint-dark to tint-light
+//   emboss     — subtle inset shadow for a "pressed" look
+const VALID_ICON_SHADINGS = new Set(['flat', 'gradient', 'emboss']);
+const DEFAULT_ICON_SHADING = 'flat';
+
+// Corner decoration — the L-shaped trim marks we used on the empty/error
+// plates. `none` means no flourish.
+//   none       — clean corners (default)
+//   trim       — light trim marks
+//   brackets   — heavier, longer bracket corners
+//   dots       — single small dot at each corner
+const VALID_CORNERS = new Set(['none', 'trim', 'brackets', 'dots']);
+const DEFAULT_CORNER = 'none';
+
+// Shared tone palette — drives the tint color across pattern / corner /
+// surface / icon axes. Each accepts a preset name OR 'custom' which pairs
+// with a hex-value sibling property to unlock any color.
+const VALID_TONES = new Set([
+    'neutral', 'brand', 'success', 'warning', 'error',
+    'violet', 'pink', 'teal', 'custom'
+]);
+const DEFAULT_TONE = 'neutral';
+
+// Loose hex validator — accepts "#RGB", "#RRGGBB", "#RRGGBBAA", case-insensitive.
+const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+function safeHex(v) {
+    if (!v) return '';
+    const s = String(v).trim();
+    return HEX_RE.test(s) ? s : '';
+}
+
+function aspectClassKey(aspect) {
+    return aspect.replace(':', '-');
+}
+
+export default class PflowAtomVisualPick extends LightningElement {
+    @api item = {};
+    @api variant = VARIANT_GRID;
+    @api selected = false;
+    @api disabled = false;
+    @api selectionMode = MODE_SINGLE;
+    @api groupName = 'pflowVisualPick';
+    @api size = 'medium';
+    @api aspectRatio = DEFAULT_ASPECT;
+    @api iconSize = 'large';
+    @api badgePosition = DEFAULT_BADGE_POSITION;
+    @api badgeVariant = DEFAULT_BADGE_VARIANT;
+    @api badgeShape = DEFAULT_BADGE_SHAPE;
+    @api selectionIndicator = DEFAULT_SELECTION_INDICATOR;
+    @api elevation = DEFAULT_ELEVATION;
+    @api pattern = DEFAULT_PATTERN;
+    @api patternTone = DEFAULT_TONE;
+    @api cornerStyle = DEFAULT_CORNER;
+    @api cornerTone = DEFAULT_TONE;
+    @api surfaceStyle = DEFAULT_SURFACE;
+    @api surfaceTone = DEFAULT_TONE;
+    @api iconDecor = DEFAULT_ICON_DECOR;
+    @api iconShape = DEFAULT_ICON_SHAPE;
+    @api iconStyle = DEFAULT_ICON_STYLE;
+    @api iconShading = DEFAULT_ICON_SHADING;
+    @api iconTone = DEFAULT_TONE;
+    // Glyph color — controls the icon ITSELF (as distinct from the decor fill).
+    // When unset, glyphTone inherits from iconTone for back-compat. Setting it
+    // independently lets admins design e.g. a neutral-gray decoration with a
+    // brand-blue glyph on top.
+    @api iconGlyphTone;
+    @api iconGlyphToneHex = '';
+    // Custom hex color (applies when iconTone === 'custom'). Same pattern for
+    // pattern/corner/surface tone axes — each can opt out of the preset palette
+    // by setting tone='custom' + providing a hex string.
+    @api iconToneHex = '';
+    @api patternToneHex = '';
+    @api cornerToneHex = '';
+    @api surfaceToneHex = '';
+    // Matches the tone/hex pair pattern used by the other color axes —
+    // badgeVariant='custom' + badgeVariantHex='#ff6b00' renders a custom-
+    // tinted badge.
+    @api badgeVariantHex = '';
+    // Global on/off switches — default ON. LWC disallows `true` defaults on
+    // `@api` booleans, so the property starts `undefined` and our check
+    // (`showIcons !== false`) treats undefined as "show". To hide, a parent
+    // must explicitly pass `false`.
+    @api showIcons;
+    @api showBadges;
+
+    get resolvedVariant() { return VALID_VARIANTS.has(this.variant) ? this.variant : VARIANT_GRID; }
+    get resolvedSize() { return VALID_SIZES.has(this.size) ? this.size : 'medium'; }
+    // Legacy configs may set aspectRatio to 'auto'; silently normalize to the default.
+    get resolvedAspect() { return VALID_ASPECTS.has(this.aspectRatio) ? this.aspectRatio : DEFAULT_ASPECT; }
+    // Icon size resolution order: item override > @api override > tile-size default.
+    // The tile-size default gives small/medium/large tiles naturally-scaled icons
+    // (previously icons were always 'large', making list-mode rows all the same
+    // apparent height regardless of tile size).
+    get resolvedIconSize() {
+        if (this.item?.iconSize) return this.item.iconSize;
+        if (this.iconSize && this.iconSize !== 'large') return this.iconSize; // explicit non-default
+        // Default: scale with tile size.
+        const map = { small: 'small', medium: 'medium', large: 'large' };
+        return map[this.resolvedSize] || 'medium';
+    }
+
+    get resolvedBadgePosition() {
+        return VALID_BADGE_POSITIONS.has(this.badgePosition)
+            ? this.badgePosition
+            : DEFAULT_BADGE_POSITION;
+    }
+    get resolvedBadgeVariant() {
+        // Per-item override wins over the picker-wide variant.
+        const itemVariant = this.item?.badgeVariant;
+        if (itemVariant && VALID_BADGE_VARIANTS.has(itemVariant)) return itemVariant;
+        return VALID_BADGE_VARIANTS.has(this.badgeVariant) ? this.badgeVariant : DEFAULT_BADGE_VARIANT;
+    }
+    get resolvedBadgeShape() {
+        return VALID_BADGE_SHAPES.has(this.badgeShape) ? this.badgeShape : DEFAULT_BADGE_SHAPE;
+    }
+    get resolvedSelectionIndicator() {
+        return VALID_SELECTION_INDICATORS.has(this.selectionIndicator)
+            ? this.selectionIndicator
+            : DEFAULT_SELECTION_INDICATOR;
+    }
+    get resolvedElevation() {
+        return VALID_ELEVATIONS.has(this.elevation) ? this.elevation : DEFAULT_ELEVATION;
+    }
+    get resolvedPattern() {
+        const itemPattern = this.item?.pattern;
+        if (itemPattern && VALID_PATTERNS.has(itemPattern)) return itemPattern;
+        return VALID_PATTERNS.has(this.pattern) ? this.pattern : DEFAULT_PATTERN;
+    }
+    get resolvedPatternTone() {
+        const itemTone = this.item?.patternTone;
+        if (itemTone && VALID_TONES.has(itemTone)) return itemTone;
+        return VALID_TONES.has(this.patternTone) ? this.patternTone : DEFAULT_TONE;
+    }
+    get resolvedCornerStyle() {
+        const itemCorner = this.item?.cornerStyle;
+        if (itemCorner && VALID_CORNERS.has(itemCorner)) return itemCorner;
+        return VALID_CORNERS.has(this.cornerStyle) ? this.cornerStyle : DEFAULT_CORNER;
+    }
+    get resolvedCornerTone() {
+        const itemTone = this.item?.cornerTone;
+        if (itemTone && VALID_TONES.has(itemTone)) return itemTone;
+        return VALID_TONES.has(this.cornerTone) ? this.cornerTone : DEFAULT_TONE;
+    }
+    get hasCornerDecor() { return this.resolvedCornerStyle !== 'none'; }
+    get hasPattern() { return this.resolvedPattern !== 'none'; }
+    get resolvedSurfaceStyle() {
+        const itemSurface = this.item?.surfaceStyle;
+        if (itemSurface && VALID_SURFACES.has(itemSurface)) return itemSurface;
+        return VALID_SURFACES.has(this.surfaceStyle) ? this.surfaceStyle : DEFAULT_SURFACE;
+    }
+    get resolvedSurfaceTone() {
+        const itemTone = this.item?.surfaceTone;
+        if (itemTone && VALID_TONES.has(itemTone)) return itemTone;
+        return VALID_TONES.has(this.surfaceTone) ? this.surfaceTone : DEFAULT_TONE;
+    }
+    get resolvedIconDecor() {
+        const itemDecor = this.item?.iconDecor;
+        if (itemDecor && VALID_ICON_DECORS.has(itemDecor)) return itemDecor;
+        return VALID_ICON_DECORS.has(this.iconDecor) ? this.iconDecor : DEFAULT_ICON_DECOR;
+    }
+
+    // Shape + style — these are the modern replacement for `iconDecor`. When
+    // iconShape is left at 'none' but the legacy iconDecor is set, we auto-
+    // translate so old configs keep rendering.
+    get resolvedIconShape() {
+        const itemShape = this.item?.iconShape;
+        if (itemShape && VALID_ICON_SHAPES.has(itemShape)) return itemShape;
+        if (VALID_ICON_SHAPES.has(this.iconShape) && this.iconShape !== 'none') {
+            return this.iconShape;
+        }
+        // Legacy auto-mapping.
+        const decor = this.resolvedIconDecor;
+        if (decor === 'badge' || decor === 'ring' || decor === 'halo') return 'circle';
+        if (decor === 'square') return 'square';
+        return 'none';
+    }
+    get resolvedIconStyle() {
+        const itemStyle = this.item?.iconStyle;
+        if (itemStyle && VALID_ICON_STYLES.has(itemStyle)) return itemStyle;
+        if (VALID_ICON_STYLES.has(this.iconStyle)) {
+            // Only trust the explicit style when the shape isn't 'none' OR a
+            // legacy decor is carrying it.
+            if (this.resolvedIconShape !== 'none') return this.iconStyle;
+        }
+        // Legacy auto-mapping.
+        const decor = this.resolvedIconDecor;
+        if (decor === 'ring')   return 'outlined';
+        if (decor === 'halo')   return 'glow';
+        if (decor === 'badge')  return 'filled';
+        if (decor === 'square') return 'filled';
+        return DEFAULT_ICON_STYLE;
+    }
+    get resolvedIconShading() {
+        const itemShading = this.item?.iconShading;
+        if (itemShading && VALID_ICON_SHADINGS.has(itemShading)) return itemShading;
+        return VALID_ICON_SHADINGS.has(this.iconShading) ? this.iconShading : DEFAULT_ICON_SHADING;
+    }
+    get resolvedIconTone() {
+        const itemTone = this.item?.iconTone;
+        if (itemTone && VALID_TONES.has(itemTone)) return itemTone;
+        return VALID_TONES.has(this.iconTone) ? this.iconTone : DEFAULT_TONE;
+    }
+    // Glyph tone — if not explicitly set, derive from iconTone. This keeps
+    // legacy behaviour (single-color icon + decor) while enabling the split
+    // when admin chooses it.
+    //   - 'auto' or undefined → inherit from iconTone (legacy)
+    //   - 'contrast'          → white for filled shapes, tone for others
+    //   - any valid tone      → use that tone explicitly
+    get resolvedIconGlyphTone() {
+        const itemGlyph = this.item?.iconGlyphTone;
+        if (itemGlyph && VALID_TONES.has(itemGlyph)) return itemGlyph;
+        if (this.iconGlyphTone === 'auto' || !this.iconGlyphTone) {
+            // Legacy: glyph follows the decor tone, but for filled shapes
+            // we render white text for contrast.
+            return this.resolvedIconStyle === 'filled' ? 'contrast' : this.resolvedIconTone;
+        }
+        if (this.iconGlyphTone === 'contrast') return 'contrast';
+        return VALID_TONES.has(this.iconGlyphTone) ? this.iconGlyphTone : this.resolvedIconTone;
+    }
+    get resolvedIconGlyphHex() {
+        if (this.resolvedIconGlyphTone !== 'custom') return '';
+        return safeHex(this.item?.iconGlyphToneHex) || safeHex(this.iconGlyphToneHex);
+    }
+    // When tone='custom', resolve to the hex value (validated). Everything
+    // else returns '' so the CSS class-based palette handles it.
+    get resolvedIconHex() {
+        if (this.resolvedIconTone !== 'custom') return '';
+        return safeHex(this.item?.iconToneHex) || safeHex(this.iconToneHex);
+    }
+    get resolvedPatternHex() {
+        if (this.resolvedPatternTone !== 'custom') return '';
+        return safeHex(this.item?.patternToneHex) || safeHex(this.patternToneHex);
+    }
+    get resolvedCornerHex() {
+        if (this.resolvedCornerTone !== 'custom') return '';
+        return safeHex(this.item?.cornerToneHex) || safeHex(this.cornerToneHex);
+    }
+    get resolvedSurfaceHex() {
+        if (this.resolvedSurfaceTone !== 'custom') return '';
+        return safeHex(this.item?.surfaceToneHex) || safeHex(this.surfaceToneHex);
+    }
+    // Badge custom hex — active only when resolvedBadgeVariant === 'custom'.
+    get resolvedBadgeHex() {
+        if (this.resolvedBadgeVariant !== 'custom') return '';
+        return safeHex(this.item?.badgeVariantHex) || safeHex(this.badgeVariantHex);
+    }
+
+    // Inline style on the wrapper — sets CSS custom properties for any
+    // 'custom' tone axes. This is the cleanest way to inject an arbitrary
+    // hex without generating a class per color.
+    get customColorStyle() {
+        const parts = [];
+        if (this.resolvedIconHex)      parts.push(`--_icn-color-custom: ${this.resolvedIconHex}`);
+        if (this.resolvedIconGlyphHex) parts.push(`--_icn-glyph-color-custom: ${this.resolvedIconGlyphHex}`);
+        if (this.resolvedPatternHex)   parts.push(`--_ptn-color-custom: ${this.resolvedPatternHex}`);
+        if (this.resolvedCornerHex)    parts.push(`--_cnr-color-custom: ${this.resolvedCornerHex}`);
+        if (this.resolvedSurfaceHex)   parts.push(`--_srf-color-custom: ${this.resolvedSurfaceHex}`);
+        if (this.resolvedBadgeHex)     parts.push(`--_bdg-color-custom: ${this.resolvedBadgeHex}`);
+        return parts.join('; ');
+    }
+
+    get hasIconDecor() {
+        // Decoration is "on" when either the new shape is set or a legacy
+        // decor is active.
+        return this.resolvedIconShape !== 'none' || this.resolvedIconDecor !== 'none';
+    }
+    get iconWrapClass() {
+        return [
+            'pflow-vpick__icon-wrap',
+            `pflow-vpick__icon-wrap_shape-${this.resolvedIconShape}`,
+            `pflow-vpick__icon-wrap_style-${this.resolvedIconStyle}`,
+            `pflow-vpick__icon-wrap_shading-${this.resolvedIconShading}`,
+            `pflow-vpick__icon-wrap_tone-${this.resolvedIconTone}`,
+            `pflow-vpick__icon-wrap_glyph-${this.resolvedIconGlyphTone}`
+        ].join(' ');
+    }
+    // Map icon decoration to lightning-icon `variant`.
+    //
+    // KEY INSIGHT: standard:/custom:/doctype: icons have their own built-in
+    // colors that ignore CSS hooks. The `bare` variant strips those colors
+    // so the glyph inherits currentColor, which our CSS can then control.
+    //
+    // Strategy:
+    //   - Any shape/decoration active → variant="bare"  (CSS drives color)
+    //   - No decoration, semantic tone → matching SLDS variant (error/warn/success)
+    //   - No decoration, preset/custom tone → default (icon as designed)
+    get iconVariant() {
+        if (this.hasIconDecor) return 'bare';
+
+        const tone = this.resolvedIconTone;
+        if (tone === 'error')   return 'error';
+        if (tone === 'warning') return 'warning';
+        if (tone === 'success') return 'success';
+        return '';
+    }
+    get badgeClass() {
+        return [
+            'pflow-vpick__badge',
+            `pflow-vpick__badge_pos-${this.resolvedBadgePosition}`,
+            `pflow-vpick__badge_variant-${this.resolvedBadgeVariant}`,
+            `pflow-vpick__badge_shape-${this.resolvedBadgeShape}`
+        ].join(' ');
+    }
+
+    get isList() { return this.resolvedVariant === VARIANT_LIST; }
+    get isMulti() { return this.selectionMode === MODE_MULTI; }
+
+    get inputType() { return this.isMulti ? 'checkbox' : 'radio'; }
+    get inputName() { return this.isMulti ? '' : this.groupName; }
+    get inputId() {
+        const key = this.item?.id || this.item?.value || 'x';
+        return `pflow-pick-${key}`;
+    }
+    get helpId() { return `${this.inputId}-help`; }
+    get hasHelp() { return Boolean(this.item?.helpText); }
+    // Per-item badge text AND the global showBadges switch must both be true.
+    // Admin can flip showBadges=false at the picker level to blanket-hide
+    // all badges even when items carry badge values.
+    get hasBadge() {
+        return Boolean(this.item?.badge) && this.showBadges !== false;
+    }
+    get hasShape() {
+        const s = this.item?.shape;
+        return Boolean(s && (s.width || s.height));
+    }
+    // Shape is an optional geometric visual (a solid rectangle) that takes
+    // priority over the icon when present. Useful for conveying aspect
+    // ratios or size tiers directly with proportional geometry.
+    // Shape beats icon, and both respect the global showIcons switch.
+    get hasIcon() {
+        return !this.hasShape
+            && Boolean(this.item?.icon)
+            && this.showIcons !== false;
+    }
+    get hasSublabel() { return Boolean(this.item?.sublabel); }
+    get isDisabled() { return this.disabled || Boolean(this.item?.disabled); }
+
+    get shapeStyle() {
+        const s = this.item?.shape;
+        if (!s) return '';
+        const parts = [];
+        if (s.width) parts.push(`width:${s.width}`);
+        if (s.height) parts.push(`height:${s.height}`);
+        return parts.join(';');
+    }
+
+    get wrapperClass() {
+        const parts = [
+            'pflow-vpick',
+            `pflow-vpick_${this.resolvedVariant}`,
+            `pflow-vpick_size-${this.resolvedSize}`,
+            `pflow-vpick_aspect-${aspectClassKey(this.resolvedAspect)}`,
+            `pflow-vpick_sel-${this.resolvedSelectionIndicator}`,
+            `pflow-vpick_elev-${this.resolvedElevation}`,
+            `pflow-vpick_pattern-${this.resolvedPattern}`,
+            `pflow-vpick_ptone-${this.resolvedPatternTone}`,
+            `pflow-vpick_corner-${this.resolvedCornerStyle}`,
+            `pflow-vpick_ctone-${this.resolvedCornerTone}`,
+            `pflow-vpick_surface-${this.resolvedSurfaceStyle}`,
+            `pflow-vpick_stone-${this.resolvedSurfaceTone}`
+        ];
+        if (this.selected) parts.push('pflow-vpick_selected');
+        if (this.isDisabled) parts.push('pflow-vpick_disabled');
+        return parts.join(' ');
+    }
+
+    handleChange() {
+        if (this.isDisabled) return;
+        this.dispatchEvent(new CustomEvent('cardselect', {
+            detail: { value: this.item?.value, id: this.item?.id },
+            bubbles: true,
+            composed: false
+        }));
+    }
+}

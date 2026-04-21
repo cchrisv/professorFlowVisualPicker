@@ -1,0 +1,18 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "package": "pflowFlowPicker",
+      "versionName": "Unified Visual Picker v1.0",
+      "versionNumber": "1.0.0.NEXT",
+      "versionDescription": "Unified, modern Flow Screen visual picker with CPE. Supports picklist, collection, SObject+SOQL, and custom data sources."
+    }
+  ],
+  "name": "professorFlowVisualPicker",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "66.0",
+  "defaultLwcLanguage": "javascript",
+  "packageAliases": {}
+}

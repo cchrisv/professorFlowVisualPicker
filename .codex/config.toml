@@ -1,0 +1,14 @@
+[mcp_servers.salesforce]
+command = "npx"
+args = [
+  "-y",
+  "@salesforce/mcp@latest",
+  "--orgs",
+  "DEFAULT_TARGET_ORG",
+  "--toolsets",
+  "orgs,metadata,data,users,testing",
+  "--tools",
+  "run_apex_test",
+  "--allow-non-ga-tools"
+]
+
