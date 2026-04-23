@@ -1,0 +1,74 @@
+import { LightningElement, api } from 'lwc';
+
+/*
+ * Adapted from UnofficialSF FlowScreenComponentsBasePack fsc_flowCheckbox
+ * (https://github.com/UnofficialSF/LightningFlowComponents), licensed under
+ * the Apache License 2.0. See repo LICENSE and NOTICE for attribution.
+ */
+
+const CB_TRUE = 'CB_TRUE';
+const CB_FALSE = 'CB_FALSE';
+
+const WIRE_BOOLEAN = 'boolean';
+const WIRE_CB_SENTINEL = 'cb-sentinel';
+
+/**
+ * Reusable toggle switch atom.
+ *
+ * Default emits a plain `{ name, checked }` detail on a `toggle` event. Set
+ * `wireFormat="cb-sentinel"` to emit the legacy Flow Builder CPE protocol
+ * shape (`{ id, newValue, newValueDataType, newStringValue }` with
+ * CB_TRUE/CB_FALSE sentinels) instead.
+ *
+ * @slot none — renders only a lightning-input toggle.
+ * @fires toggle — detail shape depends on `wireFormat`.
+ */
+export default class PflowAtomToggle extends LightningElement {
+    /** @type {string} Display label for the toggle. */
+    @api label;
+    /** @type {string} Identifier surfaced on the event detail. */
+    @api name;
+    /** @type {boolean|string} Current value — accepts true / 'true' / 'CB_TRUE' as truthy. */
+    @api checked;
+    /** @type {string} Help text rendered as the native lightning-input tooltip. */
+    @api fieldLevelHelp;
+    /** @type {boolean} Disables the toggle. */
+    @api disabled;
+    /** @type {string} Passed through to lightning-input (e.g. 'label-hidden'). */
+    @api variant;
+    /** @type {string} Text shown next to the switch when on. Empty by default. */
+    @api messageToggleActive = '';
+    /** @type {string} Text shown next to the switch when off. Empty by default. */
+    @api messageToggleInactive = '';
+    /** @type {'boolean'|'cb-sentinel'} Event detail shape. Default 'boolean'. */
+    @api wireFormat = WIRE_BOOLEAN;
+
+    /**
+     * Computed truthy state — supports boolean, string 'true', and legacy CB_TRUE sentinel.
+     * @returns {boolean}
+     */
+    @api
+    get isChecked() {
+        return (
+            this.checked === true ||
+            this.checked === 'true' ||
+            this.checked === CB_TRUE
+        );
+    }
+
+    cbClass = 'slds-p-top_xxx-small';
+
+    handleToggle(event) {
+        const isOn = event.target.checked;
+        const name = event.target.name;
+        const detail = this.wireFormat === WIRE_CB_SENTINEL
+            ? {
+                  id: name,
+                  newValue: isOn,
+                  newValueDataType: 'Boolean',
+                  newStringValue: isOn ? CB_TRUE : CB_FALSE
+              }
+            : { name, checked: isOn };
+        this.dispatchEvent(new CustomEvent('toggle', { detail }));
+    }
+}

@@ -17,11 +17,11 @@
                         </template>
                         <template lwc:elseif={showSelectedIcon}>
                             <span class="slds-icon_container slds-combobox__input-entity-icon pflow-rich-combobox__input-entity-icon">
-                                <lightning-icon
-                                    icon-name={selectedIconName}
+                                <c-pflow-atom-icon
+                                    name={selectedIconName}
                                     size="x-small"
                                     alternative-text="Selected option icon"
-                                ></lightning-icon>
+                                ></c-pflow-atom-icon>
                             </span>
                         </template>
 
@@ -48,11 +48,11 @@
                         />
 
                         <span class="slds-icon_container slds-input__icon slds-input__icon_right">
-                            <lightning-icon
-                                icon-name="utility:down"
+                            <c-pflow-atom-icon
+                                name="utility:down"
                                 size="x-small"
                                 alternative-text="Show options"
-                            ></lightning-icon>
+                            ></c-pflow-atom-icon>
                         </span>
                     </div>
 
@@ -82,11 +82,11 @@
                                                         <span class="pflow-rich-combobox__shape" style={item._shapeStyle} aria-hidden="true"></span>
                                                     </template>
                                                     <template lwc:elseif={item.icon}>
-                                                        <lightning-icon
-                                                            icon-name={item.icon}
+                                                        <c-pflow-atom-icon
+                                                            name={item.icon}
                                                             size="small"
                                                             alternative-text="Option icon"
-                                                        ></lightning-icon>
+                                                        ></c-pflow-atom-icon>
                                                     </template>
                                                 </span>
 
@@ -111,11 +111,11 @@
                                                 </span>
 
                                                 <span lwc:if={item.isSelected} class="pflow-rich-combobox__check">
-                                                    <lightning-icon
-                                                        icon-name="utility:check"
+                                                    <c-pflow-atom-icon
+                                                        name="utility:check"
                                                         size="x-small"
                                                         alternative-text="Selected"
-                                                    ></lightning-icon>
+                                                    ></c-pflow-atom-icon>
                                                 </span>
                                             </div>
                                         </li>

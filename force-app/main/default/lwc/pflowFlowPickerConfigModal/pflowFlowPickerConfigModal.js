@@ -3,7 +3,13 @@ import LightningModal from 'lightning/modal';
 import { getObjectInfo, getPicklistValues } from 'lightning/uiObjectInfoApi';
 import { SAMPLE_ITEMS } from 'c/pflowUtilityPickerDataSources';
 import searchSObjectTypes from '@salesforce/apex/PFlowCpeChoiceEngineController.searchSObjectTypes';
+import searchLookupDatasetFieldsForObject from '@salesforce/apex/PFlowCpeChoiceEngineController.searchLookupDatasetFieldsForObject';
 import queryItems from '@salesforce/apex/PflowPickerController.queryItems';
+
+const ORDER_DIRECTION_OPTIONS = [
+    { label: 'Descending', value: 'DESC' },
+    { label: 'Ascending', value: 'ASC' }
+];
 
 const SOURCE_TILES = [
     { value: 'picklist',         label: 'Picklist',     sublabel: 'Object picklist field',    icon: 'utility:picklist_type' },
@@ -1630,20 +1636,49 @@ export default class PflowFlowPickerConfigModal extends LightningModal {
             sobject: { ...this._config.sobject, whereClause: event.detail.value || '' }
         };
     }
-    handleOrderChange(event) {
+    get orderDirectionOptions() {
+        return ORDER_DIRECTION_OPTIONS;
+    }
+    get orderByFieldSelection() {
+        const field = this._config?.sobject?.orderByField;
+        if (!field) return null;
+        return { id: field, title: field, subtitle: '', icon: 'utility:text' };
+    }
+    handleOrderFieldSearch(event) {
+        const lu = event.currentTarget;
+        const obj = this._config?.sobject?.sObjectApiName || '';
+        if (!obj) { lu.setSearchResults([]); return; }
+        const term = event.detail.rawSearchTerm != null ? String(event.detail.rawSearchTerm) : '';
+        searchLookupDatasetFieldsForObject({ objectApiName: obj, searchKey: term })
+            .then((rows) => lu.setSearchResults(rows || []))
+            .catch(() => lu.setSearchResults([]));
+    }
+    handleOrderFieldSelectionChange(event) {
+        const lu = event.currentTarget;
+        const sel = lu.getSelection?.();
+        const row = Array.isArray(sel) ? sel[0] : sel;
+        const orderByField = row?.id ? String(row.id) : '';
         this._config = {
             ...this._config,
-            sobject: {
-                ...this._config.sobject,
-                orderByField: event.detail.orderByField || '',
-                orderByDirection: event.detail.orderByDirection || 'ASC'
-            }
+            sobject: { ...this._config.sobject, orderByField }
+        };
+    }
+    handleOrderDirectionChange(event) {
+        this._config = {
+            ...this._config,
+            sobject: { ...this._config.sobject, orderByDirection: event.detail.value || 'DESC' }
         };
     }
     handleLimitChange(event) {
+        const raw = event.detail.value;
+        let limit = null;
+        if (raw !== '' && raw != null) {
+            const n = Math.min(Math.max(parseInt(raw, 10) || 0, 0), 2000);
+            limit = n > 0 ? n : null;
+        }
         this._config = {
             ...this._config,
-            sobject: { ...this._config.sobject, limit: event.detail.queryLimit || 50 }
+            sobject: { ...this._config.sobject, limit }
         };
     }
     handleSObjectFieldChange(event) {

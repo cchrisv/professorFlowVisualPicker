@@ -20,7 +20,7 @@
                         onclick={handleOpen}
                     >
                         <template lwc:if={hasSelection}>
-                            <lightning-icon icon-name={_value} size="x-small" alternative-text=""></lightning-icon>
+                            <c-pflow-atom-icon name={_value} size="x-small" alternative-text=""></c-pflow-atom-icon>
                         </template>
                         <span class="pflow-combobox__label">{placeholderLabel}</span>
                         <template lwc:if={hasSelection}>
@@ -31,10 +31,10 @@
                                 aria-label="Clear selection"
                                 onclick={handleClear}
                             >
-                                <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Clear"></lightning-icon>
+                                <c-pflow-atom-icon name="utility:close" size="xx-small" alternative-text="Clear"></c-pflow-atom-icon>
                             </span>
                         </template>
-                        <lightning-icon icon-name="utility:down" size="x-small" alternative-text=""></lightning-icon>
+                        <c-pflow-atom-icon name="utility:down" size="x-small" alternative-text=""></c-pflow-atom-icon>
                     </button>
 
                     <div class={comboboxPanelClass} role="dialog" aria-label="Icon picker">
@@ -63,7 +63,7 @@
                         </ul>
 
                         <div class="pflow-search">
-                            <lightning-icon icon-name="utility:search" size="x-small" alternative-text=""></lightning-icon>
+                            <c-pflow-atom-icon name="utility:search" size="x-small" alternative-text=""></c-pflow-atom-icon>
                             <input
                                 type="search"
                                 class="pflow-search__input"
@@ -88,7 +88,7 @@
                                     onclick={handleIconClick}
                                     onkeydown={handleIconKeydown}
                                 >
-                                    <lightning-icon icon-name={entry.iconName} size="small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name={entry.iconName} size="small" alternative-text=""></c-pflow-atom-icon>
                                 </button>
                             </template>
                         </div>
@@ -130,7 +130,7 @@
                 </ul>
 
                 <div class="pflow-search">
-                    <lightning-icon icon-name="utility:search" size="x-small" alternative-text=""></lightning-icon>
+                    <c-pflow-atom-icon name="utility:search" size="x-small" alternative-text=""></c-pflow-atom-icon>
                     <input
                         type="search"
                         class="pflow-search__input"
@@ -155,7 +155,7 @@
                             onclick={handleIconClick}
                             onkeydown={handleIconKeydown}
                         >
-                            <lightning-icon icon-name={entry.iconName} size="small" alternative-text=""></lightning-icon>
+                            <c-pflow-atom-icon name={entry.iconName} size="small" alternative-text=""></c-pflow-atom-icon>
                         </button>
                     </template>
                 </div>

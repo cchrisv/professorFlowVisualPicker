@@ -10,18 +10,26 @@ const SIZE_ALIASES = {
     'xs': 'xs', 'sm': 'sm', 'md': 'md', 'lg': 'lg', 'xl': 'xl'
 };
 
+const VALID_VARIANTS = new Set(['error', 'warning', 'success', 'brand', 'inverse']);
+
 export default class PflowAtomIcon extends LightningElement {
     @api name = '';
     @api size = 'md';
     @api alternativeText = '';
     @api title = '';
+    /** @type {'error'|'warning'|'success'|'brand'|'inverse'|undefined} */
+    @api variant;
 
     get resolvedSize() {
         return SIZE_ALIASES[this.size] || 'md';
     }
 
     get wrapperClass() {
-        return `pflow-icon pflow-icon_size-${this.resolvedSize}`;
+        const cls = ['pflow-icon', `pflow-icon_size-${this.resolvedSize}`];
+        if (VALID_VARIANTS.has(this.variant)) {
+            cls.push(`pflow-icon_variant-${this.variant}`);
+        }
+        return cls.join(' ');
     }
 
     get role() {

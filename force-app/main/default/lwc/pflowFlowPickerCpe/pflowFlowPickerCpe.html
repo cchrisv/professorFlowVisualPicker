@@ -3,7 +3,7 @@
         <!-- Validation errors strip -->
         <template lwc:if={hasValidationErrors}>
             <div class="pflow-cpe__errors" role="alert">
-                <lightning-icon icon-name="utility:error" size="x-small" variant="error" alternative-text="Errors"></lightning-icon>
+                <c-pflow-atom-icon name="utility:error" size="x-small" variant="error" alternative-text="Errors"></c-pflow-atom-icon>
                 <ul class="pflow-cpe__errors-list">
                     <template for:each={validationMessages} for:item="msg">
                         <li key={msg.key}>{msg.message}</li>
@@ -19,7 +19,7 @@
                 class="pflow-cpe__cta"
                 onclick={handleOpenConfigure}
             >
-                <lightning-icon icon-name="utility:setup" size="x-small" alternative-text=""></lightning-icon>
+                <c-pflow-atom-icon name="utility:setup" size="x-small" alternative-text=""></c-pflow-atom-icon>
                 <span>Edit configuration</span>
             </button>
 
@@ -78,7 +78,7 @@
         <template lwc:else>
             <div class="pflow-cpe__empty">
                 <span class="pflow-cpe__empty-glyph" aria-hidden="true">
-                    <lightning-icon icon-name="utility:picklist" size="small" alternative-text=""></lightning-icon>
+                    <c-pflow-atom-icon name="utility:picklist" size="small" alternative-text=""></c-pflow-atom-icon>
                 </span>
                 <p class="pflow-cpe__empty-title">Not configured yet</p>
                 <p class="pflow-cpe__empty-copy">Pick a data source, layout, and behavior to build your tile picker.</p>
@@ -87,7 +87,7 @@
                     class="pflow-cpe__cta pflow-cpe__cta_primary"
                     onclick={handleOpenConfigure}
                 >
-                    <lightning-icon icon-name="utility:setup" size="x-small" alternative-text=""></lightning-icon>
+                    <c-pflow-atom-icon name="utility:setup" size="x-small" alternative-text=""></c-pflow-atom-icon>
                     <span>Configure picker</span>
                 </button>
             </div>

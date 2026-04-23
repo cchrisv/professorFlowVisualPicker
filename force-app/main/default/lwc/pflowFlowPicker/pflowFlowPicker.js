@@ -70,6 +70,7 @@ export default class PflowFlowPicker extends LightningElement {
     _values = [];
     _selectedLabel = '';
     _selectedLabels = [];
+    _selectionCount = 0;
     _allValues = [];
     _allLabels = [];
     _autoAdvanceId;
@@ -130,6 +131,9 @@ export default class PflowFlowPicker extends LightningElement {
     @api
     get allLabels() { return this._allLabels; }
     set allLabels(v) { this._allLabels = Array.isArray(v) ? [...v] : []; }
+    @api
+    get selectionCount() { return this._selectionCount; }
+    set selectionCount(v) { this._selectionCount = typeof v === 'number' ? v : 0; }
 
     connectedCallback() {
         // Most of the time Flow has already set pickerConfigJson via the
@@ -260,17 +264,21 @@ export default class PflowFlowPicker extends LightningElement {
             this._values = [];
             this._selectedLabel = label || '';
             this._selectedLabels = [];
+            this._selectionCount = this._value ? 1 : 0;
             this.dispatchEvent(new FlowAttributeChangeEvent('value', this._value));
             this.dispatchEvent(new FlowAttributeChangeEvent('selectedRecord', record || null));
             this.dispatchEvent(new FlowAttributeChangeEvent('selectedLabel', this._selectedLabel));
+            this.dispatchEvent(new FlowAttributeChangeEvent('selectionCount', this._selectionCount));
         } else {
             this._values = [...(values || [])];
             this._value = '';
             this._selectedLabels = Array.isArray(labels) ? [...labels] : [];
             this._selectedLabel = '';
+            this._selectionCount = this._values.length;
             this.dispatchEvent(new FlowAttributeChangeEvent('values', this._values));
             this.dispatchEvent(new FlowAttributeChangeEvent('selectedRecords', records || []));
             this.dispatchEvent(new FlowAttributeChangeEvent('selectedLabels', this._selectedLabels));
+            this.dispatchEvent(new FlowAttributeChangeEvent('selectionCount', this._selectionCount));
         }
 
         if (isSingle && this._config.autoAdvance && this._value) {

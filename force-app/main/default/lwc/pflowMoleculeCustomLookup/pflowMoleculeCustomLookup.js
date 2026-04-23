@@ -1,4 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
+import { buildTokens } from 'c/pflowUtilitySearchHighlight';
 
 const DEFAULT_DEBOUNCE_MS = 300;
 const DEFAULT_MIN_SEARCH = 2;
@@ -24,51 +25,6 @@ function normalizeResult(r) {
         title: titleRaw == null ? '' : String(titleRaw),
         subtitle: o.subtitle == null ? '' : String(o.subtitle)
     };
-}
-
-/** @param {string} title @param {string} term */
-function buildTitleTokens(title, term) {
-    const cleanTerm = (term || '').trim().toLowerCase();
-    if (!cleanTerm || !title) {
-        return [{ key: 't0', text: title, isHighlight: false }];
-    }
-    const lower = title.toLowerCase();
-    const idx = lower.indexOf(cleanTerm);
-    if (idx < 0) {
-        return [{ key: 't0', text: title, isHighlight: false }];
-    }
-    const parts = [];
-    let start = 0;
-    let keyIdx = 0;
-    while (start <= title.length) {
-        const foundAt = lower.indexOf(cleanTerm, start);
-        if (foundAt < 0) {
-            if (start < title.length) {
-                parts.push({
-                    key: `t${keyIdx}`,
-                    text: title.substring(start),
-                    isHighlight: false
-                });
-            }
-            break;
-        }
-        if (foundAt > start) {
-            parts.push({
-                key: `t${keyIdx}`,
-                text: title.substring(start, foundAt),
-                isHighlight: false
-            });
-            keyIdx += 1;
-        }
-        parts.push({
-            key: `t${keyIdx}`,
-            text: title.substring(foundAt, foundAt + cleanTerm.length),
-            isHighlight: true
-        });
-        keyIdx += 1;
-        start = foundAt + cleanTerm.length;
-    }
-    return parts.length ? parts : [{ key: 't0', text: title, isHighlight: false }];
 }
 
 export default class PflowMoleculeCustomLookup extends LightningElement {
@@ -287,7 +243,7 @@ export default class PflowMoleculeCustomLookup extends LightningElement {
             icon: r.icon,
             subtitle: r.subtitle,
             optionId: `${this._listboxId}-opt-${i}`,
-            titleTokens: buildTitleTokens(r.title, term),
+            titleTokens: buildTokens(r.title, term),
             isActive: i === this._activeIndex,
             ariaSelected: i === this._activeIndex ? 'true' : 'false'
         }));

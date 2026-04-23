@@ -68,12 +68,12 @@
                                     <template for:each={_options} for:item="curOption">
                                         <li role="presentation" class="slds-listbox__item" key={curOption.type}>
                                             <div class="slds-p-around_xx-small custom-text-transform_uppercase">
-                                                <lightning-icon 
-                                                                icon-name="utility:chevronleft"
+                                                <c-pflow-atom-icon
+                                                                name="utility:chevronleft"
                                                                 class="slds-icon slds-icon_small slds-icon-text-default"
                                                                 size="x-small"
                                                                 onclick={resetData}
-                                                ></lightning-icon>
+                                                ></c-pflow-atom-icon>
                                                 {curOption.type}
                                             </div>
                                             <template for:each={curOption.options} for:item="curOptionElement">
@@ -82,9 +82,9 @@
                                                      role="option">
                                                 <span class="slds-media__figure">
                                                     <span class="slds-icon_container">
-                                                        <lightning-icon icon-name={curOptionElement.optionIcon}
+                                                        <c-pflow-atom-icon name={curOptionElement.optionIcon}
                                                                         class="slds-icon slds-icon_small slds-icon-text-default"
-                                                                        size="x-small"></lightning-icon>
+                                                                        size="x-small"></c-pflow-atom-icon>
                                                     </span>
                                                 </span>
                                                     <span data-value={curOptionElement.value}
@@ -95,32 +95,32 @@
                                                     <span class="slds-listbox__option-text slds-listbox__option-text_entity">{curOptionElement.label}</span>
                                                     <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">{curOptionElement.displayType}</span>
                                                 </span>
-                                                    <lightning-icon if:true={curOptionElement.isObject}
+                                                    <c-pflow-atom-icon if:true={curOptionElement.isObject}
                                                                     data-option-value={curOptionElement.value}
                                                                     data-object-type={curOptionElement.objectType}
-                                                                    icon-name="utility:chevronright"
+                                                                    name="utility:chevronright"
                                                                     class="slds-float_right"
                                                                     size="x-small"
                                                                     onclick={handleOpenObject}
-                                                    ></lightning-icon>
+                                                    ></c-pflow-atom-icon>
 
-                                                    <lightning-icon if:true={curOptionElement.storeOutputAutomatically}
+                                                    <c-pflow-atom-icon if:true={curOptionElement.storeOutputAutomatically}
                                                                     data-option-value={curOptionElement.value}
                                                                     data-object-type={curOptionElement.objectType}
-                                                                    icon-name="utility:chevronright"
+                                                                    name="utility:chevronright"
                                                                     class="slds-float_right"
                                                                     size="x-small"
                                                                     onclick={handleOpenScreenComponent}
-                                                    ></lightning-icon>
+                                                    ></c-pflow-atom-icon>
 
-                                                    <lightning-icon if:true={curOptionElement.globalVariable}
+                                                    <c-pflow-atom-icon if:true={curOptionElement.globalVariable}
                                                                     data-option-value={curOptionElement.value}
                                                                     data-object-type={curOptionElement.objectType}
-                                                                    icon-name="utility:chevronright"
+                                                                    name="utility:chevronright"
                                                                     class="slds-float_right"
                                                                     size="x-small"
                                                                     onclick={handleOpenGlobalVariable}
-                                                    ></lightning-icon>
+                                                    ></c-pflow-atom-icon>
                                                 </div>
                                             </template>
                                         </li>

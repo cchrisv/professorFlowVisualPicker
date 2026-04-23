@@ -197,9 +197,9 @@ Molecules
   pflowMoleculeRichCombobox           <- Combobox with icon + sublabel support
 
 Atoms
-  pflowAtomCheckbox                   <- Accessible checkbox primitive
-  pflowAtomIcon                       <- SLDS icon renderer with fallback
-  pflowAtomMetaRow                    <- Label / sublabel / help-text row
+  pflowAtomToggle                     <- Reusable toggle switch (boolean or CB_TRUE/CB_FALSE wire format)
+  pflowAtomIcon                       <- Icon renderer with Lucide-style SVG catalog
+  pflowAtomVisualPick                 <- Visual picker tile (label / sublabel / badge / icon)
 
 Utilities
   pflowUtilityPickerDataSources       <- Normalizers for all 5 data sources; filter/sort/limit

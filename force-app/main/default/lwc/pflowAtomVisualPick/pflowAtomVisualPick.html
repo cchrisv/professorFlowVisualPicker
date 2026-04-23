@@ -30,12 +30,12 @@
                         <template lwc:if={hasIconDecor}>
                             <span class="pflow-vpick__icon-decor" aria-hidden="true"></span>
                         </template>
-                        <lightning-icon
-                            icon-name={item.icon}
+                        <c-pflow-atom-icon
+                            name={item.icon}
                             size={resolvedIconSize}
                             variant={iconVariant}
                             class="pflow-vpick__icon"
-                        ></lightning-icon>
+                        ></c-pflow-atom-icon>
                     </span>
                 </template>
                 <span class="pflow-vpick__text">
@@ -48,12 +48,12 @@
                     <span class={badgeClass}>{item.badge}</span>
                 </template>
                 <span class="pflow-vpick__check" aria-hidden="true">
-                    <lightning-icon
-                        icon-name="utility:check"
+                    <c-pflow-atom-icon
+                        name="utility:check"
                         size="xx-small"
                         variant="inverse"
                         class="pflow-vpick__check-icon"
-                    ></lightning-icon>
+                    ></c-pflow-atom-icon>
                 </span>
             </span>
             <template lwc:if={hasHelp}>

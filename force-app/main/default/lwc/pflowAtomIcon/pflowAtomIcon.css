@@ -23,3 +23,10 @@
 .pflow-icon_size-md { width: var(--slds-g-sizing-7, 1.5rem);  height: var(--slds-g-sizing-7, 1.5rem); }
 .pflow-icon_size-lg { width: var(--slds-g-sizing-9, 2rem);    height: var(--slds-g-sizing-9, 2rem); }
 .pflow-icon_size-xl { width: var(--slds-g-sizing-10, 3rem);    height: var(--slds-g-sizing-10, 3rem); }
+
+/* Variant hooks — mirror lightning-icon variant coloring via SLDS 2 color tokens. */
+.pflow-icon_variant-error   { color: var(--slds-g-color-error-base-40, #ba0517); }
+.pflow-icon_variant-warning { color: var(--slds-g-color-warning-base-50, #9a6700); }
+.pflow-icon_variant-success { color: var(--slds-g-color-success-base-40, #2e844a); }
+.pflow-icon_variant-brand   { color: var(--slds-g-color-brand-base-50, #0176d3); }
+.pflow-icon_variant-inverse { color: var(--slds-g-color-neutral-base-100, #ffffff); }

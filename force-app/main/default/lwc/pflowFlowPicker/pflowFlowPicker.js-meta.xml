@@ -21,6 +21,7 @@
             <property name="selectedLabels" type="String[]" label="Selected labels (multi)" description="Label text for every currently selected option." role="outputOnly"/>
             <property name="allValues" type="String[]" label="All rendered values" description="Every option value the picker rendered, in display order (post filter/sort/limit, including the None tile if enabled)." role="outputOnly"/>
             <property name="allLabels" type="String[]" label="All rendered labels" description="Every option label the picker rendered, in display order." role="outputOnly"/>
+            <property name="selectionCount" type="Integer" label="Selection count" description="Number of options the user has currently selected. 0 or 1 for single-select; 0–N for multi-select." role="outputOnly"/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

@@ -47,4 +47,51 @@ describe('c-pflow-flow-picker', () => {
         expect(result).toBeDefined();
         expect(result.isValid).toBeDefined();
     });
+
+    it('selectionCount starts at 0', async () => {
+        const el = mount();
+        await Promise.resolve();
+        expect(el.selectionCount).toBe(0);
+    });
+
+    it('selectionCount is 1 after single-select value change', async () => {
+        const el = mount({ selectionMode: 'single' });
+        await Promise.resolve();
+        const organism = el.shadowRoot.querySelector('c-pflow-organism-data-picker');
+        const events = [];
+        el.addEventListener('flowattributechange', (e) => events.push(e));
+        organism.dispatchEvent(new CustomEvent('valuechange', {
+            detail: { value: 'a', values: [], record: null, records: [], label: 'A', labels: [] },
+            bubbles: true
+        }));
+        expect(el.selectionCount).toBe(1);
+        const countEvent = events.find((e) => e.detail?.attributeName === 'selectionCount');
+        expect(countEvent?.detail?.attributeValue).toBe(1);
+    });
+
+    it('selectionCount is 0 when single-select is cleared', async () => {
+        const el = mount({ selectionMode: 'single' });
+        await Promise.resolve();
+        const organism = el.shadowRoot.querySelector('c-pflow-organism-data-picker');
+        organism.dispatchEvent(new CustomEvent('valuechange', {
+            detail: { value: '', values: [], record: null, records: [], label: '', labels: [] },
+            bubbles: true
+        }));
+        expect(el.selectionCount).toBe(0);
+    });
+
+    it('selectionCount reflects multi-select count', async () => {
+        const el = mount({ selectionMode: 'multi' });
+        await Promise.resolve();
+        const organism = el.shadowRoot.querySelector('c-pflow-organism-data-picker');
+        const events = [];
+        el.addEventListener('flowattributechange', (e) => events.push(e));
+        organism.dispatchEvent(new CustomEvent('valuechange', {
+            detail: { value: '', values: ['a', 'b', 'c'], record: null, records: [], label: '', labels: ['A', 'B', 'C'] },
+            bubbles: true
+        }));
+        expect(el.selectionCount).toBe(3);
+        const countEvent = events.find((e) => e.detail?.attributeName === 'selectionCount');
+        expect(countEvent?.detail?.attributeValue).toBe(3);
+    });
 });

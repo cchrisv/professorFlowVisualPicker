@@ -146,7 +146,31 @@ export const ICON_PATHS = {
     'utility:knowledge_base':`<path d="M4 19.5A2.5 2.5 0 016.5 17H20" ${S}/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" ${S}/>`,
     'utility:new':           `<line x1="12" y1="5" x2="12" y2="19" ${S}/><line x1="5" y1="12" x2="19" y2="12" ${S}/>`,
     'utility:add_contact':   `<circle cx="12" cy="8" r="4" ${S}/><path d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2" ${S}/><line x1="20" y1="8" x2="20" y2="14" ${S}/><line x1="23" y1="11" x2="17" y2="11" ${S}/>`,
-    'utility:announcement':  `<path d="M3 11v2a1 1 0 001 1h1l3 7h3l-2-7h5a2 2 0 002-2v-2a2 2 0 00-2-2h-5l2-7H8l-3 7H4a1 1 0 00-1 1z" ${S}/><path d="M20 7v10" ${S}/>`
+    'utility:announcement':  `<path d="M3 11v2a1 1 0 001 1h1l3 7h3l-2-7h5a2 2 0 002-2v-2a2 2 0 00-2-2h-5l2-7H8l-3 7H4a1 1 0 00-1 1z" ${S}/><path d="M20 7v10" ${S}/>`,
+
+    // -------- CPE / config-modal extras --------
+    'utility:up':                 `<line x1="12" y1="19" x2="12" y2="5" ${S}/><polyline points="5 12 12 5 19 12" ${S}/>`,
+    'utility:down':               `<line x1="12" y1="5" x2="12" y2="19" ${S}/><polyline points="19 12 12 19 5 12" ${S}/>`,
+    'utility:list':               `<line x1="8" y1="6" x2="21" y2="6" ${S}/><line x1="8" y1="12" x2="21" y2="12" ${S}/><line x1="8" y1="18" x2="21" y2="18" ${S}/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/>`,
+    'utility:multi_select_checkbox': `<rect x="3" y="3" width="18" height="18" rx="2" ${S}/><polyline points="8 12 11 15 16 9" ${S}/>`,
+    'utility:text_color':         `<path d="M4 20h16" ${S}/><path d="M7 16l5-12 5 12" ${S}/><line x1="9" y1="11" x2="15" y2="11" ${S}/>`,
+    'utility:rules':              `<line x1="3" y1="6" x2="21" y2="6" ${S}/><line x1="3" y1="12" x2="21" y2="12" ${S}/><line x1="3" y1="18" x2="21" y2="18" ${S}/>`,
+    'utility:clear':              `<circle cx="12" cy="12" r="10" ${S}/><line x1="9" y1="9" x2="15" y2="15" ${S}/><line x1="15" y1="9" x2="9" y2="15" ${S}/>`,
+    'utility:expand':             `<polyline points="15 3 21 3 21 9" ${S}/><polyline points="9 21 3 21 3 15" ${S}/><line x1="21" y1="3" x2="14" y2="10" ${S}/><line x1="3" y1="21" x2="10" y2="14" ${S}/>`,
+    'utility:expand_alt':         `<polyline points="15 3 21 3 21 9" ${S}/><polyline points="9 21 3 21 3 15" ${S}/><polyline points="21 15 21 21 15 21" ${S}/><polyline points="3 9 3 3 9 3" ${S}/>`,
+    'utility:contract_alt':       `<polyline points="4 14 10 14 10 20" ${S}/><polyline points="20 10 14 10 14 4" ${S}/><line x1="14" y1="10" x2="21" y2="3" ${S}/><line x1="3" y1="21" x2="10" y2="14" ${S}/>`,
+    'utility:crop':               `<path d="M6 2v14a2 2 0 002 2h14" ${S}/><path d="M18 22V8a2 2 0 00-2-2H2" ${S}/>`,
+    'utility:frozen':             `<line x1="12" y1="2" x2="12" y2="22" ${S}/><line x1="2" y1="12" x2="22" y2="12" ${S}/><line x1="5" y1="5" x2="19" y2="19" ${S}/><line x1="5" y1="19" x2="19" y2="5" ${S}/>`,
+    'utility:dot_net':            `<circle cx="6" cy="6" r="2" ${S}/><circle cx="18" cy="6" r="2" ${S}/><circle cx="6" cy="18" r="2" ${S}/><circle cx="18" cy="18" r="2" ${S}/><line x1="6" y1="8" x2="6" y2="16" ${S}/><line x1="18" y1="8" x2="18" y2="16" ${S}/><line x1="8" y1="6" x2="16" y2="6" ${S}/><line x1="8" y1="18" x2="16" y2="18" ${S}/>`,
+    'utility:shape':              `<circle cx="9" cy="9" r="6" ${S}/><rect x="11" y="11" width="10" height="10" rx="1" ${S}/>`,
+    'utility:adjust_value':       `<line x1="4" y1="12" x2="20" y2="12" ${S}/><circle cx="14" cy="12" r="3" fill="currentColor"/>`,
+    'utility:steps':              `<polyline points="3 20 8 20 8 14 13 14 13 8 18 8 18 2 21 2" ${S}/>`,
+    'utility:color_swatch':       `<circle cx="13.5" cy="6.5" r="0.6" fill="currentColor"/><circle cx="17.5" cy="10.5" r="0.6" fill="currentColor"/><circle cx="8.5" cy="7.5" r="0.6" fill="currentColor"/><circle cx="6.5" cy="12.5" r="0.6" fill="currentColor"/><path d="M12 2a10 10 0 100 20 2.5 2.5 0 002.5-2.5c0-.7-.27-1.36-.76-1.86-.48-.49-.76-1.15-.76-1.85 0-1.38 1.13-2.5 2.52-2.5H18a4 4 0 004-4A9.94 9.94 0 0012 2z" ${S}/>`,
+    'utility:ribbon':             `<polygon points="6 2 18 2 18 18 12 14 6 18 6 2" ${S}/>`,
+    'utility:resource_capacity':  `<rect x="3" y="9" width="18" height="6" rx="2" ${S}/><rect x="3" y="9" width="11" height="6" rx="2" fill="currentColor"/>`,
+    'utility:resize_horizontal':  `<line x1="3" y1="12" x2="21" y2="12" ${S}/><polyline points="8 7 3 12 8 17" ${S}/><polyline points="16 7 21 12 16 17" ${S}/>`,
+    'utility:resize_vertical':    `<line x1="12" y1="3" x2="12" y2="21" ${S}/><polyline points="7 8 12 3 17 8" ${S}/><polyline points="7 16 12 21 17 16" ${S}/>`,
+    'utility:setup':              `<circle cx="12" cy="12" r="3" ${S}/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" ${S}/>`
 };
 
 /**

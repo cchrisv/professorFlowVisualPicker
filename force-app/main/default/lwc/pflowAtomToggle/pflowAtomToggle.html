@@ -5,12 +5,13 @@
             label={label}
             name={name}
             data-name={name}
+            variant={variant}
             field-level-help={fieldLevelHelp}
-            message-toggle-active=""
-            message-toggle-inactive=""
+            message-toggle-active={messageToggleActive}
+            message-toggle-inactive={messageToggleInactive}
             checked={isChecked}
             disabled={disabled}
-            onchange={handleCheckboxChange}
+            onchange={handleToggle}
         ></lightning-input>
     </div>
 </template>

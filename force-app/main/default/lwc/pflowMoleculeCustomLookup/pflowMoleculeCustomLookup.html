@@ -23,11 +23,11 @@
                         <!-- Single-select: selected record icon -->
                         <template lwc:if={selectedIconName}>
                             <span class="slds-icon_container slds-combobox__input-entity-icon">
-                                <lightning-icon
-                                    icon-name={selectedIconName}
+                                <c-pflow-atom-icon
+                                    name={selectedIconName}
                                     size="x-small"
                                     alternative-text="Selected item icon"
-                                ></lightning-icon>
+                                ></c-pflow-atom-icon>
                             </span>
                         </template>
 
@@ -57,11 +57,11 @@
                         <!-- Search icon (visible when no single-select selection) -->
                         <template lwc:if={showSearchIcon}>
                             <span class="slds-icon_container slds-input__icon slds-input__icon_right">
-                                <lightning-icon
-                                    icon-name="utility:search"
+                                <c-pflow-atom-icon
+                                    name="utility:search"
                                     size="x-small"
                                     alternative-text="Search"
-                                ></lightning-icon>
+                                ></c-pflow-atom-icon>
                             </span>
                         </template>
 
@@ -74,12 +74,12 @@
                                 class="slds-button slds-button_icon slds-input__icon slds-input__icon_right"
                                 disabled={disabled}
                             >
-                                <lightning-icon
-                                    icon-name="utility:close"
+                                <c-pflow-atom-icon
+                                    name="utility:close"
                                     size="x-small"
                                     alternative-text="Remove selected option"
                                     class="slds-button__icon"
-                                ></lightning-icon>
+                                ></c-pflow-atom-icon>
                             </button>
                         </template>
                     </div>
@@ -114,7 +114,7 @@
                                                 onmousedown={handlePointerDownOption}
                                             >
                                                 <span lwc:if={row.icon} class="slds-media__figure slds-listbox__option-icon">
-                                                    <lightning-icon icon-name={row.icon} size="small"></lightning-icon>
+                                                    <c-pflow-atom-icon name={row.icon} size="small"></c-pflow-atom-icon>
                                                 </span>
                                                 <span class="slds-media__body">
                                                     <span class="slds-listbox__option-text slds-listbox__option-text_entity">
@@ -173,7 +173,7 @@
                                     has-error={hasLookupErrors}
                                     onremove={handleRemovePill}
                                 >
-                                    <lightning-icon lwc:if={pill.icon} icon-name={pill.icon}></lightning-icon>
+                                    <c-pflow-atom-icon lwc:if={pill.icon} name={pill.icon}></c-pflow-atom-icon>
                                 </lightning-pill>
                             </li>
                         </template>

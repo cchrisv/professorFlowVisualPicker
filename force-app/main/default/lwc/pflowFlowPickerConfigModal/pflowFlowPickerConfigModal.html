@@ -21,7 +21,7 @@
                             <span class="pflow-studio__nav-stripe" aria-hidden="true"></span>
                             <span class="pflow-studio__nav-numeral" aria-hidden="true">{s.numeral}</span>
                             <span class="pflow-studio__nav-glyph" aria-hidden="true">
-                                <lightning-icon icon-name={s.icon} size="x-small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name={s.icon} size="x-small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <span class="pflow-studio__nav-label">{s.label}</span>
                             <template lwc:if={s.showStatus}>
@@ -55,7 +55,7 @@
                                     aria-pressed={btn.ariaPressed}
                                     onclick={handlePreviewStateChange}
                                 >
-                                    <lightning-icon icon-name={btn.icon} size="xx-small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name={btn.icon} size="xx-small" alternative-text=""></c-pflow-atom-icon>
                                     <span>{btn.label}</span>
                                 </button>
                             </template>
@@ -65,7 +65,7 @@
                     <div class="pflow-studio__preview-frame">
                         <template lwc:if={previewEmpty}>
                             <div class="pflow-studio__preview-empty">
-                                <lightning-icon icon-name="utility:preview" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:preview" size="small" alternative-text=""></c-pflow-atom-icon>
                                 <p class="slds-text-body_regular slds-text-color_weak">Pick a data source to see your picker come to life.</p>
                             </div>
                         </template>
@@ -230,12 +230,12 @@
                     <ul class="pflow-studio__issues" role="status">
                         <template for:each={activeSectionIssues} for:item="i">
                             <li key={i.message} class={i.level}>
-                                <lightning-icon
-                                    icon-name="utility:warning"
+                                <c-pflow-atom-icon
+                                    name="utility:warning"
                                     size="xx-small"
                                     variant="warning"
                                     alternative-text=""
-                                ></lightning-icon>
+                                ></c-pflow-atom-icon>
                                 <span>{i.message}</span>
                             </li>
                         </template>
@@ -259,7 +259,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_data" aria-hidden="true">
-                                <lightning-icon icon-name="utility:database" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:database" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Data source</h3>
@@ -289,7 +289,7 @@
                         <article class="slds-card pflow-studio__card">
                             <header class="slds-card__header pflow-card__head">
                                 <span class="pflow-card__glyph pflow-card__glyph_data" aria-hidden="true">
-                                    <lightning-icon icon-name={sourceKindIcon} size="small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name={sourceKindIcon} size="small" alternative-text=""></c-pflow-atom-icon>
                                 </span>
                                 <div class="pflow-card__headings">
                                     <h3 class="slds-card__header-title slds-text-heading_small">{sourceSetupTitle}</h3>
@@ -435,14 +435,34 @@
                                         automatic-output-variables={automaticOutputVariables}
                                         onchange={handleWhereChange}
                                     ></c-pflow-organism-where-builder>
-                                    <c-pflow-molecule-order-limit
-                                        object-api-name={_config.sobject.sObjectApiName}
-                                        order-by-field={_config.sobject.orderByField}
-                                        order-by-direction={_config.sobject.orderByDirection}
-                                        query-limit={_config.sobject.limit}
-                                        onorderchange={handleOrderChange}
-                                        onlimitchange={handleLimitChange}
-                                    ></c-pflow-molecule-order-limit>
+                                    <c-pflow-molecule-custom-lookup
+                                        label="Order By"
+                                        placeholder="Default: Last Modified"
+                                        variant="label-stacked"
+                                        selection={orderByFieldSelection}
+                                        min-search-term-length="0"
+                                        scroll-after-n-items="7"
+                                        onsearch={handleOrderFieldSearch}
+                                        onselectionchange={handleOrderFieldSelectionChange}
+                                        class="slds-m-bottom_x-small"
+                                    ></c-pflow-molecule-custom-lookup>
+                                    <lightning-combobox
+                                        label="Direction"
+                                        value={_config.sobject.orderByDirection}
+                                        options={orderDirectionOptions}
+                                        onchange={handleOrderDirectionChange}
+                                        class="slds-m-bottom_x-small"
+                                    ></lightning-combobox>
+                                    <lightning-input
+                                        type="number"
+                                        label="Limit (optional)"
+                                        value={_config.sobject.limit}
+                                        placeholder="No limit"
+                                        min="1"
+                                        max="2000"
+                                        onchange={handleLimitChange}
+                                        field-level-help="Maximum results returned (1-2000). Leave empty for no limit."
+                                    ></lightning-input>
                                     <section class="pflow-studio__spec-sheet" aria-labelledby="pflow-sobject-mapping-title">
                                         <header class="pflow-studio__spec-sheet-head">
                                             <p class="pflow-studio__spec-sheet-eyebrow">Field mapping</p>
@@ -471,7 +491,7 @@
                         <article class="slds-card pflow-studio__card">
                             <header class="slds-card__header pflow-card__head">
                                 <span class="pflow-card__glyph pflow-card__glyph_data" aria-hidden="true">
-                                    <lightning-icon icon-name="utility:list" size="small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name="utility:list" size="small" alternative-text=""></c-pflow-atom-icon>
                                 </span>
                                 <div class="pflow-card__headings">
                                     <h3 class="slds-card__header-title slds-text-heading_small">Items</h3>
@@ -512,7 +532,7 @@
                             <article class="slds-card pflow-studio__card pflow-studio__bulk">
                                 <header class="slds-card__header pflow-card__head">
                                     <span class="pflow-card__glyph pflow-card__glyph_data" aria-hidden="true">
-                                        <lightning-icon icon-name="utility:multi_select_checkbox" size="small" alternative-text=""></lightning-icon>
+                                        <c-pflow-atom-icon name="utility:multi_select_checkbox" size="small" alternative-text=""></c-pflow-atom-icon>
                                     </span>
                                     <div class="pflow-card__headings">
                                         <h3 class="slds-card__header-title slds-text-heading_small">Bulk apply · {bulkSelectionLabel}</h3>
@@ -536,7 +556,7 @@
                         <article class="slds-card pflow-studio__card">
                             <header class="slds-card__header pflow-card__head">
                                 <span class="pflow-card__glyph pflow-card__glyph_data" aria-hidden="true">
-                                    <lightning-icon icon-name="utility:settings" size="small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name="utility:settings" size="small" alternative-text=""></c-pflow-atom-icon>
                                 </span>
                                 <div class="pflow-card__headings">
                                     <h3 class="slds-card__header-title slds-text-heading_small">Item overrides</h3>
@@ -549,7 +569,7 @@
                                     <div class="slds-form-element pflow-studio__search">
                                         <label class="slds-assistive-text" for="pflow-overrides-search">Filter overrides</label>
                                         <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
-                                            <lightning-icon icon-name="utility:search" size="x-small" class="slds-input__icon slds-input__icon_left" alternative-text=""></lightning-icon>
+                                            <c-pflow-atom-icon name="utility:search" size="x-small" class="slds-input__icon slds-input__icon_left" alternative-text=""></c-pflow-atom-icon>
                                             <input
                                                 type="search"
                                                 id="pflow-overrides-search"
@@ -583,7 +603,7 @@
                                                                 <lightning-button-icon icon-name="utility:refresh" size="x-small" variant="bare" alternative-text="Reset" data-value={row.value} onclick={handleClearOverride}></lightning-button-icon>
                                                             </template>
                                                             <span class="pflow-studio__overrides-chev" aria-hidden="true">
-                                                                <lightning-icon icon-name="utility:chevrondown" size="x-small" alternative-text=""></lightning-icon>
+                                                                <c-pflow-atom-icon name="utility:chevrondown" size="x-small" alternative-text=""></c-pflow-atom-icon>
                                                             </span>
                                                         </div>
                                                     </header>
@@ -625,7 +645,7 @@
                                                                 <lightning-button-icon icon-name="utility:refresh" size="x-small" variant="bare" alternative-text="Reset" data-value={row.value} onclick={handleClearOverride}></lightning-button-icon>
                                                             </template>
                                                             <span class="pflow-studio__overrides-chev" aria-hidden="true">
-                                                                <lightning-icon icon-name="utility:chevrondown" size="x-small" alternative-text=""></lightning-icon>
+                                                                <c-pflow-atom-icon name="utility:chevrondown" size="x-small" alternative-text=""></c-pflow-atom-icon>
                                                             </span>
                                                         </div>
                                                     </header>
@@ -673,7 +693,7 @@
                                                                 <lightning-button-icon icon-name="utility:refresh" size="x-small" variant="bare" alternative-text="Reset" data-value={row.value} onclick={handleClearOverride}></lightning-button-icon>
                                                             </template>
                                                             <span class="pflow-studio__overrides-chev" aria-hidden="true">
-                                                                <lightning-icon icon-name="utility:chevrondown" size="x-small" alternative-text=""></lightning-icon>
+                                                                <c-pflow-atom-icon name="utility:chevrondown" size="x-small" alternative-text=""></c-pflow-atom-icon>
                                                             </span>
                                                         </div>
                                                     </header>
@@ -703,7 +723,7 @@
                         <article class="slds-card pflow-studio__card">
                             <header class="slds-card__header pflow-card__head">
                                 <span class="pflow-card__glyph pflow-card__glyph_data" aria-hidden="true">
-                                    <lightning-icon icon-name="utility:sort" size="small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name="utility:sort" size="small" alternative-text=""></c-pflow-atom-icon>
                                 </span>
                                 <div class="pflow-card__headings">
                                     <h3 class="slds-card__header-title slds-text-heading_small">Display options</h3>
@@ -760,7 +780,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_content" aria-hidden="true">
-                                <lightning-icon icon-name="utility:text_color" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:text_color" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Picker header</h3>
@@ -805,7 +825,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_content" aria-hidden="true">
-                                <lightning-icon icon-name="utility:announcement" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:announcement" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Runtime messages</h3>
@@ -854,7 +874,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_behavior" aria-hidden="true">
-                                <lightning-icon icon-name="utility:check" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:check" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Selection mode</h3>
@@ -883,7 +903,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_behavior" aria-hidden="true">
-                                <lightning-icon icon-name="utility:rules" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:rules" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Selection rules</h3>
@@ -911,13 +931,12 @@
                                     ></lightning-input>
                                 </div>
                             </template>
-                            <lightning-input
-                                type="toggle"
+                            <c-pflow-atom-toggle
                                 label="Required"
                                 checked={_config.required}
                                 data-key="required"
-                                onchange={handleToggleChange}
-                            ></lightning-input>
+                                ontoggle={handleToggleChange}
+                            ></c-pflow-atom-toggle>
                             <template lwc:if={_config.required}>
                                 <c-pflow-organism-resource-picker
                                     name="customErrorMessage"
@@ -931,14 +950,13 @@
                                 ></c-pflow-organism-resource-picker>
                             </template>
                             <template lwc:if={isSingleSelect}>
-                                <lightning-input
-                                    type="toggle"
+                                <c-pflow-atom-toggle
                                     label="Auto-advance the flow on selection"
                                     checked={_config.autoAdvance}
                                     data-key="autoAdvance"
                                     field-level-help="Fires Flow Next the moment a user picks a tile."
-                                    onchange={handleToggleChange}
-                                ></lightning-input>
+                                    ontoggle={handleToggleChange}
+                                ></c-pflow-atom-toggle>
                             </template>
                         </div>
                     </article>
@@ -948,7 +966,7 @@
                         <article class="slds-card pflow-studio__card">
                             <header class="slds-card__header pflow-card__head">
                                 <span class="pflow-card__glyph pflow-card__glyph_behavior" aria-hidden="true">
-                                    <lightning-icon icon-name="utility:clear" size="small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name="utility:clear" size="small" alternative-text=""></c-pflow-atom-icon>
                                 </span>
                                 <div class="pflow-card__headings">
                                     <h3 class="slds-card__header-title slds-text-heading_small">None option</h3>
@@ -957,14 +975,13 @@
                                 <lightning-helptext class="pflow-card__help" content="Prepends a '--None--' choice (empty value) so users can unset the picker. Single-select only."></lightning-helptext>
                             </header>
                             <div class="slds-card__body slds-card__body_inner pflow-studio__field-block">
-                                <lightning-input
-                                    type="toggle"
+                                <c-pflow-atom-toggle
                                     label="Include a --None-- option"
                                     checked={noneOptionValue}
                                     data-key="includeNoneOption"
                                     field-level-help="Adds a blank-value tile to the list so users can clear their pick."
-                                    onchange={handleToggleChange}
-                                ></lightning-input>
+                                    ontoggle={handleToggleChange}
+                                ></c-pflow-atom-toggle>
                                 <lightning-input
                                     type="text"
                                     label="None option label"
@@ -997,7 +1014,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_behavior" aria-hidden="true">
-                                <lightning-icon icon-name="utility:search" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:search" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Search &amp; toolbar</h3>
@@ -1006,21 +1023,19 @@
                             <lightning-helptext class="pflow-card__help" content="Search adds a filter input above the tiles. The Select-all / Clear-all toolbar appears only in multi mode."></lightning-helptext>
                         </header>
                         <div class="slds-card__body slds-card__body_inner pflow-studio__field-block">
-                            <lightning-input
-                                type="toggle"
+                            <c-pflow-atom-toggle
                                 label="Show a search filter"
                                 checked={_config.enableSearch}
                                 data-key="enableSearch"
-                                onchange={handleToggleChange}
-                            ></lightning-input>
+                                ontoggle={handleToggleChange}
+                            ></c-pflow-atom-toggle>
                             <template lwc:if={isMultiSelect}>
-                                <lightning-input
-                                    type="toggle"
+                                <c-pflow-atom-toggle
                                     label="Show Select all / Clear all toolbar"
                                     checked={_config.showSelectAll}
                                     data-key="showSelectAll"
-                                    onchange={handleToggleChange}
-                                ></lightning-input>
+                                    ontoggle={handleToggleChange}
+                                ></c-pflow-atom-toggle>
                             </template>
                         </div>
                     </article>
@@ -1052,7 +1067,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:apps" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:apps" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Layout style</h3>
@@ -1082,7 +1097,7 @@
                         <article class="slds-card pflow-studio__card">
                             <header class="slds-card__header pflow-card__head">
                                 <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                    <lightning-icon icon-name="utility:expand" size="small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name="utility:expand" size="small" alternative-text=""></c-pflow-atom-icon>
                                 </span>
                                 <div class="pflow-card__headings">
                                     <h3 class="slds-card__header-title slds-text-heading_small">Tile size</h3>
@@ -1112,7 +1127,7 @@
                         <article class="slds-card pflow-studio__card">
                             <header class="slds-card__header pflow-card__head">
                                 <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                    <lightning-icon icon-name="utility:crop" size="small" alternative-text=""></lightning-icon>
+                                    <c-pflow-atom-icon name="utility:crop" size="small" alternative-text=""></c-pflow-atom-icon>
                                 </span>
                                 <div class="pflow-card__headings">
                                     <h3 class="slds-card__header-title slds-text-heading_small">Aspect ratio</h3>
@@ -1143,7 +1158,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:table" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:table" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Column count</h3>
@@ -1185,7 +1200,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:frozen" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:frozen" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Card elevation</h3>
@@ -1216,7 +1231,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:dot_net" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:dot_net" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Pattern overlay</h3>
@@ -1285,7 +1300,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:crop" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:crop" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Corner flourish</h3>
@@ -1354,7 +1369,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:picklist" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:picklist" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Surface style</h3>
@@ -1428,15 +1443,14 @@
                             </span>
                             <span class="pflow-studio__subchapter-rule" aria-hidden="true"></span>
                             <span class="pflow-studio__subchapter-toggle">
-                                <lightning-input
-                                    type="toggle"
+                                <c-pflow-atom-toggle
                                     label="Show icons"
                                     variant="label-hidden"
                                     message-toggle-active="Icons on"
                                     message-toggle-inactive="Icons hidden"
                                     checked={showIconsValue}
-                                    onchange={handleShowIconsToggle}
-                                ></lightning-input>
+                                    ontoggle={handleShowIconsToggle}
+                                ></c-pflow-atom-toggle>
                             </span>
                         </div>
                         <template lwc:if={showIconsValue}>
@@ -1457,7 +1471,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:shape" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:shape" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Icon shape</h3>
@@ -1528,7 +1542,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:adjust_value" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:adjust_value" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Icon style</h3>
@@ -1560,7 +1574,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:steps" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:steps" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Icon shading</h3>
@@ -1592,7 +1606,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:color_swatch" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:color_swatch" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Glyph color</h3>
@@ -1650,7 +1664,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:expand_alt" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:expand_alt" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Icon size</h3>
@@ -1687,15 +1701,14 @@
                             </span>
                             <span class="pflow-studio__subchapter-rule" aria-hidden="true"></span>
                             <span class="pflow-studio__subchapter-toggle">
-                                <lightning-input
-                                    type="toggle"
+                                <c-pflow-atom-toggle
                                     label="Show badges"
                                     variant="label-hidden"
                                     message-toggle-active="Badges on"
                                     message-toggle-inactive="Badges hidden"
                                     checked={showBadgesValue}
-                                    onchange={handleShowBadgesToggle}
-                                ></lightning-input>
+                                    ontoggle={handleShowBadgesToggle}
+                                ></c-pflow-atom-toggle>
                             </span>
                         </div>
                         <template lwc:if={showBadgesValue}>
@@ -1713,7 +1726,7 @@
                     <article class="slds-card pflow-studio__card pflow-badge-card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:ribbon" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:ribbon" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Badge</h3>
@@ -1832,7 +1845,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:check" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:check" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Selection indicator</h3>
@@ -1862,7 +1875,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:resource_capacity" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:resource_capacity" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Grid density</h3>
@@ -1899,7 +1912,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:rows" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:rows" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Tile gaps</h3>
@@ -1911,7 +1924,7 @@
                             <template lwc:if={showGapHorizontal}>
                                 <div class="pflow-studio__axis">
                                     <div class="pflow-studio__axis-head">
-                                        <lightning-icon icon-name="utility:resize_horizontal" size="x-small" alternative-text=""></lightning-icon>
+                                        <c-pflow-atom-icon name="utility:resize_horizontal" size="x-small" alternative-text=""></c-pflow-atom-icon>
                                         <div class="pflow-studio__axis-text">
                                             <h4 class="pflow-studio__axis-title">Horizontal</h4>
                                             <p class="pflow-studio__axis-sub">Column gap between tiles.</p>
@@ -1936,7 +1949,7 @@
                             <template lwc:if={showGapVertical}>
                                 <div class="pflow-studio__axis">
                                     <div class="pflow-studio__axis-head">
-                                        <lightning-icon icon-name="utility:resize_vertical" size="x-small" alternative-text=""></lightning-icon>
+                                        <c-pflow-atom-icon name="utility:resize_vertical" size="x-small" alternative-text=""></c-pflow-atom-icon>
                                         <div class="pflow-studio__axis-text">
                                             <h4 class="pflow-studio__axis-title">Vertical</h4>
                                             <p class="pflow-studio__axis-sub">Row gap between tiles.</p>
@@ -1966,7 +1979,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:expand_alt" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:expand_alt" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Outer margin</h3>
@@ -1975,14 +1988,13 @@
                             <lightning-helptext class="pflow-card__help" content="Link all sides to set one value, or unlink for per-side control. Each side maps to an SLDS 2 spacing token."></lightning-helptext>
                         </header>
                         <div class="slds-card__body slds-card__body_inner pflow-studio__field-block">
-                            <lightning-input
-                                type="toggle"
+                            <c-pflow-atom-toggle
                                 label="Link all sides"
                                 message-toggle-active="All four sides share one value"
                                 message-toggle-inactive="Set each side independently"
                                 checked={marginLinked}
-                                onchange={handleMarginLinkToggle}
-                            ></lightning-input>
+                                ontoggle={handleMarginLinkToggle}
+                            ></c-pflow-atom-toggle>
                             <template lwc:if={marginLinked}>
                                 <div class="pflow-studio__pickgroup pflow-studio__pickgroup_compact" role="radiogroup" aria-label="Margin — all sides" oncardselect={handleMarginAllChange}>
                                     <template for:each={marginAllTiles} for:item="tile">
@@ -2003,7 +2015,7 @@
                                 <template for:each={marginSideSections} for:item="section">
                                     <div key={section.side} class="pflow-studio__axis" data-section-side={section.side}>
                                         <div class="pflow-studio__axis-head">
-                                            <lightning-icon icon-name={section.icon} size="x-small" alternative-text=""></lightning-icon>
+                                            <c-pflow-atom-icon name={section.icon} size="x-small" alternative-text=""></c-pflow-atom-icon>
                                             <div class="pflow-studio__axis-text">
                                                 <h4 class="pflow-studio__axis-title">{section.label}</h4>
                                             </div>
@@ -2031,7 +2043,7 @@
                     <article class="slds-card pflow-studio__card">
                         <header class="slds-card__header pflow-card__head">
                             <span class="pflow-card__glyph pflow-card__glyph_appearance" aria-hidden="true">
-                                <lightning-icon icon-name="utility:contract_alt" size="small" alternative-text=""></lightning-icon>
+                                <c-pflow-atom-icon name="utility:contract_alt" size="small" alternative-text=""></c-pflow-atom-icon>
                             </span>
                             <div class="pflow-card__headings">
                                 <h3 class="slds-card__header-title slds-text-heading_small">Inner tile padding</h3>
@@ -2040,14 +2052,13 @@
                             <lightning-helptext class="pflow-card__help" content="Padding drives the content gap too — the space between icon and text is always half the padding. Pick Auto to follow the tile size's default."></lightning-helptext>
                         </header>
                         <div class="slds-card__body slds-card__body_inner pflow-studio__field-block">
-                            <lightning-input
-                                type="toggle"
+                            <c-pflow-atom-toggle
                                 label="Link all sides"
                                 message-toggle-active="All four sides share one value"
                                 message-toggle-inactive="Set each side independently"
                                 checked={paddingLinked}
-                                onchange={handlePaddingLinkToggle}
-                            ></lightning-input>
+                                ontoggle={handlePaddingLinkToggle}
+                            ></c-pflow-atom-toggle>
                             <template lwc:if={paddingLinked}>
                                 <div class="pflow-studio__pickgroup pflow-studio__pickgroup_compact" role="radiogroup" aria-label="Padding — all sides" oncardselect={handlePaddingAllChange}>
                                     <template for:each={paddingAllTiles} for:item="tile">
@@ -2068,7 +2079,7 @@
                                 <template for:each={paddingSideSections} for:item="section">
                                     <div key={section.side} class="pflow-studio__axis" data-section-side={section.side}>
                                         <div class="pflow-studio__axis-head">
-                                            <lightning-icon icon-name={section.icon} size="x-small" alternative-text=""></lightning-icon>
+                                            <c-pflow-atom-icon name={section.icon} size="x-small" alternative-text=""></c-pflow-atom-icon>
                                             <div class="pflow-studio__axis-text">
                                                 <h4 class="pflow-studio__axis-title">{section.label}</h4>
                                             </div>
