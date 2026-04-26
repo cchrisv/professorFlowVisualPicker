@@ -1,32 +1,40 @@
 export class FlowAttributeChangeEvent extends CustomEvent {
-    constructor(attributeName, attributeValue) {
-        super('flowattributechange', {
-            bubbles: true,
-            composed: true,
-            cancelable: false,
-            detail: { attributeName, attributeValue }
-        });
-    }
+  constructor(attributeName, attributeValue) {
+    super("flowattributechange", {
+      bubbles: true,
+      composed: true,
+      cancelable: false,
+      detail: { attributeName, attributeValue }
+    });
+  }
 }
 
 export class FlowNavigationNextEvent extends CustomEvent {
-    constructor() {
-        super('flownavigationnext', {
-            bubbles: true,
-            composed: true,
-            cancelable: false
-        });
-    }
+  constructor() {
+    super("flownavigationnext", {
+      bubbles: true,
+      composed: true,
+      cancelable: false
+    });
+  }
 }
 
 export class FlowNavigationBackEvent extends CustomEvent {
-    constructor() {
-        super('flownavigationback', { bubbles: true, composed: true, cancelable: false });
-    }
+  constructor() {
+    super("flownavigationback", {
+      bubbles: true,
+      composed: true,
+      cancelable: false
+    });
+  }
 }
 
 export class FlowNavigationFinishEvent extends CustomEvent {
-    constructor() {
-        super('flownavigationfinish', { bubbles: true, composed: true, cancelable: false });
-    }
+  constructor() {
+    super("flownavigationfinish", {
+      bubbles: true,
+      composed: true,
+      cancelable: false
+    });
+  }
 }

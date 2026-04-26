@@ -13,6 +13,9 @@ deploy-options.json
 
 # LWC Jest coverage reports
 coverage/
+artifacts/
+output/playwright/
+.tmp/
 
 # Logs
 logs

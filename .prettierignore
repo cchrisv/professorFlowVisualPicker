@@ -3,6 +3,7 @@
 #
 
 **/staticresources/**
+.agents/
 .localdevserver
 .sfdx
 .sf

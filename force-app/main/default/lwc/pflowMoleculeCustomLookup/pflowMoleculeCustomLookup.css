@@ -1,35 +1,45 @@
 /* Dropdown: absolute overlay, full width, above surrounding content */
 .cc-lookup__dropdown {
-    position: absolute;
-    margin-top: var(--slds-g-spacing-1, 0.25rem);
-    width: 100%;
-    z-index: 7001;
+  position: absolute;
+  margin-top: var(--slds-g-spacing-1, 0.25rem);
+  width: var(--pflow-static-v-100-percent, 100%);
+  z-index: 7001;
 }
 
 /* Centered state rows (loading spinner, no-results) */
 .cc-lookup__state {
-    min-height: var(--slds-g-sizing-9, 2rem);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  min-height: var(--slds-g-sizing-9, 2rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Search term highlight */
 .cc-mark {
-    background-color: var(--slds-g-color-neutral-base-95, rgba(243, 243, 243, 1));
-    color: inherit;
+  background-color: var(--slds-g-color-neutral-base-95, rgba(243, 243, 243, 1));
+  color: inherit;
 }
 
-/* Combobox anchor + selected-value padding.
-   These reach into SLDS's internal .slds-combobox DOM because the
-   combobox pattern doesn't expose equivalent component hooks yet.
-   When SLDS 2 adds them, swap for --slds-c-combobox-* hooks. */
-/* stylelint-disable-next-line selector-class-pattern */
-.slds-combobox {
-    position: relative;
+.cc-lookup__combobox {
+  position: relative;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
-.slds-combobox__input-value {
-    padding-left: var(--slds-g-spacing-6, 2rem);
+.cc-lookup__input-entity-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slds-g-color-neutral-base-30);
+}
+
+.cc-lookup__clear-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slds-g-color-neutral-base-40);
+}
+
+.cc-lookup__clear-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

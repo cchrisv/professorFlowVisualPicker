@@ -1,0 +1,1304 @@
+<template>
+  <!-- ═══════════════ CHAPTER 01 · DATA ═══════════════ -->
+  <section class="pflow-chapter pflow-chapter_01" data-chapter="data">
+    <aside class="pflow-chapter__mark" aria-hidden="true">
+      <span class="pflow-chapter__numeral">01</span>
+      <span class="pflow-chapter__rule"></span>
+    </aside>
+    <header class="pflow-chapter__head">
+      <p class="pflow-chapter__eyebrow">Chapter · Data</p>
+      <h2 class="pflow-chapter__title">Where the tiles come from</h2>
+    </header>
+  </section>
+  <template lwc:if={isDataSection}>
+    <!-- CARD 1 · Data source -->
+    <article class="slds-card pflow-studio__card">
+      <header class="slds-card__header pflow-card__head">
+        <span
+          class="pflow-card__glyph pflow-card__glyph_data"
+          aria-hidden="true"
+        >
+          <c-pflow-atom-icon
+            name="database"
+            size="small"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+        </span>
+        <div class="pflow-card__headings">
+          <h3 class="slds-card__header-title slds-text-heading_small">
+            Data source
+          </h3>
+          <p
+            class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+          >
+            Pick where the options come from.
+          </p>
+        </div>
+        <lightning-helptext
+          class="pflow-card__help"
+          content="Picklist pulls values from an object's picklist field. Collection binds to a Flow record collection variable. SOQL runs a custom query. Custom lets you type options inline."
+        ></lightning-helptext>
+      </header>
+      <div class="slds-card__body slds-card__body_inner">
+        <div
+          class="pflow-studio__pickgroup pflow-studio__pickgroup_2x2"
+          role="radiogroup"
+          aria-label="Data source"
+          oncardselect={handleSourceTileChange}
+        >
+          <template for:each={sourceTiles} for:item="tile">
+            <c-pflow-atom-visual-pick
+              key={tile.value}
+              item={tile}
+              selected={tile._selected}
+              selection-mode="single"
+              group-name="pflow-source"
+              size="small"
+              aspect-ratio="1:1"
+            ></c-pflow-atom-visual-pick>
+          </template>
+        </div>
+      </div>
+    </article>
+
+    <!-- CARD 2 · Source setup (conditional) -->
+    <template lwc:if={hasDataSource}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_data"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name={sourceKindIcon}
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              {sourceSetupTitle}
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              {sourceSetupSubtitle}
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="These fields configure the source you picked above. They change based on the source kind."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <template lwc:if={isPicklistMode}>
+            <c-pflow-molecule-custom-lookup
+              label="Object"
+              placeholder="Search objects..."
+              required
+              min-search-term-length="0"
+              selection={picklistObjectSelection}
+              onsearch={handlePicklistObjectSearch}
+              onselectionchange={handlePicklistObjectSelect}
+            ></c-pflow-molecule-custom-lookup>
+            <c-pflow-molecule-field-picker
+              label="Picklist field"
+              required
+              field-type-filter="PICKLIST,MULTIPICKLIST"
+              object-api-name={_config.picklist.objectApiName}
+              value={_config.picklist.fieldApiName}
+              onfieldchange={handlePicklistFieldChange}
+            ></c-pflow-molecule-field-picker>
+            <template lwc:if={hasRecordTypeOptions}>
+              <lightning-combobox
+                label="Record Type"
+                value={recordTypeValue}
+                options={recordTypeOptions}
+                placeholder="Default record type"
+                onchange={handleRecordTypeComboChange}
+                field-level-help="Pick a record type whose picklist values you want to pull. Leave on Default for the object's primary type."
+              ></lightning-combobox>
+            </template>
+            <template lwc:else>
+              <c-pflow-organism-resource-picker
+                name="recordTypeId"
+                label="Record Type Id (optional)"
+                value={_config.picklist.recordTypeId}
+                builder-context={builderContext}
+                automatic-output-variables={automaticOutputVariables}
+                builder-context-filter-type="String"
+                allow-hard-code-reference
+                onvaluechanged={handleRecordTypeIdChange}
+              ></c-pflow-organism-resource-picker>
+            </template>
+            <lightning-combobox
+              label="Output value as"
+              value={picklistValueSource}
+              options={picklistValueSourceOptions}
+              onchange={handlePicklistValueSourceChange}
+            ></lightning-combobox>
+          </template>
+
+          <template lwc:if={isStringCollectionMode}>
+            <c-pflow-organism-resource-picker
+              name="sourceStrings"
+              label="Flow String[] variable"
+              required
+              builder-context-filter-type="String"
+              builder-context-filter-collection-boolean
+              value={_sourceStringsRef}
+              onvaluechanged={handleStringCollectionVariableChange}
+              builder-context={builderContext}
+              automatic-output-variables={automaticOutputVariables}
+            ></c-pflow-organism-resource-picker>
+            <p class="slds-text-body_small slds-text-color_weak">
+              Each string becomes a tile where the label and value are both the
+              string. Use <strong>Item overrides</strong> below to layer on
+              icons, sublabels, badges, or help text per value.
+            </p>
+
+            <!-- Resolved values detected at design time: read-only pill preview.
+                                 These power both the live preview AND the per-item overrides
+                                 list — the admin doesn't have to type anything. -->
+            <template lwc:if={hasResolvedStringValues}>
+              <section
+                class="pflow-string-preview"
+                aria-label="Detected string values"
+              >
+                <header class="pflow-string-preview__head">
+                  <span class="pflow-string-preview__eyebrow"
+                    >From variable</span
+                  >
+                  <span class="pflow-string-preview__count"
+                    >{resolvedStringCountLabel}</span
+                  >
+                </header>
+                <div class="pflow-string-preview__list" role="list">
+                  <template for:each={resolvedStringValuePreview} for:item="v">
+                    <span
+                      key={v.key}
+                      role="listitem"
+                      class="pflow-string-preview__pill"
+                      >{v.label}</span
+                    >
+                  </template>
+                </div>
+              </section>
+            </template>
+
+            <!-- Fallback: the bound variable has no design-time default values
+                                 (or nothing is bound yet). Let the admin seed the overrides list
+                                 manually so per-item config still works. -->
+            <template lwc:else>
+              <lightning-textarea
+                label="Known values (for per-item overrides)"
+                placeholder="Hot, Warm, Cold"
+                field-level-help="This variable has no design-time default values. Enter the values you expect at runtime (comma or newline separated) to enable per-item overrides and preview. Runtime still uses the bound Flow variable's actual values."
+                value={stringCollectionSampleRaw}
+                onchange={handleStringSamplesChange}
+              ></lightning-textarea>
+            </template>
+          </template>
+
+          <template lwc:if={isCollectionMode}>
+            <c-pflow-organism-resource-picker
+              name="sourceRecords"
+              label="Flow record collection"
+              required
+              builder-context-filter-collection-boolean
+              value={_sourceRecordsRef}
+              onvaluechanged={handleCollectionVariableChange}
+              builder-context={builderContext}
+              automatic-output-variables={automaticOutputVariables}
+            ></c-pflow-organism-resource-picker>
+            <section
+              class="pflow-studio__spec-sheet"
+              aria-labelledby="pflow-collection-mapping-title"
+            >
+              <header class="pflow-studio__spec-sheet-head">
+                <p class="pflow-studio__spec-sheet-eyebrow">Field mapping</p>
+                <h4
+                  id="pflow-collection-mapping-title"
+                  class="pflow-studio__spec-sheet-title"
+                >
+                  Map collection fields to tile slots
+                </h4>
+              </header>
+              <div class="pflow-studio__spec-grid">
+                <c-pflow-molecule-field-picker
+                  label="Label (required)"
+                  data-field="label"
+                  required
+                  value={_config.collection.fieldMap.label}
+                  onfieldchange={handleCollectionFieldMapChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Value"
+                  data-field="value"
+                  value={_config.collection.fieldMap.value}
+                  onfieldchange={handleCollectionFieldMapChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Sublabel"
+                  data-field="sublabel"
+                  value={_config.collection.fieldMap.sublabel}
+                  onfieldchange={handleCollectionFieldMapChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Icon"
+                  data-field="icon"
+                  value={_config.collection.fieldMap.icon}
+                  onfieldchange={handleCollectionFieldMapChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Badge"
+                  data-field="badge"
+                  value={_config.collection.fieldMap.badge}
+                  onfieldchange={handleCollectionFieldMapChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Help text"
+                  data-field="helpText"
+                  value={_config.collection.fieldMap.helpText}
+                  onfieldchange={handleCollectionFieldMapChange}
+                ></c-pflow-molecule-field-picker>
+              </div>
+            </section>
+          </template>
+
+          <template lwc:if={isSObjectMode}>
+            <c-pflow-molecule-custom-lookup
+              label="SObject"
+              placeholder="Search objects..."
+              required
+              min-search-term-length="0"
+              selection={sobjectSelection}
+              onsearch={handleSObjectSearch}
+              onselectionchange={handleSObjectSelect}
+            ></c-pflow-molecule-custom-lookup>
+            <c-pflow-organism-where-builder
+              object-api-name={_config.sobject.sObjectApiName}
+              value={_config.sobject.whereClause}
+              builder-context={builderContext}
+              automatic-output-variables={automaticOutputVariables}
+              onchange={handleWhereChange}
+            ></c-pflow-organism-where-builder>
+            <c-pflow-molecule-custom-lookup
+              label="Order By"
+              placeholder="Default: Last Modified"
+              variant="label-stacked"
+              selection={orderByFieldSelection}
+              min-search-term-length="0"
+              scroll-after-n-items="7"
+              onsearch={handleOrderFieldSearch}
+              onselectionchange={handleOrderFieldSelectionChange}
+              class="slds-m-bottom_x-small"
+            ></c-pflow-molecule-custom-lookup>
+            <lightning-combobox
+              label="Direction"
+              value={_config.sobject.orderByDirection}
+              options={orderDirectionOptions}
+              onchange={handleOrderDirectionChange}
+              class="slds-m-bottom_x-small"
+            ></lightning-combobox>
+            <lightning-input
+              type="number"
+              label="Limit (optional)"
+              value={_config.sobject.limit}
+              placeholder="No limit"
+              min="1"
+              max="2000"
+              onchange={handleLimitChange}
+              field-level-help="Maximum results returned (1-2000). Leave empty for no limit."
+            ></lightning-input>
+            <section
+              class="pflow-studio__spec-sheet"
+              aria-labelledby="pflow-sobject-mapping-title"
+            >
+              <header class="pflow-studio__spec-sheet-head">
+                <p class="pflow-studio__spec-sheet-eyebrow">Field mapping</p>
+                <h4
+                  id="pflow-sobject-mapping-title"
+                  class="pflow-studio__spec-sheet-title"
+                >
+                  Map query columns to tile slots
+                </h4>
+              </header>
+              <div class="pflow-studio__spec-grid">
+                <c-pflow-molecule-field-picker
+                  label="Label (required)"
+                  data-field="labelField"
+                  required
+                  object-api-name={_config.sobject.sObjectApiName}
+                  value={_config.sobject.labelField}
+                  onfieldchange={handleSObjectFieldChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Value"
+                  data-field="valueField"
+                  object-api-name={_config.sobject.sObjectApiName}
+                  value={_config.sobject.valueField}
+                  onfieldchange={handleSObjectFieldChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Sublabel"
+                  data-field="sublabelField"
+                  object-api-name={_config.sobject.sObjectApiName}
+                  value={_config.sobject.sublabelField}
+                  onfieldchange={handleSObjectFieldChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Icon"
+                  data-field="iconField"
+                  object-api-name={_config.sobject.sObjectApiName}
+                  value={_config.sobject.iconField}
+                  onfieldchange={handleSObjectFieldChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Badge"
+                  data-field="badgeField"
+                  object-api-name={_config.sobject.sObjectApiName}
+                  value={_config.sobject.badgeField}
+                  onfieldchange={handleSObjectFieldChange}
+                ></c-pflow-molecule-field-picker>
+                <c-pflow-molecule-field-picker
+                  label="Help text"
+                  data-field="helpField"
+                  object-api-name={_config.sobject.sObjectApiName}
+                  value={_config.sobject.helpField}
+                  onfieldchange={handleSObjectFieldChange}
+                ></c-pflow-molecule-field-picker>
+              </div>
+            </section>
+          </template>
+
+          <template lwc:if={isCustomMode}>
+            <p class="slds-text-body_small slds-text-color_weak">
+              You'll add options in the <strong>Items</strong> card below.
+            </p>
+          </template>
+        </div>
+      </article>
+    </template>
+
+    <!-- CARD 3 · Items (conditional, per source) -->
+    <template lwc:if={isCustomMode}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_data"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="list"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Items
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Add, reorder, or remove the options users will see.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="These are the literal options that appear as tiles. Label is what users read; value is what Flow receives when they pick."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <template for:each={customItems} for:item="row">
+            <article key={row.index} class="pflow-studio__custom-row">
+              <header class="pflow-studio__custom-row-head">
+                <h4>Option · {row.index}</h4>
+                <div
+                  class="slds-button-group"
+                  role="group"
+                  aria-label="Reorder option"
+                >
+                  <lightning-button-icon
+                    icon-name="chevron-up"
+                    size="x-small"
+                    alternative-text="Move up"
+                    data-index={row.index}
+                    disabled={row.canMoveUp}
+                    onclick={handleCustomMoveUp}
+                  ></lightning-button-icon>
+                  <lightning-button-icon
+                    icon-name="chevron-down"
+                    size="x-small"
+                    alternative-text="Move down"
+                    data-index={row.index}
+                    disabled={row.canMoveDown}
+                    onclick={handleCustomMoveDown}
+                  ></lightning-button-icon>
+                  <lightning-button-icon
+                    icon-name="copy"
+                    size="x-small"
+                    alternative-text="Duplicate"
+                    data-index={row.index}
+                    onclick={handleCustomDuplicateRow}
+                  ></lightning-button-icon>
+                  <lightning-button-icon
+                    icon-name="trash-2"
+                    size="x-small"
+                    variant="bare"
+                    alternative-text="Delete"
+                    data-index={row.index}
+                    onclick={handleCustomRemoveRow}
+                  ></lightning-button-icon>
+                </div>
+              </header>
+              <div class="pflow-studio__custom-grid">
+                <c-pflow-atom-toggle
+                  label="Hide option"
+                  checked={row.hidden}
+                  data-index={row.index}
+                  message-toggle-active="Hidden from preview and runtime"
+                  message-toggle-inactive="Visible in preview and runtime"
+                  ontoggle={handleCustomHiddenToggle}
+                ></c-pflow-atom-toggle>
+                <c-pflow-molecule-icon-picker
+                  label="Icon"
+                  mode="combobox"
+                  value={row.icon}
+                  data-index={row.index}
+                  oniconselect={handleCustomIconChange}
+                ></c-pflow-molecule-icon-picker>
+                <c-pflow-organism-resource-picker
+                  name="label"
+                  label="Label"
+                  required
+                  value={row.label}
+                  data-index={row.index}
+                  data-field="label"
+                  builder-context={builderContext}
+                  automatic-output-variables={automaticOutputVariables}
+                  builder-context-filter-type="String"
+                  allow-hard-code-reference
+                  onvaluechanged={handleCustomCellChange}
+                ></c-pflow-organism-resource-picker>
+                <c-pflow-organism-resource-picker
+                  name="value"
+                  label="Value"
+                  value={row.value}
+                  data-index={row.index}
+                  data-field="value"
+                  builder-context={builderContext}
+                  automatic-output-variables={automaticOutputVariables}
+                  builder-context-filter-type="String"
+                  allow-hard-code-reference
+                  onvaluechanged={handleCustomCellChange}
+                ></c-pflow-organism-resource-picker>
+                <c-pflow-organism-resource-picker
+                  name="sublabel"
+                  label="Sublabel"
+                  value={row.sublabel}
+                  data-index={row.index}
+                  data-field="sublabel"
+                  builder-context={builderContext}
+                  automatic-output-variables={automaticOutputVariables}
+                  builder-context-filter-type="String"
+                  allow-hard-code-reference
+                  onvaluechanged={handleCustomCellChange}
+                ></c-pflow-organism-resource-picker>
+                <c-pflow-organism-resource-picker
+                  name="badge"
+                  label="Badge"
+                  value={row.badge}
+                  data-index={row.index}
+                  data-field="badge"
+                  builder-context={builderContext}
+                  automatic-output-variables={automaticOutputVariables}
+                  builder-context-filter-type="String"
+                  allow-hard-code-reference
+                  onvaluechanged={handleCustomCellChange}
+                ></c-pflow-organism-resource-picker>
+                <c-pflow-organism-resource-picker
+                  name="helpText"
+                  label="Help text"
+                  value={row.helpText}
+                  data-index={row.index}
+                  data-field="helpText"
+                  builder-context={builderContext}
+                  automatic-output-variables={automaticOutputVariables}
+                  builder-context-filter-type="String"
+                  allow-hard-code-reference
+                  onvaluechanged={handleCustomCellChange}
+                ></c-pflow-organism-resource-picker>
+              </div>
+            </article>
+          </template>
+          <lightning-button
+            variant="neutral"
+            label="Add option"
+            icon-name="plus"
+            icon-position="left"
+            onclick={handleCustomAddRow}
+          ></lightning-button>
+        </div>
+      </article>
+    </template>
+
+    <template lwc:if={canCustomizeValues}>
+      <!-- Bulk-edit card (only visible when rows are selected) -->
+      <template lwc:if={hasBulkSelection}>
+        <article class="slds-card pflow-studio__card pflow-studio__bulk">
+          <header class="slds-card__header pflow-card__head">
+            <span
+              class="pflow-card__glyph pflow-card__glyph_data"
+              aria-hidden="true"
+            >
+              <c-pflow-atom-icon
+                name="list-checks"
+                size="small"
+                alternative-text=""
+              ></c-pflow-atom-icon>
+            </span>
+            <div class="pflow-card__headings">
+              <h3 class="slds-card__header-title slds-text-heading_small">
+                Bulk apply · {bulkSelectionLabel}
+              </h3>
+              <p
+                class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+              >
+                Set these fields on every selected option at once.
+              </p>
+            </div>
+            <lightning-helptext
+              class="pflow-card__help"
+              content="Fill any of the fields to the right and click Apply to overlay them onto the selected items in one action."
+            ></lightning-helptext>
+          </header>
+          <div
+            class="slds-card__body slds-card__body_inner pflow-studio__custom-grid"
+          >
+            <c-pflow-molecule-icon-picker
+              label="Icon"
+              mode="combobox"
+              value={_bulkEditDraft.icon}
+              oniconselect={handleBulkDraftIconChange}
+            ></c-pflow-molecule-icon-picker>
+            <c-pflow-organism-resource-picker
+              name="bulk-sublabel"
+              label="Subtitle"
+              value={_bulkEditDraft.sublabel}
+              data-field="sublabel"
+              builder-context={builderContext}
+              automatic-output-variables={automaticOutputVariables}
+              builder-context-filter-type="String"
+              allow-hard-code-reference
+              onvaluechanged={handleBulkDraftChange}
+            ></c-pflow-organism-resource-picker>
+            <c-pflow-organism-resource-picker
+              name="bulk-badge"
+              label="Badge"
+              value={_bulkEditDraft.badge}
+              data-field="badge"
+              builder-context={builderContext}
+              automatic-output-variables={automaticOutputVariables}
+              builder-context-filter-type="String"
+              allow-hard-code-reference
+              onvaluechanged={handleBulkDraftChange}
+            ></c-pflow-organism-resource-picker>
+            <c-pflow-organism-resource-picker
+              name="bulk-helpText"
+              label="Help text"
+              value={_bulkEditDraft.helpText}
+              data-field="helpText"
+              builder-context={builderContext}
+              automatic-output-variables={automaticOutputVariables}
+              builder-context-filter-type="String"
+              allow-hard-code-reference
+              onvaluechanged={handleBulkDraftChange}
+            ></c-pflow-organism-resource-picker>
+          </div>
+          <footer class="slds-card__footer pflow-studio__bulk-footer">
+            <lightning-button
+              variant="base"
+              label="Clear"
+              onclick={handleClearBulkSelection}
+            ></lightning-button>
+            <lightning-button
+              variant="brand"
+              label="Apply to selected"
+              onclick={handleApplyBulk}
+              disabled={cannotApplyBulk}
+            ></lightning-button>
+          </footer>
+        </article>
+      </template>
+
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_data"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="settings"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Item overrides
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Fine-tune icon, subtitle, badge, and help text on specific
+              options.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Overrides are stored per value (the option's API value). They take precedence over the raw data and apply visually without changing the source."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <section
+            class="pflow-overrides-hero"
+            aria-labelledby="pflow-overrides-title"
+          >
+            <div class="pflow-overrides-hero__copy">
+              <p class="pflow-overrides-hero__eyebrow">Override workspace</p>
+              <h4 id="pflow-overrides-title">{overrideSourceLabel}</h4>
+              <p>{overrideGuideText}</p>
+            </div>
+            <div class="pflow-overrides-hero__metrics" role="list">
+              <template for:each={overrideMetrics} for:item="metric">
+                <span
+                  key={metric.key}
+                  class="pflow-overrides-hero__metric"
+                  role="listitem"
+                >
+                  <strong>{metric.value}</strong>
+                  <span>{metric.label}</span>
+                </span>
+              </template>
+            </div>
+            <ol class="pflow-overrides-flow" aria-label="Override progress">
+              <template for:each={overrideFlowSteps} for:item="step">
+                <li key={step.key} class={step.className}>
+                  <span class="pflow-overrides-flow__dot" aria-hidden="true">
+                    <c-pflow-atom-icon
+                      name="check"
+                      size="xx-small"
+                      alternative-text=""
+                    ></c-pflow-atom-icon>
+                  </span>
+                  <span class="pflow-overrides-flow__copy">
+                    <strong>{step.label}</strong>
+                    <span>{step.detail}</span>
+                  </span>
+                </li>
+              </template>
+            </ol>
+          </section>
+          <div class="pflow-studio__overrides-toolbar">
+            <div class="slds-form-element pflow-studio__search">
+              <label class="slds-assistive-text" for="pflow-overrides-search"
+                >Filter overrides</label
+              >
+              <div
+                class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left"
+              >
+                <c-pflow-atom-icon
+                  name="search"
+                  size="x-small"
+                  box="input"
+                  class="slds-input__icon slds-input__icon_left"
+                  alternative-text=""
+                ></c-pflow-atom-icon>
+                <input
+                  type="search"
+                  id="pflow-overrides-search"
+                  class="slds-input"
+                  placeholder="Filter values, labels, overrides..."
+                  value={_overrideSearch}
+                  oninput={handleOverrideSearch}
+                />
+              </div>
+            </div>
+            <lightning-button
+              variant="neutral"
+              label="Select filtered"
+              onclick={handleSelectAllFiltered}
+              disabled={hasNoFilteredOverrideRows}
+            ></lightning-button>
+          </div>
+
+          <template lwc:if={isPicklistMode}>
+            <template lwc:if={hasPicklistValues}>
+              <div class="pflow-studio__overrides">
+                <template for:each={overrideRows} for:item="row">
+                  <article key={row.value} class={row.rowClass}>
+                    <header class="pflow-studio__overrides-head">
+                      <label class="slds-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={row.isSelected}
+                          data-value={row.value}
+                          onchange={handleToggleSelectRow}
+                        />
+                        <span class="slds-checkbox_faux"></span>
+                        <span class="slds-assistive-text">Select row</span>
+                      </label>
+                      <button
+                        type="button"
+                        class="pflow-studio__overrides-trigger"
+                        data-value={row.value}
+                        onclick={handleToggleExpandRow}
+                        aria-expanded={row.ariaExpanded}
+                        aria-label={row.assistiveLabel}
+                      >
+                        <span
+                          class="pflow-studio__overrides-preview"
+                          aria-hidden="true"
+                        >
+                          <c-pflow-atom-icon
+                            name={row.previewIcon}
+                            size="small"
+                            box="option"
+                            alternative-text=""
+                          ></c-pflow-atom-icon>
+                        </span>
+                        <span class="pflow-studio__overrides-copy">
+                          <span class="pflow-studio__overrides-name"
+                            >{row.previewLabel}</span
+                          >
+                          <span class="pflow-studio__overrides-value"
+                            >{row.value}</span
+                          >
+                          <span
+                            class="pflow-overrides-summary"
+                            aria-hidden="true"
+                          >
+                            <template
+                              for:each={row.summaryItems}
+                              for:item="item"
+                            >
+                              <span key={item.key} class={item.className}
+                                >{item.label}</span
+                              >
+                            </template>
+                          </span>
+                        </span>
+                      </button>
+                      <div class="pflow-studio__overrides-actions">
+                        <template lwc:if={row.hasCustom}>
+                          <lightning-button-icon
+                            icon-name="rotate-cw"
+                            size="x-small"
+                            variant="bare"
+                            alternative-text="Reset"
+                            data-value={row.value}
+                            onclick={handleClearOverride}
+                          ></lightning-button-icon>
+                        </template>
+                        <span
+                          class="pflow-studio__overrides-chev"
+                          aria-hidden="true"
+                        >
+                          <c-pflow-atom-icon
+                            name="chevron-down"
+                            size="x-small"
+                            box="button"
+                            alternative-text=""
+                          ></c-pflow-atom-icon>
+                        </span>
+                      </div>
+                    </header>
+                    <template lwc:if={row.isExpanded}>
+                      <div class="pflow-studio__overrides-grid">
+                        <c-pflow-atom-toggle
+                          label="Hide option"
+                          checked={row.hidden}
+                          data-value={row.value}
+                          message-toggle-active="Hidden from preview and runtime"
+                          message-toggle-inactive="Visible in preview and runtime"
+                          ontoggle={handleOverrideHiddenToggle}
+                        ></c-pflow-atom-toggle>
+                        <c-pflow-molecule-icon-picker
+                          label="Icon"
+                          mode="combobox"
+                          value={row.icon}
+                          data-value={row.value}
+                          oniconselect={handleOverrideIconChange}
+                        ></c-pflow-molecule-icon-picker>
+                        <c-pflow-organism-resource-picker
+                          name="label"
+                          label="Label override"
+                          value={row.label}
+                          data-value={row.value}
+                          data-field="label"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="sublabel"
+                          label="Subtitle"
+                          value={row.sublabel}
+                          data-value={row.value}
+                          data-field="sublabel"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="badge"
+                          label="Badge"
+                          value={row.badge}
+                          data-value={row.value}
+                          data-field="badge"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="helpText"
+                          label="Help text"
+                          value={row.helpText}
+                          data-value={row.value}
+                          data-field="helpText"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                      </div>
+                    </template>
+                  </article>
+                </template>
+              </div>
+            </template>
+            <template lwc:else>
+              <p class="slds-text-body_regular slds-text-color_weak">
+                Pick an object and picklist field above to load values here.
+              </p>
+            </template>
+          </template>
+
+          <template lwc:if={isSObjectMode}>
+            <template lwc:if={hasSampleRows}>
+              <div class="pflow-studio__overrides">
+                <template for:each={overrideRows} for:item="row">
+                  <article key={row.value} class={row.rowClass}>
+                    <header class="pflow-studio__overrides-head">
+                      <label class="slds-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={row.isSelected}
+                          data-value={row.value}
+                          onchange={handleToggleSelectRow}
+                        />
+                        <span class="slds-checkbox_faux"></span>
+                        <span class="slds-assistive-text">Select row</span>
+                      </label>
+                      <button
+                        type="button"
+                        class="pflow-studio__overrides-trigger"
+                        data-value={row.value}
+                        onclick={handleToggleExpandRow}
+                        aria-expanded={row.ariaExpanded}
+                        aria-label={row.assistiveLabel}
+                      >
+                        <span
+                          class="pflow-studio__overrides-preview"
+                          aria-hidden="true"
+                        >
+                          <c-pflow-atom-icon
+                            name={row.previewIcon}
+                            size="small"
+                            box="option"
+                            alternative-text=""
+                          ></c-pflow-atom-icon>
+                        </span>
+                        <span class="pflow-studio__overrides-copy">
+                          <span class="pflow-studio__overrides-name"
+                            >{row.previewLabel}</span
+                          >
+                          <span class="pflow-studio__overrides-value"
+                            >{row.value}</span
+                          >
+                          <span
+                            class="pflow-overrides-summary"
+                            aria-hidden="true"
+                          >
+                            <template
+                              for:each={row.summaryItems}
+                              for:item="item"
+                            >
+                              <span key={item.key} class={item.className}
+                                >{item.label}</span
+                              >
+                            </template>
+                          </span>
+                        </span>
+                      </button>
+                      <div class="pflow-studio__overrides-actions">
+                        <template lwc:if={row.hasCustom}>
+                          <lightning-button-icon
+                            icon-name="rotate-cw"
+                            size="x-small"
+                            variant="bare"
+                            alternative-text="Reset"
+                            data-value={row.value}
+                            onclick={handleClearOverride}
+                          ></lightning-button-icon>
+                        </template>
+                        <span
+                          class="pflow-studio__overrides-chev"
+                          aria-hidden="true"
+                        >
+                          <c-pflow-atom-icon
+                            name="chevron-down"
+                            size="x-small"
+                            box="button"
+                            alternative-text=""
+                          ></c-pflow-atom-icon>
+                        </span>
+                      </div>
+                    </header>
+                    <template lwc:if={row.isExpanded}>
+                      <div class="pflow-studio__overrides-grid">
+                        <c-pflow-atom-toggle
+                          label="Hide option"
+                          checked={row.hidden}
+                          data-value={row.value}
+                          message-toggle-active="Hidden from preview and runtime"
+                          message-toggle-inactive="Visible in preview and runtime"
+                          ontoggle={handleOverrideHiddenToggle}
+                        ></c-pflow-atom-toggle>
+                        <c-pflow-molecule-icon-picker
+                          label="Icon"
+                          mode="combobox"
+                          value={row.icon}
+                          data-value={row.value}
+                          oniconselect={handleOverrideIconChange}
+                        ></c-pflow-molecule-icon-picker>
+                        <c-pflow-organism-resource-picker
+                          name="label"
+                          label="Label override"
+                          value={row.label}
+                          data-value={row.value}
+                          data-field="label"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="sublabel"
+                          label="Subtitle"
+                          value={row.sublabel}
+                          data-value={row.value}
+                          data-field="sublabel"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="badge"
+                          label="Badge"
+                          value={row.badge}
+                          data-value={row.value}
+                          data-field="badge"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="helpText"
+                          label="Help text"
+                          value={row.helpText}
+                          data-value={row.value}
+                          data-field="helpText"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                      </div>
+                    </template>
+                  </article>
+                </template>
+              </div>
+              <div class="slds-m-top_small">
+                <lightning-button
+                  variant="neutral"
+                  label="Reload sample rows"
+                  onclick={handleLoadSObjectSample}
+                  disabled={_isLoadingSample}
+                ></lightning-button>
+              </div>
+            </template>
+            <template lwc:else>
+              <lightning-button
+                variant="brand-outline"
+                label="Load sample rows"
+                onclick={handleLoadSObjectSample}
+                disabled={_isLoadingSample}
+              ></lightning-button>
+              <template lwc:if={_sampleLoadError}>
+                <p
+                  class="slds-text-color_error slds-text-body_regular slds-m-top_x-small"
+                >
+                  {_sampleLoadError}
+                </p>
+              </template>
+            </template>
+          </template>
+
+          <template lwc:if={isStringCollectionMode}>
+            <template lwc:if={overrideRows.length}>
+              <div class="pflow-studio__overrides">
+                <template for:each={overrideRows} for:item="row">
+                  <article key={row.value} class={row.rowClass}>
+                    <header class="pflow-studio__overrides-head">
+                      <label class="slds-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={row.isSelected}
+                          data-value={row.value}
+                          onchange={handleToggleSelectRow}
+                        />
+                        <span class="slds-checkbox_faux"></span>
+                        <span class="slds-assistive-text">Select row</span>
+                      </label>
+                      <button
+                        type="button"
+                        class="pflow-studio__overrides-trigger"
+                        data-value={row.value}
+                        onclick={handleToggleExpandRow}
+                        aria-expanded={row.ariaExpanded}
+                        aria-label={row.assistiveLabel}
+                      >
+                        <span
+                          class="pflow-studio__overrides-preview"
+                          aria-hidden="true"
+                        >
+                          <c-pflow-atom-icon
+                            name={row.previewIcon}
+                            size="small"
+                            box="option"
+                            alternative-text=""
+                          ></c-pflow-atom-icon>
+                        </span>
+                        <span class="pflow-studio__overrides-copy">
+                          <span class="pflow-studio__overrides-name"
+                            >{row.previewLabel}</span
+                          >
+                          <span class="pflow-studio__overrides-value"
+                            >{row.value}</span
+                          >
+                          <span
+                            class="pflow-overrides-summary"
+                            aria-hidden="true"
+                          >
+                            <template
+                              for:each={row.summaryItems}
+                              for:item="item"
+                            >
+                              <span key={item.key} class={item.className}
+                                >{item.label}</span
+                              >
+                            </template>
+                          </span>
+                        </span>
+                      </button>
+                      <div class="pflow-studio__overrides-actions">
+                        <template lwc:if={row.hasCustom}>
+                          <lightning-button-icon
+                            icon-name="rotate-cw"
+                            size="x-small"
+                            variant="bare"
+                            alternative-text="Reset"
+                            data-value={row.value}
+                            onclick={handleClearOverride}
+                          ></lightning-button-icon>
+                        </template>
+                        <span
+                          class="pflow-studio__overrides-chev"
+                          aria-hidden="true"
+                        >
+                          <c-pflow-atom-icon
+                            name="chevron-down"
+                            size="x-small"
+                            box="button"
+                            alternative-text=""
+                          ></c-pflow-atom-icon>
+                        </span>
+                      </div>
+                    </header>
+                    <template lwc:if={row.isExpanded}>
+                      <div class="pflow-studio__overrides-grid">
+                        <c-pflow-atom-toggle
+                          label="Hide option"
+                          checked={row.hidden}
+                          data-value={row.value}
+                          message-toggle-active="Hidden from preview and runtime"
+                          message-toggle-inactive="Visible in preview and runtime"
+                          ontoggle={handleOverrideHiddenToggle}
+                        ></c-pflow-atom-toggle>
+                        <c-pflow-molecule-icon-picker
+                          label="Icon"
+                          mode="combobox"
+                          value={row.icon}
+                          data-value={row.value}
+                          oniconselect={handleOverrideIconChange}
+                        ></c-pflow-molecule-icon-picker>
+                        <c-pflow-organism-resource-picker
+                          name="label"
+                          label="Label override"
+                          value={row.label}
+                          data-value={row.value}
+                          data-field="label"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="sublabel"
+                          label="Subtitle"
+                          value={row.sublabel}
+                          data-value={row.value}
+                          data-field="sublabel"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="badge"
+                          label="Badge"
+                          value={row.badge}
+                          data-value={row.value}
+                          data-field="badge"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                        <c-pflow-organism-resource-picker
+                          name="helpText"
+                          label="Help text"
+                          value={row.helpText}
+                          data-value={row.value}
+                          data-field="helpText"
+                          builder-context={builderContext}
+                          automatic-output-variables={automaticOutputVariables}
+                          builder-context-filter-type="String"
+                          allow-hard-code-reference
+                          onvaluechanged={handleOverrideCellChange}
+                        ></c-pflow-organism-resource-picker>
+                      </div>
+                    </template>
+                  </article>
+                </template>
+              </div>
+            </template>
+            <template lwc:else>
+              <p class="slds-text-body_regular slds-text-color_weak">
+                Enter sample values above (e.g.
+                <code>Hot, Warm, Cold</code>) to manage per-value overrides.
+              </p>
+            </template>
+          </template>
+        </div>
+      </article>
+    </template>
+
+    <!-- CARD · Display options (sort + limit, post-fetch transform) -->
+    <template lwc:if={hasDataSource}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_data"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="arrow-up-down"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Display options
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Sort options and cap how many show up at runtime.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Sort is applied after overrides, so overridden labels sort correctly. Limit caps the rendered count after sorting."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <div class="pflow-studio__field-grid">
+            <lightning-combobox
+              label="Sort by"
+              value={displaySortBy}
+              options={sortByOptions}
+              onchange={handleDisplaySortByChange}
+              field-level-help="Order the options after they're fetched. Source order preserves the order from the data source."
+            ></lightning-combobox>
+            <template lwc:if={displaySortEnabled}>
+              <lightning-combobox
+                label="Direction"
+                value={displaySortDirection}
+                options={sortDirectionOptions}
+                onchange={handleDisplaySortDirectionChange}
+              ></lightning-combobox>
+            </template>
+            <lightning-input
+              type="number"
+              label="Maximum options"
+              placeholder="No limit"
+              value={displayLimit}
+              min="0"
+              onchange={handleDisplayLimitChange}
+              field-level-help="Cap how many options render at runtime. Leave blank to show all."
+            ></lightning-input>
+          </div>
+        </div>
+      </article>
+    </template>
+  </template>
+</template>

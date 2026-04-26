@@ -1,4 +1,4 @@
 :host {
-    display: block;
-    width: 100%;
+  display: block;
+  width: var(--pflow-static-v-100-percent, 100%);
 }

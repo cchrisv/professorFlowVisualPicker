@@ -1,165 +1,217 @@
 <template>
-    <div class="pflow-icon-picker">
-        <template lwc:if={isCombobox}>
-            <label class="slds-form-element__label" for="combobox-trigger">
-                <template lwc:if={required}>
-                    <abbr title="required" class="slds-required">*</abbr>
-                </template>
-                {label}
-            </label>
-            <div class="slds-form-element__control">
-                <div class="pflow-combobox" onblur={handleBlur}>
-                    <button
-                        type="button"
-                        class="pflow-combobox__trigger slds-button slds-button_neutral"
-                        id="combobox-trigger"
-                        aria-haspopup="listbox"
-                        aria-expanded={_isOpen}
-                        aria-label={label}
-                        disabled={disabled}
-                        onclick={handleOpen}
-                    >
-                        <template lwc:if={hasSelection}>
-                            <c-pflow-atom-icon name={_value} size="x-small" alternative-text=""></c-pflow-atom-icon>
-                        </template>
-                        <span class="pflow-combobox__label">{placeholderLabel}</span>
-                        <template lwc:if={hasSelection}>
-                            <span
-                                class="pflow-combobox__clear"
-                                role="button"
-                                tabindex="0"
-                                aria-label="Clear selection"
-                                onclick={handleClear}
-                            >
-                                <c-pflow-atom-icon name="utility:close" size="xx-small" alternative-text="Clear"></c-pflow-atom-icon>
-                            </span>
-                        </template>
-                        <c-pflow-atom-icon name="utility:down" size="x-small" alternative-text=""></c-pflow-atom-icon>
-                    </button>
+  <div class={pickerClass}>
+    <template lwc:if={isCombobox}>
+      <label class="slds-form-element__label" for="combobox-trigger">
+        <template lwc:if={required}>
+          <abbr title="required" class="slds-required">*</abbr>
+        </template>
+        {label}
+      </label>
+      <div class="slds-form-element__control">
+        <div class="pflow-combobox" onblur={handleBlur}>
+          <button
+            type="button"
+            class="pflow-combobox__trigger slds-button slds-button_neutral"
+            id="combobox-trigger"
+            aria-haspopup="listbox"
+            aria-expanded={_isOpen}
+            aria-label={label}
+            disabled={disabled}
+            onclick={handleOpen}
+          >
+            <template lwc:if={hasSelection}>
+              <span class="pflow-combobox__preview" aria-hidden="true">
+                <c-pflow-atom-icon
+                  name={_value}
+                  size="small"
+                  box="tile"
+                  alternative-text=""
+                ></c-pflow-atom-icon>
+              </span>
+            </template>
+            <span class="pflow-combobox__label">{placeholderLabel}</span>
+            <template lwc:if={hasSelection}>
+              <span
+                class="pflow-combobox__clear"
+                role="button"
+                tabindex="0"
+                aria-label="Clear selection"
+                onclick={handleClear}
+              >
+                <c-pflow-atom-icon
+                  name="x"
+                  size="xx-small"
+                  box="button"
+                  alternative-text="Clear"
+                ></c-pflow-atom-icon>
+              </span>
+            </template>
+            <c-pflow-atom-icon
+              name="chevron-down"
+              size="x-small"
+              box="button"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </button>
 
-                    <div class={comboboxPanelClass} role="dialog" aria-label="Icon picker">
-                        <ul
-                            class="slds-tabs_default__nav pflow-tabs"
-                            role="tablist"
-                            onkeydown={handleTabKeydown}
-                        >
-                            <template for:each={setTabs} for:item="t">
-                                <li
-                                    key={t.key}
-                                    class={t.liClass}
-                                    role="presentation"
-                                >
-                                    <button
-                                        type="button"
-                                        class={t.buttonClass}
-                                        role="tab"
-                                        aria-selected={t.ariaSelected}
-                                        tabindex={t.tabIndex}
-                                        data-set={t.key}
-                                        onclick={handleTabClick}
-                                    >{t.label}</button>
-                                </li>
-                            </template>
-                        </ul>
+          <div
+            class={comboboxPanelClass}
+            role="dialog"
+            aria-label="Icon picker"
+          >
+            <ul
+              class="slds-tabs_default__nav pflow-tabs"
+              role="tablist"
+              onkeydown={handleTabKeydown}
+            >
+              <template for:each={setTabs} for:item="t">
+                <li key={t.key} class={t.liClass} role="presentation">
+                  <button
+                    type="button"
+                    class={t.buttonClass}
+                    role="tab"
+                    aria-selected={t.ariaSelected}
+                    tabindex={t.tabIndex}
+                    data-set={t.key}
+                    onclick={handleTabClick}
+                  >
+                    {t.label}
+                  </button>
+                </li>
+              </template>
+            </ul>
 
-                        <div class="pflow-search">
-                            <c-pflow-atom-icon name="utility:search" size="x-small" alternative-text=""></c-pflow-atom-icon>
-                            <input
-                                type="search"
-                                class="pflow-search__input"
-                                placeholder="Search icons..."
-                                value={_searchTerm}
-                                oninput={handleSearchInput}
-                                aria-label="Search icons"
-                            />
-                        </div>
-
-                        <div class="pflow-grid" role="listbox" aria-label="Icons">
-                            <template for:each={visibleIcons} for:item="entry">
-                                <button
-                                    key={entry.id}
-                                    type="button"
-                                    class={entry.buttonClass}
-                                    role="option"
-                                    aria-selected={entry.selected}
-                                    aria-label={entry.iconName}
-                                    title={entry.iconName}
-                                    data-icon={entry.iconName}
-                                    onclick={handleIconClick}
-                                    onkeydown={handleIconKeydown}
-                                >
-                                    <c-pflow-atom-icon name={entry.iconName} size="small" alternative-text=""></c-pflow-atom-icon>
-                                </button>
-                            </template>
-                        </div>
-                    </div>
-                </div>
+            <div class="pflow-search">
+              <c-pflow-atom-icon
+                name="search"
+                size="x-small"
+                box="input"
+                alternative-text=""
+              ></c-pflow-atom-icon>
+              <input
+                type="search"
+                class="pflow-search__input"
+                placeholder="Search icons..."
+                value={_searchTerm}
+                oninput={handleSearchInput}
+                aria-label="Search icons"
+              />
             </div>
-        </template>
 
-        <template lwc:if={isTabs}>
-            <fieldset class="slds-form-element">
-                <legend class="slds-form-element__legend slds-form-element__label">
-                    <template lwc:if={required}>
-                        <abbr title="required" class="slds-required">*</abbr>
-                    </template>
-                    {label}
-                </legend>
-                <ul
-                    class="slds-tabs_default__nav pflow-tabs"
-                    role="tablist"
-                    onkeydown={handleTabKeydown}
-                >
-                    <template for:each={setTabs} for:item="t">
-                        <li
-                            key={t.key}
-                            class={t.liClass}
-                            role="presentation"
-                        >
-                            <button
-                                type="button"
-                                class={t.buttonClass}
-                                role="tab"
-                                aria-selected={t.ariaSelected}
-                                tabindex={t.tabIndex}
-                                data-set={t.key}
-                                onclick={handleTabClick}
-                            >{t.label}</button>
-                        </li>
-                    </template>
-                </ul>
+            <template lwc:if={hasVisibleIcons}>
+              <div class="pflow-grid" role="listbox" aria-label="Icons">
+                <template for:each={visibleIcons} for:item="entry">
+                  <button
+                    key={entry.id}
+                    type="button"
+                    class={entry.buttonClass}
+                    role="option"
+                    aria-selected={entry.selected}
+                    aria-label={entry.assistiveLabel}
+                    title={entry.iconName}
+                    data-icon={entry.iconName}
+                    onclick={handleIconClick}
+                    onkeydown={handleIconKeydown}
+                  >
+                    <c-pflow-atom-icon
+                      name={entry.iconName}
+                      size="medium"
+                      box="tile"
+                      alternative-text=""
+                    ></c-pflow-atom-icon>
+                    <span class="pflow-icon-cell__label"
+                      >{entry.displayLabel}</span
+                    >
+                  </button>
+                </template>
+              </div>
+            </template>
+            <template lwc:if={hasNoVisibleIcons}>
+              <div class="pflow-icon-picker__empty" role="status">
+                No icons match this search.
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
 
-                <div class="pflow-search">
-                    <c-pflow-atom-icon name="utility:search" size="x-small" alternative-text=""></c-pflow-atom-icon>
-                    <input
-                        type="search"
-                        class="pflow-search__input"
-                        placeholder="Search icons..."
-                        value={_searchTerm}
-                        oninput={handleSearchInput}
-                        aria-label="Search icons"
-                    />
-                </div>
+    <template lwc:if={isTabs}>
+      <fieldset class="slds-form-element">
+        <legend class="slds-form-element__legend slds-form-element__label">
+          <template lwc:if={required}>
+            <abbr title="required" class="slds-required">*</abbr>
+          </template>
+          {label}
+        </legend>
+        <ul
+          class="slds-tabs_default__nav pflow-tabs"
+          role="tablist"
+          onkeydown={handleTabKeydown}
+        >
+          <template for:each={setTabs} for:item="t">
+            <li key={t.key} class={t.liClass} role="presentation">
+              <button
+                type="button"
+                class={t.buttonClass}
+                role="tab"
+                aria-selected={t.ariaSelected}
+                tabindex={t.tabIndex}
+                data-set={t.key}
+                onclick={handleTabClick}
+              >
+                {t.label}
+              </button>
+            </li>
+          </template>
+        </ul>
 
-                <div class="pflow-grid pflow-grid_wide" role="radiogroup" aria-label="Icons">
-                    <template for:each={visibleIcons} for:item="entry">
-                        <button
-                            key={entry.id}
-                            type="button"
-                            class={entry.buttonClass}
-                            role="radio"
-                            aria-checked={entry.selected}
-                            aria-label={entry.iconName}
-                            title={entry.iconName}
-                            data-icon={entry.iconName}
-                            onclick={handleIconClick}
-                            onkeydown={handleIconKeydown}
-                        >
-                            <c-pflow-atom-icon name={entry.iconName} size="small" alternative-text=""></c-pflow-atom-icon>
-                        </button>
-                    </template>
-                </div>
-            </fieldset>
-        </template>
-    </div>
+        <div class="pflow-search">
+          <c-pflow-atom-icon
+            name="search"
+            size="x-small"
+            box="input"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+          <input
+            type="search"
+            class="pflow-search__input"
+            placeholder="Search icons..."
+            value={_searchTerm}
+            oninput={handleSearchInput}
+            aria-label="Search icons"
+          />
+        </div>
+
+        <div
+          class="pflow-grid pflow-grid_wide"
+          role="radiogroup"
+          aria-label="Icons"
+        >
+          <template for:each={visibleIcons} for:item="entry">
+            <button
+              key={entry.id}
+              type="button"
+              class={entry.buttonClass}
+              role="radio"
+              aria-checked={entry.selected}
+              aria-label={entry.assistiveLabel}
+              title={entry.iconName}
+              data-icon={entry.iconName}
+              onclick={handleIconClick}
+              onkeydown={handleIconKeydown}
+            >
+              <c-pflow-atom-icon
+                name={entry.iconName}
+                size="medium"
+                box="tile"
+                alternative-text=""
+              ></c-pflow-atom-icon>
+              <span class="pflow-icon-cell__label">{entry.displayLabel}</span>
+            </button>
+          </template>
+        </div>
+      </fieldset>
+    </template>
+  </div>
 </template>

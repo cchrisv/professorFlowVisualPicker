@@ -15,7 +15,7 @@
  * (Apache-2.0). See repo LICENSE and NOTICE.
  */
 
-import getObjectFields from '@salesforce/apex/PFlowCpeChoiceEngineController.getObjectFields';
+import getObjectFields from "@salesforce/apex/PFlowCpeChoiceEngineController.getObjectFields";
 
 // ═════════════════════════════════════════════════════════════════
 // 1. FIELD METADATA CACHE
@@ -33,15 +33,15 @@ const _fieldInflight = new Map();
 const _fieldLru = [];
 
 function touchLru(key) {
-    const idx = _fieldLru.indexOf(key);
-    if (idx > -1) {
-        _fieldLru.splice(idx, 1);
-    }
-    _fieldLru.push(key);
-    while (_fieldLru.length > MAX_CACHE_SIZE) {
-        const evict = _fieldLru.shift();
-        _fieldCache.delete(evict);
-    }
+  const idx = _fieldLru.indexOf(key);
+  if (idx > -1) {
+    _fieldLru.splice(idx, 1);
+  }
+  _fieldLru.push(key);
+  while (_fieldLru.length > MAX_CACHE_SIZE) {
+    const evict = _fieldLru.shift();
+    _fieldCache.delete(evict);
+  }
 }
 
 /**
@@ -51,88 +51,88 @@ function touchLru(key) {
  * @returns {Promise<{name:string, label:string, type:string, relationshipName:string}[]>}
  */
 export function fetchFields(objectApiName) {
-    if (!objectApiName) {
-        return Promise.resolve([]);
-    }
-    const key = objectApiName.trim().toLowerCase();
-    if (_fieldCache.has(key)) {
-        touchLru(key);
-        return Promise.resolve(_fieldCache.get(key));
-    }
-    if (_fieldInflight.has(key)) {
-        return _fieldInflight.get(key);
-    }
-    const p = getObjectFields({ objectName: objectApiName.trim() })
-        .then((fields) => {
-            const result = Array.isArray(fields) ? fields : [];
-            _fieldCache.set(key, result);
-            touchLru(key);
-            _fieldInflight.delete(key);
-            return result;
-        })
-        .catch(() => {
-            _fieldInflight.delete(key);
-            return [];
-        });
-    _fieldInflight.set(key, p);
-    return p;
+  if (!objectApiName) {
+    return Promise.resolve([]);
+  }
+  const key = objectApiName.trim().toLowerCase();
+  if (_fieldCache.has(key)) {
+    touchLru(key);
+    return Promise.resolve(_fieldCache.get(key));
+  }
+  if (_fieldInflight.has(key)) {
+    return _fieldInflight.get(key);
+  }
+  const p = getObjectFields({ objectName: objectApiName.trim() })
+    .then((fields) => {
+      const result = Array.isArray(fields) ? fields : [];
+      _fieldCache.set(key, result);
+      touchLru(key);
+      _fieldInflight.delete(key);
+      return result;
+    })
+    .catch(() => {
+      _fieldInflight.delete(key);
+      return [];
+    });
+  _fieldInflight.set(key, p);
+  return p;
 }
 
 /** Clear all cached field metadata. */
 export function clearFieldCache() {
-    _fieldCache.clear();
-    _fieldInflight.clear();
-    _fieldLru.length = 0;
+  _fieldCache.clear();
+  _fieldInflight.clear();
+  _fieldLru.length = 0;
 }
 
 /** Clear cache for a specific object (useful when a custom field is added mid-session). */
 export function clearFieldCacheFor(objectApiName) {
-    if (!objectApiName) return;
-    const key = objectApiName.trim().toLowerCase();
-    _fieldCache.delete(key);
-    _fieldInflight.delete(key);
-    const idx = _fieldLru.indexOf(key);
-    if (idx > -1) _fieldLru.splice(idx, 1);
+  if (!objectApiName) return;
+  const key = objectApiName.trim().toLowerCase();
+  _fieldCache.delete(key);
+  _fieldInflight.delete(key);
+  const idx = _fieldLru.indexOf(key);
+  if (idx > -1) _fieldLru.splice(idx, 1);
 }
 
 /** Diagnostics for tests/debugging. */
 export function getFieldCacheStats() {
-    return {
-        size: _fieldCache.size,
-        inflight: _fieldInflight.size,
-        lru: [..._fieldLru]
-    };
+  return {
+    size: _fieldCache.size,
+    inflight: _fieldInflight.size,
+    lru: [..._fieldLru]
+  };
 }
 
 // ── Field type → SLDS icon mapping ────────────────────────────────
 
 const TYPE_ICON_MAP = Object.freeze({
-    STRING: 'utility:text',
-    TEXTAREA: 'utility:textarea',
-    INTEGER: 'utility:number_input',
-    LONG: 'utility:number_input',
-    DOUBLE: 'utility:number_input',
-    CURRENCY: 'utility:currency',
-    PERCENT: 'utility:percent',
-    BOOLEAN: 'utility:check',
-    DATE: 'utility:date_input',
-    DATETIME: 'utility:date_time',
-    TIME: 'utility:clock',
-    PICKLIST: 'utility:picklist_type',
-    COMBOBOX: 'utility:picklist_type',
-    MULTIPICKLIST: 'utility:multi_select_picklist',
-    REFERENCE: 'utility:record_lookup',
-    EMAIL: 'utility:email',
-    PHONE: 'utility:phone_portrait',
-    URL: 'utility:link',
-    ID: 'utility:key',
-    ADDRESS: 'utility:location',
-    LOCATION: 'utility:location',
-    ENCRYPTEDSTRING: 'utility:lock',
-    BASE64: 'utility:image'
+  STRING: "type",
+  TEXTAREA: "typearea",
+  INTEGER: "hash",
+  LONG: "hash",
+  DOUBLE: "hash",
+  CURRENCY: "dollar-sign",
+  PERCENT: "percent",
+  BOOLEAN: "check",
+  DATE: "calendar-days",
+  DATETIME: "calendar-clock",
+  TIME: "clock",
+  PICKLIST: "list_type",
+  COMBOBOX: "list_type",
+  MULTIPICKLIST: "list-checks",
+  REFERENCE: "circle_lookup",
+  EMAIL: "mail",
+  PHONE: "smartphone",
+  URL: "link",
+  ID: "key-round",
+  ADDRESS: "map-pin",
+  LOCATION: "map-pin",
+  ENCRYPTEDSTRING: "lock",
+  BASE64: "image"
 });
 
-const FALLBACK_ICON = 'utility:text';
+const FALLBACK_ICON = "type";
 
 /**
  * Return the SLDS utility icon name for a Salesforce field type.
@@ -140,8 +140,8 @@ const FALLBACK_ICON = 'utility:text';
  * @returns {string}
  */
 export function iconForFieldType(fieldType) {
-    if (!fieldType) return FALLBACK_ICON;
-    return TYPE_ICON_MAP[fieldType.toUpperCase()] || FALLBACK_ICON;
+  if (!fieldType) return FALLBACK_ICON;
+  return TYPE_ICON_MAP[fieldType.toUpperCase()] || FALLBACK_ICON;
 }
 
 /**
@@ -150,23 +150,23 @@ export function iconForFieldType(fieldType) {
  * @returns {string}
  */
 export function formatFieldType(fieldType) {
-    if (!fieldType) return '';
-    const map = {
-        MULTIPICKLIST: 'Multi-Picklist',
-        ENCRYPTEDSTRING: 'Encrypted Text',
-        TEXTAREA: 'Text Area',
-        DATETIME: 'Date/Time',
-        COMBOBOX: 'Combobox',
-        BOOLEAN: 'Checkbox',
-        REFERENCE: 'Lookup',
-        INTEGER: 'Number',
-        DOUBLE: 'Number',
-        LONG: 'Number',
-        BASE64: 'Base64'
-    };
-    const upper = fieldType.toUpperCase();
-    if (map[upper]) return map[upper];
-    return upper.charAt(0) + upper.slice(1).toLowerCase();
+  if (!fieldType) return "";
+  const map = {
+    MULTIPICKLIST: "Multi-Picklist",
+    ENCRYPTEDSTRING: "Encrypted Text",
+    TEXTAREA: "Text Area",
+    DATETIME: "Date/Time",
+    COMBOBOX: "Combobox",
+    BOOLEAN: "Checkbox",
+    REFERENCE: "Lookup",
+    INTEGER: "Number",
+    DOUBLE: "Number",
+    LONG: "Number",
+    BASE64: "Base64"
+  };
+  const upper = fieldType.toUpperCase();
+  if (map[upper]) return map[upper];
+  return upper.charAt(0) + upper.slice(1).toLowerCase();
 }
 
 /**
@@ -175,15 +175,15 @@ export function formatFieldType(fieldType) {
  * @returns {{id:string, title:string, subtitle:string, icon:string, type:string, relationshipName:string}[]}
  */
 export function fieldsToOptions(fields) {
-    if (!Array.isArray(fields)) return [];
-    return fields.map((f) => ({
-        id: f.name || '',
-        title: f.label || f.name || '',
-        subtitle: `${f.name || ''} — ${formatFieldType(f.type)}`,
-        icon: iconForFieldType(f.type),
-        type: f.type || '',
-        relationshipName: f.relationshipName || ''
-    }));
+  if (!Array.isArray(fields)) return [];
+  return fields.map((f) => ({
+    id: f.name || "",
+    title: f.label || f.name || "",
+    subtitle: `${f.name || ""} — ${formatFieldType(f.type)}`,
+    icon: iconForFieldType(f.type),
+    type: f.type || "",
+    relationshipName: f.relationshipName || ""
+  }));
 }
 
 /**
@@ -192,14 +192,14 @@ export function fieldsToOptions(fields) {
  * @param {string} term
  */
 export function filterFieldOptions(options, term) {
-    const t = (term || '').trim().toLowerCase();
-    if (!t) return options;
-    return options.filter(
-        (o) =>
-            (o.title || '').toLowerCase().includes(t) ||
-            (o.id || '').toLowerCase().includes(t) ||
-            (o.subtitle || '').toLowerCase().includes(t)
-    );
+  const t = (term || "").trim().toLowerCase();
+  if (!t) return options;
+  return options.filter(
+    (o) =>
+      (o.title || "").toLowerCase().includes(t) ||
+      (o.id || "").toLowerCase().includes(t) ||
+      (o.subtitle || "").toLowerCase().includes(t)
+  );
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -208,19 +208,19 @@ export function filterFieldOptions(options, term) {
 // Adapted from UnofficialSF fsc_flowComboboxUtils (Apache-2.0).
 
 export const flowComboboxDefaults = Object.freeze({
-    stringDataType: 'String',
-    referenceDataType: 'reference',
-    defaultKeyPrefix: 'flowCombobox-',
-    defaultGlobalVariableKeyPrefix: 'flowCombobox-globalVariable-',
-    recordLookupsType: 'recordLookups',
-    recordCreatesType: 'recordCreates',
-    recordUpdatesType: 'recordUpdates',
-    dataTypeSObject: 'SObject',
-    isCollectionField: 'isCollection',
-    actionType: 'actionCalls',
-    screenComponentType: 'screenComponent',
-    screenActionType: 'screenAction',
-    regionContainerName: 'Screen_Section'
+  stringDataType: "String",
+  referenceDataType: "reference",
+  defaultKeyPrefix: "flowCombobox-",
+  defaultGlobalVariableKeyPrefix: "flowCombobox-globalVariable-",
+  recordLookupsType: "recordLookups",
+  recordCreatesType: "recordCreates",
+  recordUpdatesType: "recordUpdates",
+  dataTypeSObject: "SObject",
+  isCollectionField: "isCollection",
+  actionType: "actionCalls",
+  screenComponentType: "screenComponent",
+  screenActionType: "screenAction",
+  regionContainerName: "Screen_Section"
 });
 
 /**
@@ -229,8 +229,10 @@ export const flowComboboxDefaults = Object.freeze({
  * @returns {boolean}
  */
 export function isReference(value) {
-    if (!value) return false;
-    return value.indexOf('{!') === 0 && value.lastIndexOf('}') === value.length - 1;
+  if (!value) return false;
+  return (
+    value.indexOf("{!") === 0 && value.lastIndexOf("}") === value.length - 1
+  );
 }
 
 /**
@@ -238,9 +240,9 @@ export function isReference(value) {
  * @returns {'String' | 'reference'}
  */
 export function getDataType(currentText) {
-    return isReference(currentText)
-        ? flowComboboxDefaults.referenceDataType
-        : flowComboboxDefaults.stringDataType;
+  return isReference(currentText)
+    ? flowComboboxDefaults.referenceDataType
+    : flowComboboxDefaults.stringDataType;
 }
 
 /**
@@ -249,8 +251,10 @@ export function getDataType(currentText) {
  * @param {string} dataType
  */
 export function formattedValue(value, dataType) {
-    if (isReference(value)) return value;
-    return dataType === flowComboboxDefaults.referenceDataType ? `{!${value}}` : value;
+  if (isReference(value)) return value;
+  return dataType === flowComboboxDefaults.referenceDataType
+    ? `{!${value}}`
+    : value;
 }
 
 /**
@@ -259,8 +263,7 @@ export function formattedValue(value, dataType) {
  * @param {string} value
  */
 export function removeFormatting(value) {
-    if (!value) return value;
-    if (!isReference(value)) return value;
-    return value.substring(0, value.lastIndexOf('}')).replace('{!', '');
+  if (!value) return value;
+  if (!isReference(value)) return value;
+  return value.substring(0, value.lastIndexOf("}")).replace("{!", "");
 }
-

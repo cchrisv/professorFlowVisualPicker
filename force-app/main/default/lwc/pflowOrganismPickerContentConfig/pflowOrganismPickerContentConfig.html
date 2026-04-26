@@ -1,0 +1,130 @@
+<template>
+  <!-- ═══════════════ CHAPTER 02 · CONTENT ═══════════════ -->
+  <section class="pflow-chapter pflow-chapter_02" data-chapter="content">
+    <aside class="pflow-chapter__mark" aria-hidden="true">
+      <span class="pflow-chapter__numeral">02</span>
+      <span class="pflow-chapter__rule"></span>
+    </aside>
+    <header class="pflow-chapter__head">
+      <p class="pflow-chapter__eyebrow">Chapter · Content</p>
+      <h2 class="pflow-chapter__title">What the user reads</h2>
+    </header>
+  </section>
+  <template lwc:if={isDetailsSection}>
+    <article class="slds-card pflow-studio__card">
+      <header class="slds-card__header pflow-card__head">
+        <span
+          class="pflow-card__glyph pflow-card__glyph_content"
+          aria-hidden="true"
+        >
+          <c-pflow-atom-icon
+            name="baseline"
+            size="small"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+        </span>
+        <div class="pflow-card__headings">
+          <h3 class="slds-card__header-title slds-text-heading_small">
+            Picker header
+          </h3>
+          <p
+            class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+          >
+            The label and help text shown above the tiles.
+          </p>
+        </div>
+        <lightning-helptext
+          class="pflow-card__help"
+          content="Label is shown like a form field label. Help text appears as a small info icon next to the label, expanding on hover."
+        ></lightning-helptext>
+      </header>
+      <div
+        class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+      >
+        <c-pflow-organism-resource-picker
+          name="label"
+          label="Picker label"
+          value={_config.label}
+          builder-context={builderContext}
+          automatic-output-variables={automaticOutputVariables}
+          builder-context-filter-type="String"
+          allow-hard-code-reference
+          onvaluechanged={handleLabelChange}
+        ></c-pflow-organism-resource-picker>
+        <c-pflow-organism-resource-picker
+          name="helpText"
+          label="Help text (description under label)"
+          value={_config.helpText}
+          builder-context={builderContext}
+          automatic-output-variables={automaticOutputVariables}
+          builder-context-filter-type="String"
+          allow-hard-code-reference
+          onvaluechanged={handleHelpTextChange}
+        ></c-pflow-organism-resource-picker>
+        <c-pflow-organism-resource-picker
+          name="fieldLevelHelp"
+          label="Label tooltip (info icon)"
+          value={_config.fieldLevelHelp}
+          builder-context={builderContext}
+          automatic-output-variables={automaticOutputVariables}
+          builder-context-filter-type="String"
+          allow-hard-code-reference
+          onvaluechanged={handleFieldLevelHelpChange}
+        ></c-pflow-organism-resource-picker>
+      </div>
+    </article>
+
+    <article class="slds-card pflow-studio__card">
+      <header class="slds-card__header pflow-card__head">
+        <span
+          class="pflow-card__glyph pflow-card__glyph_content"
+          aria-hidden="true"
+        >
+          <c-pflow-atom-icon
+            name="megaphone"
+            size="small"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+        </span>
+        <div class="pflow-card__headings">
+          <h3 class="slds-card__header-title slds-text-heading_small">
+            Runtime messages
+          </h3>
+          <p
+            class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+          >
+            What users see when there's nothing to pick or the load fails.
+          </p>
+        </div>
+        <lightning-helptext
+          class="pflow-card__help"
+          content="These texts appear in the picker at runtime when the data source returns zero rows (empty) or throws (error)."
+        ></lightning-helptext>
+      </header>
+      <div
+        class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+      >
+        <c-pflow-organism-resource-picker
+          name="emptyStateMessage"
+          label="Empty-state message"
+          value={_config.emptyStateMessage}
+          builder-context={builderContext}
+          automatic-output-variables={automaticOutputVariables}
+          builder-context-filter-type="String"
+          allow-hard-code-reference
+          onvaluechanged={handleEmptyStateChange}
+        ></c-pflow-organism-resource-picker>
+        <c-pflow-organism-resource-picker
+          name="errorStateMessage"
+          label="Error-state message"
+          value={_config.errorStateMessage}
+          builder-context={builderContext}
+          automatic-output-variables={automaticOutputVariables}
+          builder-context-filter-type="String"
+          allow-hard-code-reference
+          onvaluechanged={handleErrorStateChange}
+        ></c-pflow-organism-resource-picker>
+      </div>
+    </article>
+  </template>
+</template>

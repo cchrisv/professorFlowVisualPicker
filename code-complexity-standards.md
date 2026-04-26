@@ -1,7 +1,8 @@
 ---
 domain: salesforce
 type: standard
-topics: [complexity, cyclomatic, cognitive, pmd, sonarqube, refactoring, code-review]
+topics:
+  [complexity, cyclomatic, cognitive, pmd, sonarqube, refactoring, code-review]
 summary: Complexity thresholds and refactoring strategies for Apex and LWC using PMD and SonarQube metrics.
 audience: [developer, architect]
 ---
@@ -17,27 +18,34 @@ Complexity guardrails for Apex and LWC using PMD and SonarQube.
 
 ## Thresholds
 
-| Metric | Apex method | LWC function |
-|--------|-------------|-------------|
+| Metric                | Apex method       | LWC function  |
+| --------------------- | ----------------- | ------------- |
 | CC Pass / Warn / Fail | <10 / 10–15 / >15 | <10 / — / >10 |
-| CoC Pass / Fail | ≤15 / >15 | ≤15 / >15 |
+| CoC Pass / Fail       | ≤15 / >15         | ≤15 / >15     |
 
 Fail PRs when exceeded · document mitigation if guardrails must be overridden.
 
 ## Tooling
 
 ```bash
-# Install
-sf plugins install @salesforce/sfdx-scanner
-# Run
-sf scanner run --target "force-app/**/*.{cls,js}" --engine pmd --pmdconfig ./pmd-apex-complexity.xml --format table --severity-threshold 2
+# Current Salesforce Code Analyzer CLI (v5+) installs just-in-time in Salesforce CLI.
+sf code-analyzer run --workspace force-app --rule-selector Recommended --severity-threshold 3 --view table
+
+# Focus Apex PMD findings when working on Apex complexity.
+sf code-analyzer run --workspace force-app --target "force-app/**/*.cls" --rule-selector pmd --severity-threshold 3 --view table
 ```
 
+The older `sf scanner run` command belongs to retired Code Analyzer v4. Keep using it only in CI jobs explicitly pinned to `@salesforce/sfdx-scanner` v4.
+
 **PMD ruleset** (`pmd-apex-complexity.xml`):
+
 ```xml
-<ruleset name="Apex Complexity" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0">
+<ruleset
+  name="Apex Complexity"
+  xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+>
   <rule ref="category/apex/design.xml/StdCyclomaticComplexity">
-    <properties><property name="reportLevel" value="10"/></properties>
+    <properties><property name="reportLevel" value="10" /></properties>
   </rule>
 </ruleset>
 ```

@@ -1,143 +1,158 @@
 <template>
-    <div class="cc-where">
-        <!-- Match mode selector (ALL / ANY / CUSTOM) — only when 2+ conditions -->
-        <template lwc:if={showLogic}>
-            <div class="cc-where-mode">
-                <span class="cc-where-mode-label">Match</span>
-                <div class="cc-where-logic-group" role="group" aria-label="Match mode">
-                    <template for:each={logicSegments} for:item="seg">
-                        <button
-                            key={seg.value}
-                            type="button"
-                            class={seg.cssClass}
-                            data-value={seg.value}
-                            aria-pressed={seg.ariaPressed}
-                            disabled={disabled}
-                            onclick={handleLogicSegmentClick}
-                        >{seg.label}</button>
-                    </template>
-                </div>
-            </div>
-        </template>
-
-        <!-- Custom logic expression input — sits directly under the Match selector -->
-        <template lwc:if={showCustomLogicInput}>
-            <div class="cc-where-custom">
-                <label class="cc-where-custom-label" for="cc-where-custom-input">
-                    Custom logic
-                </label>
-                <input
-                    id="cc-where-custom-input"
-                    type="text"
-                    class="cc-where-custom-input"
-                    value={customLogic}
-                    placeholder={customLogicPlaceholder}
-                    disabled={disabled}
-                    spellcheck="false"
-                    autocomplete="off"
-                    oninput={handleCustomLogicInput}
-                />
-                <template lwc:if={hasCustomLogicError}>
-                    <p class="cc-where-custom-error" role="alert">{customLogicError}</p>
-                </template>
-                <template lwc:else>
-                    <p class="cc-where-custom-hint">Reference conditions by number with AND, OR, and parentheses.</p>
-                </template>
-            </div>
-        </template>
-
-        <!-- Conditions -->
-        <div class="cc-where-conditions">
-            <template for:each={conditionRows} for:item="row">
-                <div key={row.id} class="cc-where-row">
-                    <span class="cc-where-num" title={row.numberTitle} aria-label={row.numberTitle}>{row.number}</span>
-                    <div class="cc-where-row-body">
-                        <div class="cc-where-field-line">
-                            <div class="cc-where-field">
-                                <c-pflow-molecule-custom-lookup
-                                    label="Field"
-                                    placeholder="Select field…"
-                                    variant="label-hidden"
-                                    selection={row.fieldSelection}
-                                    disabled={disabled}
-                                    min-search-term-length="0"
-                                    scroll-after-n-items="5"
-                                    data-index={row.index}
-                                    onsearch={handleFieldSearch}
-                                    onselectionchange={handleFieldSelectionChange}
-                                ></c-pflow-molecule-custom-lookup>
-                            </div>
-                            <template lwc:if={row.removable}>
-                                <button
-                                    type="button"
-                                    class="cc-where-remove"
-                                    title="Remove condition"
-                                    aria-label="Remove condition"
-                                    data-index={row.index}
-                                    disabled={disabled}
-                                    onclick={handleRemoveCondition}
-                                >
-                                    <c-pflow-atom-icon
-                                        name="utility:delete"
-                                        alternative-text="Remove condition"
-                                        size="xx-small"
-                                    ></c-pflow-atom-icon>
-                                </button>
-                            </template>
-                        </div>
-                        <div class="cc-where-op">
-                            <lightning-combobox
-                                label="Operator"
-                                value={row.operator}
-                                options={row.operatorOptions}
-                                disabled={disabled}
-                                data-index={row.index}
-                                onchange={handleOperatorChange}
-                                variant="label-hidden"
-                            ></lightning-combobox>
-                        </div>
-                        <div class="cc-where-val">
-                            <template lwc:if={row.isBooleanValue}>
-                                <lightning-combobox
-                                    label="Value"
-                                    value={row.value}
-                                    options={row.booleanOptions}
-                                    placeholder="Select…"
-                                    disabled={disabled}
-                                    data-index={row.index}
-                                    onchange={handleValueChange}
-                                    variant="label-hidden"
-                                ></lightning-combobox>
-                            </template>
-                            <template lwc:else>
-                                <c-pflow-organism-resource-picker
-                                    name={row.valueName}
-                                    value={row.value}
-                                    value-type="reference"
-                                    variant="label-hidden"
-                                    builder-context={builderContext}
-                                    automatic-output-variables={automaticOutputVariables}
-                                    allow-hard-code-reference
-                                    max-width={maxWidth}
-                                    data-index={row.index}
-                                    onvaluechanged={handleResourceValueChange}
-                                ></c-pflow-organism-resource-picker>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </template>
+  <div class="cc-where">
+    <!-- Match mode selector (ALL / ANY / CUSTOM) — only when 2+ conditions -->
+    <template lwc:if={showLogic}>
+      <div class="cc-where-mode">
+        <span class="cc-where-mode-label">Match</span>
+        <div class="cc-where-logic-group" role="group" aria-label="Match mode">
+          <template for:each={logicSegments} for:item="seg">
+            <button
+              key={seg.value}
+              type="button"
+              class={seg.cssClass}
+              data-value={seg.value}
+              aria-pressed={seg.ariaPressed}
+              disabled={disabled}
+              onclick={handleLogicSegmentClick}
+            >
+              {seg.label}
+            </button>
+          </template>
         </div>
+      </div>
+    </template>
 
-        <!-- Add condition -->
-        <button
-            type="button"
-            class="cc-where-add"
-            disabled={disabled}
-            onclick={handleAddCondition}
-        >
-            <c-pflow-atom-icon name="utility:add" size="xx-small" alternative-text=""></c-pflow-atom-icon>
-            <span>Add condition</span>
-        </button>
+    <!-- Custom logic expression input — sits directly under the Match selector -->
+    <template lwc:if={showCustomLogicInput}>
+      <div class="cc-where-custom">
+        <label class="cc-where-custom-label" for="cc-where-custom-input">
+          Custom logic
+        </label>
+        <input
+          id="cc-where-custom-input"
+          type="text"
+          class="cc-where-custom-input"
+          value={customLogic}
+          placeholder={customLogicPlaceholder}
+          disabled={disabled}
+          spellcheck="false"
+          autocomplete="off"
+          oninput={handleCustomLogicInput}
+        />
+        <template lwc:if={hasCustomLogicError}>
+          <p class="cc-where-custom-error" role="alert">{customLogicError}</p>
+        </template>
+        <template lwc:else>
+          <p class="cc-where-custom-hint">
+            Reference conditions by number with AND, OR, and parentheses.
+          </p>
+        </template>
+      </div>
+    </template>
+
+    <!-- Conditions -->
+    <div class="cc-where-conditions">
+      <template for:each={conditionRows} for:item="row">
+        <div key={row.id} class="cc-where-row">
+          <span
+            class="cc-where-num"
+            title={row.numberTitle}
+            aria-label={row.numberTitle}
+            >{row.number}</span
+          >
+          <div class="cc-where-row-body">
+            <div class="cc-where-field-line">
+              <div class="cc-where-field">
+                <c-pflow-molecule-custom-lookup
+                  label="Field"
+                  placeholder="Select field…"
+                  variant="label-hidden"
+                  selection={row.fieldSelection}
+                  disabled={disabled}
+                  min-search-term-length="0"
+                  scroll-after-n-items="5"
+                  data-index={row.index}
+                  onsearch={handleFieldSearch}
+                  onselectionchange={handleFieldSelectionChange}
+                ></c-pflow-molecule-custom-lookup>
+              </div>
+              <template lwc:if={row.removable}>
+                <button
+                  type="button"
+                  class="cc-where-remove"
+                  title="Remove condition"
+                  aria-label="Remove condition"
+                  data-index={row.index}
+                  disabled={disabled}
+                  onclick={handleRemoveCondition}
+                >
+                  <c-pflow-atom-icon
+                    name="trash-2"
+                    alternative-text="Remove condition"
+                    size="xx-small"
+                    box="button"
+                  ></c-pflow-atom-icon>
+                </button>
+              </template>
+            </div>
+            <div class="cc-where-op">
+              <lightning-combobox
+                label="Operator"
+                value={row.operator}
+                options={row.operatorOptions}
+                disabled={disabled}
+                data-index={row.index}
+                onchange={handleOperatorChange}
+                variant="label-hidden"
+              ></lightning-combobox>
+            </div>
+            <div class="cc-where-val">
+              <template lwc:if={row.isBooleanValue}>
+                <lightning-combobox
+                  label="Value"
+                  value={row.value}
+                  options={row.booleanOptions}
+                  placeholder="Select…"
+                  disabled={disabled}
+                  data-index={row.index}
+                  onchange={handleValueChange}
+                  variant="label-hidden"
+                ></lightning-combobox>
+              </template>
+              <template lwc:else>
+                <c-pflow-organism-resource-picker
+                  name={row.valueName}
+                  value={row.value}
+                  value-type="reference"
+                  variant="label-hidden"
+                  builder-context={builderContext}
+                  automatic-output-variables={automaticOutputVariables}
+                  allow-hard-code-reference
+                  max-width={maxWidth}
+                  data-index={row.index}
+                  onvaluechanged={handleResourceValueChange}
+                ></c-pflow-organism-resource-picker>
+              </template>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
+
+    <!-- Add condition -->
+    <button
+      type="button"
+      class="cc-where-add"
+      disabled={disabled}
+      onclick={handleAddCondition}
+    >
+      <c-pflow-atom-icon
+        name="plus"
+        size="xx-small"
+        box="button"
+        alternative-text=""
+      ></c-pflow-atom-icon>
+      <span>Add condition</span>
+    </button>
+  </div>
 </template>

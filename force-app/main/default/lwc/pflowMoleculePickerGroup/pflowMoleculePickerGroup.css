@@ -1,53 +1,54 @@
 :host {
-    display: block;
+  display: block;
 
-    --pflow-group-gap-x: 1rem;
-    --pflow-group-gap-y: 1rem;
-    --pflow-group-min-w: 16rem;
+  --pflow-group-gap-x: 1rem;
+  --pflow-group-gap-y: 1rem;
+  --pflow-group-min-w: 16rem;
 }
 
 .pflow-group-wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 /* Search bar */
 .pflow-search-bar {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
-    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-base-1, #c9c9c9);
-    border-radius: var(--slds-g-radius-border-2, 0.25rem);
-    background: var(--slds-g-color-neutral-base-100, #ffffff);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+  border: var(--slds-g-sizing-border-1, 1px) solid
+    var(--slds-g-color-border-base-1, #c9c9c9);
+  border-radius: var(--slds-g-radius-border-2, 0.25rem);
+  background: var(--slds-g-color-neutral-base-100, #ffffff);
 }
 
 .pflow-search-bar__input {
-    flex: 1 1 auto;
-    border: 0;
-    outline: none;
-    background: transparent;
-    font-size: var(--slds-g-font-scale-1, 0.875rem);
+  flex: 1 1 auto;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: var(--slds-g-font-scale-1, 0.875rem);
 }
 
 /* Multi-select toolbar */
 .pflow-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: var(--slds-g-spacing-1, 0.25rem) 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--slds-g-spacing-1, 0.25rem) 0;
 }
 
 .pflow-toolbar__btn {
-    flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 
 .pflow-toolbar__counter {
-    margin-left: auto;
-    font-size: var(--slds-g-font-scale-base, 0.8125rem);
-    color: var(--slds-g-color-neutral-base-50, #747474);
+  margin-left: auto;
+  font-size: var(--slds-g-font-scale-base, 0.8125rem);
+  color: var(--slds-g-color-neutral-base-50, #747474);
 }
 
 /* Grid layout: fixed column width = chosen tile size (Small=7.5rem, Medium=12rem,
@@ -58,44 +59,48 @@
    The `min(100%, X)` guard ensures very narrow containers don't overflow:
    the column shrinks to 100% of the container before clipping. */
 .pflow-group_grid {
-    display: grid;
-    grid-template-columns:
-        repeat(auto-fill, minmax(min(100%, var(--pflow-group-min-w)), var(--pflow-group-min-w)));
-    column-gap: var(--pflow-group-gap-x);
-    row-gap: var(--pflow-group-gap-y);
-    align-items: stretch;
-    justify-items: stretch;
-    /* Leftover horizontal space (when the container is wider than N columns
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, var(--pflow-group-min-w)), var(--pflow-group-min-w))
+  );
+  column-gap: var(--pflow-group-gap-x);
+  row-gap: var(--pflow-group-gap-y);
+  align-items: stretch;
+  justify-items: stretch;
+  /* Leftover horizontal space (when the container is wider than N columns
        fit exactly) stays at the right edge — tiles never spread apart to fill. */
-    justify-content: start;
-    margin-top: var(--pflow-group-margin-t, 0);
-    margin-right: var(--pflow-group-margin-r, 0);
-    margin-bottom: var(--pflow-group-margin-b, 0);
-    margin-left: var(--pflow-group-margin-l, 0);
+  justify-content: start;
+  margin-top: var(--pflow-group-margin-t, 0);
+  margin-right: var(--pflow-group-margin-r, 0);
+  margin-bottom: var(--pflow-group-margin-b, 0);
+  margin-left: var(--pflow-group-margin-l, 0);
 }
 
 /* List layout: single column flex */
 .pflow-group_list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--pflow-group-gap-y);
-    margin-top: var(--pflow-group-margin-t, 0);
-    margin-right: var(--pflow-group-margin-r, 0);
-    margin-bottom: var(--pflow-group-margin-b, 0);
-    margin-left: var(--pflow-group-margin-l, 0);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pflow-group-gap-y);
+  margin-top: var(--pflow-group-margin-t, 0);
+  margin-right: var(--pflow-group-margin-r, 0);
+  margin-bottom: var(--pflow-group-margin-b, 0);
+  margin-left: var(--pflow-group-margin-l, 0);
 }
 
 .pflow-group_list c-pflow-atom-visual-pick {
-    display: block;
-    width: 100%;
+  display: block;
+  width: var(--pflow-static-v-100-percent, 100%);
 }
 
 /* Fixed-column override: when --pflow-group-cols is set (1–6), force an
    equal-fraction grid regardless of container width. Leaves the auto-fill
    behavior intact when the variable is absent. */
 .pflow-group_grid {
-    grid-template-columns:
-        repeat(var(--pflow-group-cols, auto-fill), minmax(min(100%, var(--pflow-group-min-w)), var(--pflow-group-min-w)));
+  grid-template-columns: repeat(
+    var(--pflow-group-cols, auto-fill),
+    minmax(min(100%, var(--pflow-group-min-w)), var(--pflow-group-min-w))
+  );
 }
 /* Fixed column count — tiles keep their configured width (size setting)
    rather than stretching to fill the container. Previously we used
@@ -104,7 +109,10 @@
    the container is narrower than cols × min-width, tiles overflow — that's
    the deliberate consequence of pinning a column count. */
 .pflow-group_grid[style*="--pflow-group-cols:"] {
-    grid-template-columns: repeat(var(--pflow-group-cols), var(--pflow-group-min-w));
+  grid-template-columns: repeat(
+    var(--pflow-group-cols),
+    var(--pflow-group-min-w)
+  );
 }
 
 /* =============================================================================
@@ -114,54 +122,54 @@
    ============================================================================= */
 
 .pflow-group_horizontal {
-    display: flex;
-    flex-direction: row;
-    gap: var(--pflow-group-gap-x);
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--pflow-group-margin-l, 0);
-    padding-bottom: var(--slds-g-spacing-2, 0.5rem); /* room for scrollbar */
-    margin-top: var(--pflow-group-margin-t, 0);
-    margin-right: var(--pflow-group-margin-r, 0);
-    margin-bottom: var(--pflow-group-margin-b, 0);
-    margin-left: var(--pflow-group-margin-l, 0);
+  display: flex;
+  flex-direction: row;
+  gap: var(--pflow-group-gap-x);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--pflow-group-margin-l, 0);
+  padding-bottom: var(--slds-g-spacing-2, 0.5rem); /* room for scrollbar */
+  margin-top: var(--pflow-group-margin-t, 0);
+  margin-right: var(--pflow-group-margin-r, 0);
+  margin-bottom: var(--pflow-group-margin-b, 0);
+  margin-left: var(--pflow-group-margin-l, 0);
 }
 
 .pflow-group_horizontal c-pflow-atom-visual-pick {
-    flex: 0 0 var(--pflow-group-min-w);
-    scroll-snap-align: start;
+  flex: 0 0 var(--pflow-group-min-w);
+  scroll-snap-align: start;
 }
 
 /* Subtle scrollbar — visible but unobtrusive */
 .pflow-group_horizontal::-webkit-scrollbar {
-    height: 0.5rem;
+  height: var(--slds-g-sizing-3, 0.5rem);
 }
 .pflow-group_horizontal::-webkit-scrollbar-thumb {
-    background: var(--slds-g-color-neutral-base-80, #d4d4d4);
-    border-radius: 999px;
+  background: var(--slds-g-color-neutral-base-80, #d4d4d4);
+  border-radius: var(--pflow-static-v-999px, 999px);
 }
 .pflow-group_horizontal::-webkit-scrollbar-thumb:hover {
-    background: var(--slds-g-color-neutral-base-70, #aeaeae);
+  background: var(--slds-g-color-neutral-base-70, #aeaeae);
 }
 .pflow-group_horizontal::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
 
 /* Empty state */
 .pflow-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: var(--slds-g-spacing-6, 2rem) var(--slds-g-spacing-4, 1rem);
-    color: var(--slds-g-color-neutral-base-50, #747474);
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--slds-g-spacing-6, 2rem) var(--slds-g-spacing-4, 1rem);
+  color: var(--slds-g-color-neutral-base-50, #747474);
+  text-align: center;
 }
 
 /* Native-control variants — simple block wrappers; SLDS handles the look */
 .pflow-group_dropdown,
 .pflow-group_radio {
-    display: block;
-    width: 100%;
+  display: block;
+  width: var(--pflow-static-v-100-percent, 100%);
 }

@@ -1,7 +1,17 @@
 ---
 domain: salesforce
 type: standard
-topics: [lwc, atomic-design, components, lightning, testing, accessibility, performance, unidirectional-data]
+topics:
+  [
+    lwc,
+    atomic-design,
+    components,
+    lightning,
+    testing,
+    accessibility,
+    performance,
+    unidirectional-data
+  ]
 summary: Atomic design framework for scalable LWC development with seven component levels and code review checklists.
 audience: [developer, architect]
 ---
@@ -12,15 +22,15 @@ Atomic design for scalable, maintainable Salesforce interfaces. Build **systems 
 
 ## Seven Levels
 
-| Level | Format | Data | Logic | Example |
-|-------|--------|------|-------|---------|
-| **Atom** | `{app}Atom{Name}` | Never | Never | `coreAtomButton` |
-| **Molecule** | `{app}Molecule{Name}` | Never | Coordination | `coreMoleculeSearchBar` |
-| **Organism** | `{app}Organism{Name}` | wire/Apex | Business rules | `emplidLoaderOrganismStudentSearch` |
-| **Template** | `{app}Template{Name}` | Never | Never | `coreTemplateListView` |
-| **Page** | `{app}Page{Name}` | Orchestration | Process | `emplidLoaderPageEmplidManager` |
-| **Utility** | `{app}Utility{Name}` | Varies | Technical | `coreUtilityFormatters` |
-| **Flow** | `{app}Flow{Name}` | Delegation | Delegation | `admissionsFlowApplicationSelector` |
+| Level        | Format                | Data          | Logic          | Example                             |
+| ------------ | --------------------- | ------------- | -------------- | ----------------------------------- |
+| **Atom**     | `{app}Atom{Name}`     | Never         | Never          | `coreAtomButton`                    |
+| **Molecule** | `{app}Molecule{Name}` | Never         | Coordination   | `coreMoleculeSearchBar`             |
+| **Organism** | `{app}Organism{Name}` | wire/Apex     | Business rules | `emplidLoaderOrganismStudentSearch` |
+| **Template** | `{app}Template{Name}` | Never         | Never          | `coreTemplateListView`              |
+| **Page**     | `{app}Page{Name}`     | Orchestration | Process        | `emplidLoaderPageEmplidManager`     |
+| **Utility**  | `{app}Utility{Name}`  | Varies        | Technical      | `coreUtilityFormatters`             |
+| **Flow**     | `{app}Flow{Name}`     | Delegation    | Delegation     | `admissionsFlowApplicationSelector` |
 
 **Atoms** — presentational only, `@api` in, events out.
 **Molecules** — 2-5 atoms, local coordination, transform child events. No data fetching.
@@ -58,16 +68,19 @@ Naming conventions are defined in `metadata-naming-conventions.md`.
 
 ## Testing
 
-| Level | Focus |
-|-------|-------|
-| Atoms | Rendering + event emission |
-| Molecules | Coordination + event transformation |
+| Level     | Focus                                        |
+| --------- | -------------------------------------------- |
+| Atoms     | Rendering + event emission                   |
+| Molecules | Coordination + event transformation          |
 | Organisms | Business logic + data + loading/error states |
 
 ```javascript
 export const createMockAccount = (overrides = {}) => ({
-    Id: '001xx000003EXAMPLE', Name: 'Test Account',
-    Industry: 'Technology', CustomerTier__c: 'Silver', ...overrides
+  Id: "001xx000003EXAMPLE",
+  Name: "Test Account",
+  Industry: "Technology",
+  CustomerTier__c: "Silver",
+  ...overrides
 });
 ```
 
@@ -77,13 +90,13 @@ Audit → extract atoms (repeated UI) → identify molecules (atom groups) → r
 
 ## Anti-Patterns
 
-| Anti-Pattern | Fix |
-|-------------|-----|
-| **God Component** | Split by level and domain |
-| **Prop Drilling** | Organisms fetch; LMS for cross-hierarchy |
-| **Premature Abstraction** | Rule of Three |
-| **Shallow Components** | Deep with simple interfaces |
-| **Mixed Levels** | Strictly follow level responsibilities |
-| **Missing App Prefix** | Always: `coreAtomButton` |
+| Anti-Pattern              | Fix                                      |
+| ------------------------- | ---------------------------------------- |
+| **God Component**         | Split by level and domain                |
+| **Prop Drilling**         | Organisms fetch; LMS for cross-hierarchy |
+| **Premature Abstraction** | Rule of Three                            |
+| **Shallow Components**    | Deep with simple interfaces              |
+| **Mixed Levels**          | Strictly follow level responsibilities   |
+| **Missing App Prefix**    | Always: `coreAtomButton`                 |
 
 → Apex: [apex-well-architected.md]

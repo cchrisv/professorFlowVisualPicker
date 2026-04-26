@@ -1,0 +1,264 @@
+<template>
+  <!-- ═══════════════ CHAPTER 03 · BEHAVIOR ═══════════════ -->
+  <section class="pflow-chapter pflow-chapter_03" data-chapter="behavior">
+    <aside class="pflow-chapter__mark" aria-hidden="true">
+      <span class="pflow-chapter__numeral">03</span>
+      <span class="pflow-chapter__rule"></span>
+    </aside>
+    <header class="pflow-chapter__head">
+      <p class="pflow-chapter__eyebrow">Chapter · Behavior</p>
+      <h2 class="pflow-chapter__title">How users interact</h2>
+    </header>
+  </section>
+  <template lwc:if={hasDataSource}>
+    <!-- CARD · Selection mode -->
+    <article class="slds-card pflow-studio__card">
+      <header class="slds-card__header pflow-card__head">
+        <span
+          class="pflow-card__glyph pflow-card__glyph_behavior"
+          aria-hidden="true"
+        >
+          <c-pflow-atom-icon
+            name="check"
+            size="small"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+        </span>
+        <div class="pflow-card__headings">
+          <h3 class="slds-card__header-title slds-text-heading_small">
+            Selection mode
+          </h3>
+          <p
+            class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+          >
+            Does the user pick one, or several?
+          </p>
+        </div>
+        <lightning-helptext
+          class="pflow-card__help"
+          content="Single = exactly one option. Multi = any number within min/max. Auto-advance only works in single mode."
+        ></lightning-helptext>
+      </header>
+      <div class="slds-card__body slds-card__body_inner">
+        <div
+          class="pflow-studio__pickgroup"
+          role="radiogroup"
+          aria-label="Selection mode"
+          oncardselect={handleSelectionTileChange}
+        >
+          <template for:each={selectionTiles} for:item="tile">
+            <c-pflow-atom-visual-pick
+              key={tile.value}
+              item={tile}
+              selected={tile._selected}
+              selection-mode="single"
+              group-name="pflow-selection"
+              size="small"
+              aspect-ratio="1:1"
+            ></c-pflow-atom-visual-pick>
+          </template>
+        </div>
+      </div>
+    </article>
+
+    <!-- CARD · Selection rules -->
+    <article class="slds-card pflow-studio__card">
+      <header class="slds-card__header pflow-card__head">
+        <span
+          class="pflow-card__glyph pflow-card__glyph_behavior"
+          aria-hidden="true"
+        >
+          <c-pflow-atom-icon
+            name="list-filter"
+            size="small"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+        </span>
+        <div class="pflow-card__headings">
+          <h3 class="slds-card__header-title slds-text-heading_small">
+            Selection rules
+          </h3>
+          <p
+            class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+          >
+            Required, min / max, and auto-advance.
+          </p>
+        </div>
+        <lightning-helptext
+          class="pflow-card__help"
+          content="Min/Max apply only in multi mode. A custom error message replaces the default 'Please make a selection.' when validation fails."
+        ></lightning-helptext>
+      </header>
+      <div
+        class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+      >
+        <template lwc:if={isMultiSelect}>
+          <div class="pflow-studio__field-grid">
+            <lightning-input
+              type="number"
+              label="Minimum selections"
+              value={_config.minSelections}
+              min="0"
+              onchange={handleMinChange}
+            ></lightning-input>
+            <lightning-input
+              type="number"
+              label="Maximum selections"
+              placeholder="Unlimited"
+              value={_config.maxSelections}
+              min="1"
+              onchange={handleMaxChange}
+            ></lightning-input>
+          </div>
+        </template>
+        <c-pflow-atom-toggle
+          label="Required"
+          checked={_config.required}
+          data-key="required"
+          ontoggle={handleToggleChange}
+        ></c-pflow-atom-toggle>
+        <template lwc:if={_config.required}>
+          <c-pflow-organism-resource-picker
+            name="customErrorMessage"
+            label="Custom error message (optional)"
+            value={_config.customErrorMessage}
+            builder-context={builderContext}
+            automatic-output-variables={automaticOutputVariables}
+            builder-context-filter-type="String"
+            allow-hard-code-reference
+            onvaluechanged={handleErrorMessageChange}
+          ></c-pflow-organism-resource-picker>
+        </template>
+        <template lwc:if={isSingleSelect}>
+          <c-pflow-atom-toggle
+            label="Auto-advance the flow on selection"
+            checked={_config.autoAdvance}
+            data-key="autoAdvance"
+            field-level-help="Fires Flow Next the moment a user picks a tile."
+            ontoggle={handleToggleChange}
+          ></c-pflow-atom-toggle>
+        </template>
+      </div>
+    </article>
+
+    <!-- CARD · None option -->
+    <template lwc:if={isNoneOptionAvailable}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_behavior"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="circle-x"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              None option
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Let users clear their selection with a dedicated tile.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Prepends a '--None--' choice (empty value) so users can unset the picker. Single-select only."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <c-pflow-atom-toggle
+            label="Include a --None-- option"
+            checked={noneOptionValue}
+            data-key="includeNoneOption"
+            field-level-help="Adds a blank-value tile to the list so users can clear their pick."
+            ontoggle={handleToggleChange}
+          ></c-pflow-atom-toggle>
+          <lightning-input
+            type="text"
+            label="None option label"
+            value={noneOptionLabelValue}
+            placeholder="--None--"
+            disabled={isNoneOptionLabelDisabled}
+            onchange={handleNoneOptionLabelChange}
+          ></lightning-input>
+          <div class="pflow-studio__field" aria-label="None option position">
+            <p class="pflow-studio__field-label">Position</p>
+            <div
+              class="pflow-studio__pickgroup"
+              role="radiogroup"
+              aria-label="None option position"
+              oncardselect={handleNoneOptionPositionChange}
+            >
+              <template for:each={noneOptionPositionTiles} for:item="tile">
+                <c-pflow-atom-visual-pick
+                  key={tile.value}
+                  item={tile}
+                  selected={tile._selected}
+                  disabled={tile._disabled}
+                  selection-mode="single"
+                  group-name="pflow-none-pos"
+                  size="small"
+                ></c-pflow-atom-visual-pick>
+              </template>
+            </div>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <!-- CARD · Search & toolbar -->
+    <article class="slds-card pflow-studio__card">
+      <header class="slds-card__header pflow-card__head">
+        <span
+          class="pflow-card__glyph pflow-card__glyph_behavior"
+          aria-hidden="true"
+        >
+          <c-pflow-atom-icon
+            name="search"
+            size="small"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+        </span>
+        <div class="pflow-card__headings">
+          <h3 class="slds-card__header-title slds-text-heading_small">
+            Search &amp; toolbar
+          </h3>
+          <p
+            class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+          >
+            Extra controls users can use to filter and bulk-select.
+          </p>
+        </div>
+        <lightning-helptext
+          class="pflow-card__help"
+          content="Search adds a filter input above the tiles. The Select-all / Clear-all toolbar appears only in multi mode."
+        ></lightning-helptext>
+      </header>
+      <div
+        class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+      >
+        <c-pflow-atom-toggle
+          label="Show a search filter"
+          checked={_config.enableSearch}
+          data-key="enableSearch"
+          ontoggle={handleToggleChange}
+        ></c-pflow-atom-toggle>
+        <template lwc:if={isMultiSelect}>
+          <c-pflow-atom-toggle
+            label="Show Select all / Clear all toolbar"
+            checked={_config.showSelectAll}
+            data-key="showSelectAll"
+            ontoggle={handleToggleChange}
+          ></c-pflow-atom-toggle>
+        </template>
+      </div>
+    </article>
+  </template>
+</template>

@@ -41,20 +41,20 @@ Drop the `Professor Flow | Visual Picker` component onto any Flow Screen and the
 
 ## Features at a Glance
 
-| Capability | Detail |
-|---|---|
-| **5 data sources** | Picklist field, Record collection, String collection, SOQL query, Custom static list |
-| **5 layouts** | Grid, List, Horizontal ribbon, Dropdown, Radio group |
-| **Selection modes** | Single and Multi (with configurable min/max) |
-| **Auto-advance** | Automatically navigates to the next screen after a single selection |
-| **Search/filter** | Inline search bar filters tiles as the user types |
-| **Select all** | One-click select-all button for multi-select mode |
-| **None option** | Configurable --None-- tile that clears the selection (position: start or end) |
-| **8 output variables** | value, values, selectedRecord, selectedRecords, selectedLabel, selectedLabels, allValues, allLabels |
-| **Item overrides** | Per-item label, icon, badge, and help text overrides layered on top of any data source |
-| **Sort and limit** | Sort by label, value, or source order; optional result cap |
-| **Required validation** | Block flow navigation with a configurable error message |
-| **SLDS 2 compliant** | Styling hooks, design tokens, dark-mode support, WCAG 2.1 AA accessibility, RTL |
+| Capability              | Detail                                                                                                                                         |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **5 data sources**      | Picklist field, Record collection, String collection, SOQL query, Custom static list                                                           |
+| **5 layouts**           | Grid, List, Horizontal ribbon, Dropdown, Radio group                                                                                           |
+| **Selection modes**     | Single and Multi (with configurable min/max)                                                                                                   |
+| **Auto-advance**        | Automatically navigates to the next screen after a single selection                                                                            |
+| **Search/filter**       | Inline search bar filters tiles as the user types                                                                                              |
+| **Select all**          | One-click select-all button for multi-select mode                                                                                              |
+| **None option**         | Configurable --None-- tile that clears the selection (position: start or end)                                                                  |
+| **8 output variables**  | value, values, selectedRecord, selectedRecords, selectedLabel, selectedLabels, allValues, allLabels                                            |
+| **Item overrides**      | Per-item label, icon, badge, and help text overrides layered on top of any data source                                                         |
+| **Sort and limit**      | Sort by label, value, or source order; optional result cap                                                                                     |
+| **Required validation** | Block flow navigation with a configurable error message                                                                                        |
+| **SLDS 2-oriented UI**  | Uses SLDS utilities, design tokens, accessibility patterns, and the SLDS linter. Warning-level SLDS cleanup remains tracked as hardening debt. |
 
 ---
 
@@ -94,22 +94,22 @@ Type options directly into the CPE. Each item has a label, value, sublabel, icon
 
 ## Layouts
 
-| Layout | Best for |
-|---|---|
-| **Grid** | Visual, icon-forward choices; responsive tile grid with configurable column count or auto-fill |
-| **List** | Dense option sets; stacked rows with icon, label, sublabel, and badge |
-| **Horizontal** | Timeline steps, status sequences, or any scrollable ribbon of options |
-| **Dropdown** | Space-constrained screens; compact combobox that expands on click |
-| **Radio** | Accessibility-first flows; native radio group with SLDS 2 styling |
+| Layout         | Best for                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------- |
+| **Grid**       | Visual, icon-forward choices; responsive tile grid with configurable column count or auto-fill |
+| **List**       | Dense option sets; stacked rows with icon, label, sublabel, and badge                          |
+| **Horizontal** | Timeline steps, status sequences, or any scrollable ribbon of options                          |
+| **Dropdown**   | Space-constrained screens; compact combobox that expands on click                              |
+| **Radio**      | Accessibility-first flows; native radio group with SLDS 2 styling                              |
 
 ---
 
 ## Selection Modes
 
-| Mode | Behaviour |
-|---|---|
-| **Single** | One tile selected at a time. Outputs `value`, `selectedRecord`, `selectedLabel`. |
-| **Multi** | Any number of tiles. Configurable `minSelections` and `maxSelections` enforce constraints. Outputs `values`, `selectedRecords`, `selectedLabels`. |
+| Mode       | Behaviour                                                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Single** | One tile selected at a time. Outputs `value`, `selectedRecord`, `selectedLabel`.                                                                  |
+| **Multi**  | Any number of tiles. Configurable `minSelections` and `maxSelections` enforce constraints. Outputs `values`, `selectedRecords`, `selectedLabels`. |
 
 Both modes support the `required` flag, which blocks the Flow's Next button until a valid selection is made and shows a configurable error message.
 
@@ -121,11 +121,11 @@ All visual settings are managed through the CPE's Appearance tab -- no CSS editi
 
 ### Tile Size and Aspect Ratio
 
-| Size | Column width |
-|---|---|
-| Small | 7.5 rem |
+| Size   | Column width     |
+| ------ | ---------------- |
+| Small  | 7.5 rem          |
 | Medium | 12 rem (default) |
-| Large | 16 rem |
+| Large  | 16 rem           |
 
 Aspect ratio options: `1:1` (square), `4:3` (landscape), `16:9` (wide), `3:4` (portrait).
 
@@ -159,16 +159,16 @@ Grid gap, margin, and padding all accept SLDS 2 spacing tokens (`1`--`12`, `none
 
 Every output is available as a Flow resource once the component is placed on a screen.
 
-| Variable | Type | Description |
-|---|---|---|
-| `value` | String | The value of the currently selected option (single mode) |
-| `values` | String[] | All selected values (multi mode) |
-| `selectedRecord` | SObject | The full record for the selected option (record-backed sources, single mode) |
-| `selectedRecords` | SObject[] | All selected records (record-backed sources, multi mode) |
-| `selectedLabel` | String | Display label of the selected option (single mode) |
-| `selectedLabels` | String[] | Display labels of all selected options (multi mode) |
-| `allValues` | String[] | Every value rendered by the picker, in display order |
-| `allLabels` | String[] | Every label rendered by the picker, in display order |
+| Variable          | Type      | Description                                                                  |
+| ----------------- | --------- | ---------------------------------------------------------------------------- |
+| `value`           | String    | The value of the currently selected option (single mode)                     |
+| `values`          | String[]  | All selected values (multi mode)                                             |
+| `selectedRecord`  | SObject   | The full record for the selected option (record-backed sources, single mode) |
+| `selectedRecords` | SObject[] | All selected records (record-backed sources, multi mode)                     |
+| `selectedLabel`   | String    | Display label of the selected option (single mode)                           |
+| `selectedLabels`  | String[]  | Display labels of all selected options (multi mode)                          |
+| `allValues`       | String[]  | Every value rendered by the picker, in display order                         |
+| `allLabels`       | String[]  | Every label rendered by the picker, in display order                         |
 
 ---
 
@@ -179,7 +179,9 @@ The project follows the LWC Atomic Design pattern. Every layer has a single resp
 ```
 pflowFlowPicker                       <- Flow Screen component (entry point)
   +-- pflowFlowPickerCpe              <- Custom Property Editor (Flow Builder panel)
-        +-- pflowFlowPickerConfigModal <- Full-screen configuration modal
+        +-- pflowFlowPickerConfigModal <- LightningModal shell and configuration orchestration
+              +-- pflowTemplatePickerStudio <- Studio layout, left navigation, splitter, scroll container
+              +-- pflowOrganismPickerConfigPreview <- Live/fallback preview and preview-state controls
 
 pflowOrganismDataPicker               <- Data loading, source switching, state machine
   +-- pflowMoleculePickerGroup        <- Renders the correct layout + search/select-all
@@ -204,23 +206,29 @@ Atoms
 Utilities
   pflowUtilityPickerDataSources       <- Normalizers for all 5 data sources; filter/sort/limit
   pflowUtilityCpeHelpers              <- Flow Builder context helpers (merge fields, types)
+  pflowUtilityPickerConfigDefaults    <- Shared default picker configuration
+  pflowUtilityPickerConfigOptions     <- Shared option metadata for CPE and modal controls
+  pflowUtilityPickerConfigState       <- Immutable config merge/patch helpers and preview/query mapping
+  pflowUtilityPickerConfigValidation  <- Configuration issue generation and save-blocking rules
 ```
+
+The config modal has been partially decomposed into shell, studio layout, preview, state, and validation modules. The Data, Content, Behavior, and Appearance chapter bodies still live in `pflowFlowPickerConfigModal` and remain the primary architecture debt before the modal meets the repository's sub-500-line component target.
 
 ---
 
 ## Apex Layer
 
-| Class | Role |
-|---|---|
-| `PflowPickerController` | `@AuraEnabled(cacheable=true)` endpoint for the SOQL data source. Deserializes the query config JSON and delegates to the service layer. |
-| `PflowPickerService` | Maps SObject records to `PflowPickerItemDTO` instances using field mappings from `PflowPickerQueryDTO`. |
-| `PflowPickerSelector` | Builds and executes the dynamic SOQL query in `USER_MODE`. Validates object and field accessibility; enforces a 2,000-row hard cap. |
-| `PflowPickerQueryDTO` | Input DTO: object API name, WHERE clause, ORDER BY, LIMIT, and field mappings. |
-| `PflowPickerItemDTO` | Output DTO: `id`, `label`, `sublabel`, `icon`, `badge`, `helpText`, `value`, `disabled`. |
-| `PflowPickerException` | Typed exception surfaced to the LWC as an `AuraHandledException`. |
-| `PFlowCpeChoiceEngineController` | Design-time Apex for the CPE: `searchSObjectTypes`, `searchFields`, `getObjectFields` -- powers the object/field pickers in the config modal. |
+| Class                            | Role                                                                                                                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PflowPickerController`          | `@AuraEnabled(cacheable=true)` endpoint for the SOQL data source. Deserializes the query config JSON and delegates to the service layer.                               |
+| `PflowPickerService`             | Maps SObject records to `PflowPickerItemDTO` instances using field mappings from `PflowPickerQueryDTO`.                                                                |
+| `PflowPickerSelector`            | Builds and executes the dynamic SOQL query in `USER_MODE`. Validates object and field accessibility; allowlists WHERE fields/operators; enforces a 2,000-row hard cap. |
+| `PflowPickerQueryDTO`            | Input DTO: object API name, structured filters, legacy WHERE clause, ORDER BY, LIMIT, and field mappings.                                                              |
+| `PflowPickerItemDTO`             | Output DTO: `id`, `label`, `sublabel`, `icon`, `badge`, `helpText`, `value`, `disabled`.                                                                               |
+| `PflowPickerException`           | Typed exception surfaced to the LWC as an `AuraHandledException`.                                                                                                      |
+| `PFlowCpeChoiceEngineController` | Design-time Apex for the CPE: `searchSObjectTypes`, `searchFields`, `getObjectFields` -- powers the object/field pickers in the config modal.                          |
 
-All classes run `with sharing`. SOQL is executed via `Database.queryWithBinds` with `AccessLevel.USER_MODE` to respect field-level security.
+All classes run `with sharing`. SOQL is executed via `Database.queryWithBinds` with `AccessLevel.USER_MODE` to respect field-level security and object permissions. Legacy WHERE text is parsed into allowlisted predicates before execution.
 
 ---
 

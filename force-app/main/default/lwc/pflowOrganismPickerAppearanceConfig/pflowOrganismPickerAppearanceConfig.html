@@ -1,0 +1,1305 @@
+<template>
+  <!-- ═══════════════ CHAPTER 04 · APPEARANCE ═══════════════ -->
+  <section class="pflow-chapter pflow-chapter_04" data-chapter="appearance">
+    <aside class="pflow-chapter__mark" aria-hidden="true">
+      <span class="pflow-chapter__numeral">04</span>
+      <span class="pflow-chapter__rule"></span>
+    </aside>
+    <header class="pflow-chapter__head">
+      <p class="pflow-chapter__eyebrow">Chapter · Appearance</p>
+      <h2 class="pflow-chapter__title">How it looks</h2>
+    </header>
+  </section>
+  <template lwc:if={isLayoutSection}>
+    <!-- ▂▂▂▂ FOUNDATION — layout + tile geometry ▂▂▂▂ -->
+    <div
+      class="pflow-studio__subchapter"
+      role="separator"
+      aria-label="Foundation"
+    >
+      <span class="pflow-studio__subchapter-eyebrow">
+        <span class="pflow-studio__subchapter-numeral">04·A</span>
+        <span class="pflow-studio__subchapter-title">Foundation</span>
+      </span>
+      <span class="pflow-studio__subchapter-rule" aria-hidden="true"></span>
+      <span></span>
+    </div>
+
+    <article class="slds-card pflow-studio__card">
+      <header class="slds-card__header pflow-card__head">
+        <span
+          class="pflow-card__glyph pflow-card__glyph_appearance"
+          aria-hidden="true"
+        >
+          <c-pflow-atom-icon
+            name="layout-grid"
+            size="small"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+        </span>
+        <div class="pflow-card__headings">
+          <h3 class="slds-card__header-title slds-text-heading_small">
+            Layout style
+          </h3>
+          <p
+            class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+          >
+            Arrange tiles as a grid or a stacked list.
+          </p>
+        </div>
+        <lightning-helptext
+          class="pflow-card__help"
+          content="Grid wraps tiles across columns. List stacks them vertically as full-width rows."
+        ></lightning-helptext>
+      </header>
+      <div class="slds-card__body slds-card__body_inner">
+        <div
+          class="pflow-studio__pickgroup"
+          role="radiogroup"
+          aria-label="Layout"
+          oncardselect={handleLayoutTileChange}
+        >
+          <template for:each={layoutTiles} for:item="tile">
+            <c-pflow-atom-visual-pick
+              key={tile.value}
+              item={tile}
+              selected={tile._selected}
+              disabled={tile._disabled}
+              selection-mode="single"
+              group-name="pflow-layout"
+              size="small"
+              aspect-ratio="1:1"
+            ></c-pflow-atom-visual-pick>
+          </template>
+        </div>
+      </div>
+    </article>
+
+    <template lwc:if={showTileSize}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="expand"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Tile size
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              How wide each tile is and how dense the typography feels.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Size fixes the tile width: Small = 7.5rem, Medium = 12rem, Large = 16rem. The grid column width follows the size so layouts stay predictable."
+          ></lightning-helptext>
+        </header>
+        <div class="slds-card__body slds-card__body_inner">
+          <div
+            class="pflow-studio__pickgroup"
+            role="radiogroup"
+            aria-label="Tile size"
+            oncardselect={handleSizeTileChange}
+          >
+            <template for:each={sizeTiles} for:item="tile">
+              <c-pflow-atom-visual-pick
+                key={tile.value}
+                item={tile}
+                selected={tile._selected}
+                selection-mode="single"
+                group-name="pflow-size"
+                size="small"
+                aspect-ratio="1:1"
+              ></c-pflow-atom-visual-pick>
+            </template>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <template lwc:if={showAspectRatio}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="crop"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Aspect ratio
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              The shape of each tile — square, landscape, wide, or portrait.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Tile height is calculated from this ratio applied to its width. 1:1 is square; 16:9 is cinematic; 3:4 is portrait."
+          ></lightning-helptext>
+        </header>
+        <div class="slds-card__body slds-card__body_inner">
+          <div
+            class="pflow-studio__pickgroup pflow-studio__pickgroup_2x2"
+            role="radiogroup"
+            aria-label="Aspect ratio"
+            oncardselect={handleAspectChange}
+          >
+            <template for:each={aspectTiles} for:item="tile">
+              <c-pflow-atom-visual-pick
+                key={tile.value}
+                item={tile}
+                selected={tile._selected}
+                selection-mode="single"
+                group-name="pflow-aspect"
+                size="small"
+                aspect-ratio="1:1"
+              ></c-pflow-atom-visual-pick>
+            </template>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <!-- ═════════════════════ COLUMNS ═════════════════════ -->
+    <template lwc:if={showColumns}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="table"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Column count
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Force a fixed grid width. Auto lets tiles reflow with the
+              container.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Grid mode only. Auto uses the tile size's canonical column width and wraps responsively. Fixed (1–6) forces that many equal columns regardless of container width."
+          ></lightning-helptext>
+        </header>
+        <div class="slds-card__body slds-card__body_inner">
+          <div
+            class="pflow-studio__col-row"
+            role="radiogroup"
+            aria-label="Columns"
+          >
+            <template for:each={columnChips} for:item="chip">
+              <button
+                key={chip.value}
+                type="button"
+                class={chip.className}
+                data-value={chip.value}
+                aria-pressed={chip.ariaPressed}
+                onclick={handleColumnsChange}
+              >
+                {chip.label}
+              </button>
+            </template>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <!-- ▂▂▂▂ CARD — tile surface design ▂▂▂▂ -->
+    <template lwc:if={isTileLayout}>
+      <div
+        class="pflow-studio__subchapter"
+        role="separator"
+        aria-label="Card design"
+      >
+        <span class="pflow-studio__subchapter-eyebrow">
+          <span class="pflow-studio__subchapter-numeral">04·B</span>
+          <span class="pflow-studio__subchapter-title">Card</span>
+        </span>
+        <span class="pflow-studio__subchapter-rule" aria-hidden="true"></span>
+        <span></span>
+      </div>
+    </template>
+
+    <!-- ═════════════════════ ELEVATION ═════════════════════ -->
+    <template lwc:if={showElevation}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="snowflake"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Card elevation
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Flat, outlined, or elevated card style.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Outlined has a 1px border (default). Flat removes the border and uses a tinted surface. Elevated adds a permanent drop shadow so tiles read as physical cards."
+          ></lightning-helptext>
+        </header>
+        <div class="slds-card__body slds-card__body_inner">
+          <div
+            class="pflow-studio__pickgroup"
+            role="radiogroup"
+            aria-label="Card elevation"
+            oncardselect={handleElevationChange}
+          >
+            <template for:each={elevationTiles} for:item="tile">
+              <c-pflow-atom-visual-pick
+                key={tile.value}
+                item={tile}
+                selected={tile._selected}
+                selection-mode="single"
+                group-name="pflow-elevation"
+                size="small"
+                aspect-ratio="1:1"
+              ></c-pflow-atom-visual-pick>
+            </template>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <!-- ═══════════════ PATTERN — dots/lines/diagonal/etc. ═══════════════ -->
+    <template lwc:if={isTileLayout}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="network"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Pattern overlay
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Decorative texture layered on each tile. Choose a pattern, then
+              its color tone.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Patterns layer over the surface. They work with every surface style — e.g. brand radial surface + neutral dots pattern."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <div
+            class="pflow-studio__pickgroup"
+            role="radiogroup"
+            aria-label="Pattern"
+            oncardselect={handlePatternChange}
+          >
+            <template for:each={patternTiles} for:item="tile">
+              <c-pflow-atom-visual-pick
+                key={tile.value}
+                item={tile}
+                selected={tile._selected}
+                selection-mode="single"
+                group-name="pflow-pattern"
+                size="small"
+                aspect-ratio="1:1"
+              ></c-pflow-atom-visual-pick>
+            </template>
+          </div>
+          <div
+            class="pflow-tone-row"
+            role="radiogroup"
+            aria-label="Pattern color"
+          >
+            <span class="pflow-tone-row__eyebrow">Color</span>
+            <template for:each={patternToneChips} for:item="chip">
+              <button
+                key={chip.value}
+                type="button"
+                class={chip.className}
+                data-value={chip.value}
+                aria-pressed={chip.ariaPressed}
+                title={chip.label}
+                disabled={chip.disabled}
+                onclick={handlePatternToneChange}
+              >
+                <span class={chip.dotClassName} aria-hidden="true"></span>
+                <span class="pflow-tone-chip__label">{chip.label}</span>
+              </button>
+            </template>
+          </div>
+          <template lwc:if={patternToneIsCustom}>
+            <div class="pflow-hex-row">
+              <label class="pflow-hex-row__label" for="pattern-tone-hex"
+                >Custom color</label
+              >
+              <input
+                id="pattern-tone-hex"
+                type="color"
+                class="pflow-hex-row__picker"
+                value={patternToneHexValue}
+                oninput={handlePatternToneHexChange}
+                onchange={handlePatternToneHexChange}
+                aria-label="Pick pattern color"
+              />
+              <input
+                type="text"
+                class="pflow-hex-row__input"
+                value={patternToneHexValue}
+                placeholder="#3baa6f"
+                onchange={handlePatternToneHexChange}
+                aria-label="Hex color value"
+              />
+            </div>
+          </template>
+        </div>
+      </article>
+
+      <!-- ═══════════════ CORNERS — trim/brackets/dots ═══════════════ -->
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="crop"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Corner flourish
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Printer-style trim marks, heavier brackets, or corner dots.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Corner decorations sit inside each tile edge. Pick the style, then a color tone."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <div
+            class="pflow-studio__pickgroup"
+            role="radiogroup"
+            aria-label="Corner style"
+            oncardselect={handleCornerChange}
+          >
+            <template for:each={cornerTiles} for:item="tile">
+              <c-pflow-atom-visual-pick
+                key={tile.value}
+                item={tile}
+                selected={tile._selected}
+                selection-mode="single"
+                group-name="pflow-corner"
+                size="small"
+                aspect-ratio="1:1"
+              ></c-pflow-atom-visual-pick>
+            </template>
+          </div>
+          <div
+            class="pflow-tone-row"
+            role="radiogroup"
+            aria-label="Corner color"
+          >
+            <span class="pflow-tone-row__eyebrow">Color</span>
+            <template for:each={cornerToneChips} for:item="chip">
+              <button
+                key={chip.value}
+                type="button"
+                class={chip.className}
+                data-value={chip.value}
+                aria-pressed={chip.ariaPressed}
+                title={chip.label}
+                disabled={chip.disabled}
+                onclick={handleCornerToneChange}
+              >
+                <span class={chip.dotClassName} aria-hidden="true"></span>
+                <span class="pflow-tone-chip__label">{chip.label}</span>
+              </button>
+            </template>
+          </div>
+          <template lwc:if={cornerToneIsCustom}>
+            <div class="pflow-hex-row">
+              <label class="pflow-hex-row__label" for="corner-tone-hex"
+                >Custom color</label
+              >
+              <input
+                id="corner-tone-hex"
+                type="color"
+                class="pflow-hex-row__picker"
+                value={cornerToneHexValue}
+                oninput={handleCornerToneHexChange}
+                onchange={handleCornerToneHexChange}
+                aria-label="Pick corner color"
+              />
+              <input
+                type="text"
+                class="pflow-hex-row__input"
+                value={cornerToneHexValue}
+                placeholder="#3baa6f"
+                onchange={handleCornerToneHexChange}
+                aria-label="Hex color value"
+              />
+            </div>
+          </template>
+        </div>
+      </article>
+
+      <!-- ═══════════════ SURFACE — gradient styles ═══════════════ -->
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="list"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Surface style
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Background gradient on each tile. Compose with patterns above.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Surface gradients tint the tile background. Combine them with overlay patterns for layered depth."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <div
+            class="pflow-studio__pickgroup"
+            role="radiogroup"
+            aria-label="Surface style"
+            oncardselect={handleSurfaceChange}
+          >
+            <template for:each={surfaceTiles} for:item="tile">
+              <c-pflow-atom-visual-pick
+                key={tile.value}
+                item={tile}
+                selected={tile._selected}
+                selection-mode="single"
+                group-name="pflow-surface"
+                size="small"
+                aspect-ratio="1:1"
+              ></c-pflow-atom-visual-pick>
+            </template>
+          </div>
+          <div
+            class="pflow-tone-row"
+            role="radiogroup"
+            aria-label="Surface color"
+          >
+            <span class="pflow-tone-row__eyebrow">Color</span>
+            <template for:each={surfaceToneChips} for:item="chip">
+              <button
+                key={chip.value}
+                type="button"
+                class={chip.className}
+                data-value={chip.value}
+                aria-pressed={chip.ariaPressed}
+                title={chip.label}
+                disabled={chip.disabled}
+                onclick={handleSurfaceToneChange}
+              >
+                <span class={chip.dotClassName} aria-hidden="true"></span>
+                <span class="pflow-tone-chip__label">{chip.label}</span>
+              </button>
+            </template>
+          </div>
+          <template lwc:if={surfaceToneIsCustom}>
+            <div class="pflow-hex-row">
+              <label class="pflow-hex-row__label" for="surface-tone-hex"
+                >Custom color</label
+              >
+              <input
+                id="surface-tone-hex"
+                type="color"
+                class="pflow-hex-row__picker"
+                value={surfaceToneHexValue}
+                oninput={handleSurfaceToneHexChange}
+                onchange={handleSurfaceToneHexChange}
+                aria-label="Pick surface color"
+              />
+              <input
+                type="text"
+                class="pflow-hex-row__input"
+                value={surfaceToneHexValue}
+                placeholder="#3baa6f"
+                onchange={handleSurfaceToneHexChange}
+                aria-label="Hex color value"
+              />
+            </div>
+          </template>
+        </div>
+      </article>
+
+      <!-- ▂▂▂▂ ICON — glyph treatment (gated by global show-icons) ▂▂▂▂ -->
+      <template lwc:if={isTileLayout}>
+        <div
+          class={iconSubchapterClass}
+          role="separator"
+          aria-label="Icon section"
+        >
+          <span class="pflow-studio__subchapter-eyebrow">
+            <span class="pflow-studio__subchapter-numeral">04·C</span>
+            <span class="pflow-studio__subchapter-title">Icon</span>
+          </span>
+          <span class="pflow-studio__subchapter-rule" aria-hidden="true"></span>
+          <span class="pflow-studio__subchapter-toggle">
+            <c-pflow-atom-toggle
+              label="Show icons"
+              variant="label-hidden"
+              message-toggle-active="Icons on"
+              message-toggle-inactive="Icons hidden"
+              checked={showIconsValue}
+              ontoggle={handleShowIconsToggle}
+            ></c-pflow-atom-toggle>
+          </span>
+        </div>
+        <template lwc:if={showIconsValue}>
+          <!-- When icons are globally hidden, none of the axis cards
+                         render — keeps the appearance chapter from showing
+                         knobs that have no effect. Flip the toggle on to bring
+                         back icon sizing. -->
+        </template>
+        <template lwc:else>
+          <p class="pflow-studio__subchapter-off-note" role="note">
+            Icons are hidden across every tile. Turn the toggle above on to
+            configure icon size.
+          </p>
+        </template>
+      </template>
+
+      <!-- ═══════════════ ICON SIZE ═══════════════ -->
+      <template lwc:if={showIconsValue}>
+        <article class="slds-card pflow-studio__card">
+          <header class="slds-card__header pflow-card__head">
+            <span
+              class="pflow-card__glyph pflow-card__glyph_appearance"
+              aria-hidden="true"
+            >
+              <c-pflow-atom-icon
+                name="expand"
+                size="small"
+                alternative-text=""
+              ></c-pflow-atom-icon>
+            </span>
+            <div class="pflow-card__headings">
+              <h3 class="slds-card__header-title slds-text-heading_small">
+                Icon size
+              </h3>
+              <p
+                class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+              >
+                How large the glyph renders inside the tile.
+              </p>
+            </div>
+            <lightning-helptext
+              class="pflow-card__help"
+              content="Auto scales with the tile size (default). Explicit values pin the glyph regardless of tile size — useful for consistent glyph scale across mixed tile sizes."
+            ></lightning-helptext>
+          </header>
+          <div class="slds-card__body slds-card__body_inner">
+            <div
+              class="pflow-studio__pickgroup"
+              role="radiogroup"
+              aria-label="Icon size"
+              oncardselect={handleIconSizeChange}
+            >
+              <template for:each={iconSizeTiles} for:item="tile">
+                <c-pflow-atom-visual-pick
+                  key={tile.value}
+                  item={tile}
+                  selected={tile._selected}
+                  disabled={tile._disabled}
+                  selection-mode="single"
+                  group-name="pflow-icon-size"
+                  size="small"
+                  aspect-ratio="1:1"
+                ></c-pflow-atom-visual-pick>
+              </template>
+            </div>
+          </div>
+        </article>
+      </template>
+    </template>
+
+    <!-- ▂▂▂▂ BADGE — tile status label (gated by global show-badges) ▂▂▂▂ -->
+    <template lwc:if={showBadgeCard}>
+      <div
+        class={badgeSubchapterClass}
+        role="separator"
+        aria-label="Badge section"
+      >
+        <span class="pflow-studio__subchapter-eyebrow">
+          <span class="pflow-studio__subchapter-numeral">04·D</span>
+          <span class="pflow-studio__subchapter-title">Badge</span>
+        </span>
+        <span class="pflow-studio__subchapter-rule" aria-hidden="true"></span>
+        <span class="pflow-studio__subchapter-toggle">
+          <c-pflow-atom-toggle
+            label="Show badges"
+            variant="label-hidden"
+            message-toggle-active="Badges on"
+            message-toggle-inactive="Badges hidden"
+            checked={showBadgesValue}
+            ontoggle={handleShowBadgesToggle}
+          ></c-pflow-atom-toggle>
+        </span>
+      </div>
+      <template lwc:if={showBadgesValue}>
+        <!-- Badges shown; configurator renders below. -->
+      </template>
+      <template lwc:else>
+        <p class="pflow-studio__subchapter-off-note" role="note">
+          Badges are hidden across every tile. Turn the toggle above on to
+          configure position, color, and shape.
+        </p>
+      </template>
+    </template>
+
+    <template lwc:if={showBadgeGroupCards}>
+      <template lwc:if={showBadgeCard}>
+        <article class="slds-card pflow-studio__card pflow-badge-card">
+          <header class="slds-card__header pflow-card__head">
+            <span
+              class="pflow-card__glyph pflow-card__glyph_appearance"
+              aria-hidden="true"
+            >
+              <c-pflow-atom-icon
+                name="award"
+                size="small"
+                alternative-text=""
+              ></c-pflow-atom-icon>
+            </span>
+            <div class="pflow-card__headings">
+              <h3 class="slds-card__header-title slds-text-heading_small">
+                Badge
+              </h3>
+              <p
+                class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+              >
+                Highlight a tile with a short status label.
+              </p>
+            </div>
+            <lightning-helptext
+              class="pflow-card__help"
+              content="Badge text comes from your data (the badge field). Position, color, and shape are global settings applied to every tile. Per-item overrides are supported via item.badgeVariant."
+            ></lightning-helptext>
+          </header>
+          <div
+            class="slds-card__body slds-card__body_inner pflow-badge-card__body"
+          >
+            <!-- Position -->
+            <div class="pflow-badge-card__control">
+              <span class="pflow-badge-card__eyebrow">Position</span>
+              <div
+                class="pflow-badge-card__pos-row"
+                role="radiogroup"
+                aria-label="Badge position"
+              >
+                <template for:each={badgePositionChips} for:item="chip">
+                  <button
+                    key={chip.value}
+                    type="button"
+                    class={chip.className}
+                    data-value={chip.value}
+                    onclick={handleBadgePositionChange}
+                    role="radio"
+                    aria-checked={chip._selected}
+                    title={chip.label}
+                  >
+                    <span class="pflow-badge-pos-chip__canvas">
+                      <span class={chip.dotClass}></span>
+                    </span>
+                    <span class="pflow-badge-pos-chip__label"
+                      >{chip.label}</span
+                    >
+                  </button>
+                </template>
+              </div>
+            </div>
+
+            <!-- Variant -->
+            <div class="pflow-badge-card__control">
+              <span class="pflow-badge-card__eyebrow">Color</span>
+              <div
+                class="pflow-tone-row"
+                role="radiogroup"
+                aria-label="Badge color"
+              >
+                <template for:each={badgeVariantChips} for:item="chip">
+                  <button
+                    key={chip.value}
+                    type="button"
+                    class={chip.className}
+                    data-value={chip.value}
+                    aria-pressed={chip.ariaPressed}
+                    title={chip.label}
+                    disabled={chip.disabled}
+                    onclick={handleBadgeVariantChange}
+                  >
+                    <span class={chip.dotClassName} aria-hidden="true"></span>
+                    <span class="pflow-tone-chip__label">{chip.label}</span>
+                  </button>
+                </template>
+              </div>
+              <template lwc:if={badgeVariantIsCustom}>
+                <div class="pflow-hex-row">
+                  <label class="pflow-hex-row__label" for="badge-variant-hex"
+                    >Custom color</label
+                  >
+                  <input
+                    id="badge-variant-hex"
+                    type="color"
+                    class="pflow-hex-row__picker"
+                    value={badgeVariantHexValue}
+                    oninput={handleBadgeVariantHexChange}
+                    onchange={handleBadgeVariantHexChange}
+                    aria-label="Pick badge color"
+                  />
+                  <input
+                    type="text"
+                    class="pflow-hex-row__input"
+                    value={badgeVariantHexValue}
+                    placeholder="#3baa6f"
+                    onchange={handleBadgeVariantHexChange}
+                    aria-label="Hex color value"
+                  />
+                </div>
+              </template>
+            </div>
+
+            <!-- Shape -->
+            <div class="pflow-badge-card__control">
+              <span class="pflow-badge-card__eyebrow">Shape</span>
+              <div
+                class="pflow-badge-card__shape-row"
+                role="radiogroup"
+                aria-label="Badge shape"
+              >
+                <template for:each={badgeShapeChips} for:item="chip">
+                  <button
+                    key={chip.value}
+                    type="button"
+                    class={chip.className}
+                    data-value={chip.value}
+                    onclick={handleBadgeShapeChange}
+                    role="radio"
+                    title={chip.label}
+                  >
+                    <span class={chip.badgeClass}>Sample</span>
+                    <span class="pflow-badge-shape-chip__label"
+                      >{chip.label}</span
+                    >
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+        </article>
+      </template>
+    </template>
+
+    <!-- ▂▂▂▂ SPACING & RHYTHM — selection + gaps + margins ▂▂▂▂ -->
+    <template lwc:if={isTileLayout}>
+      <div
+        class="pflow-studio__subchapter"
+        role="separator"
+        aria-label="Spacing and rhythm"
+      >
+        <span class="pflow-studio__subchapter-eyebrow">
+          <span class="pflow-studio__subchapter-numeral">04·E</span>
+          <span class="pflow-studio__subchapter-title"
+            >Spacing &amp; rhythm</span
+          >
+        </span>
+        <span class="pflow-studio__subchapter-rule" aria-hidden="true"></span>
+        <span></span>
+      </div>
+    </template>
+
+    <!-- ═════════════════ SELECTION INDICATOR (moved into SPACING) ═════════════════ -->
+    <template lwc:if={showSelectionIndicator}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="check"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Selection indicator
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              How a picked tile shows its selected state.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Checkmark shows a floating circle badge. Fill flips the tile surface to brand color. Bar draws a thick accent edge (left in grid, bottom in list)."
+          ></lightning-helptext>
+        </header>
+        <div class="slds-card__body slds-card__body_inner">
+          <div
+            class="pflow-studio__pickgroup"
+            role="radiogroup"
+            aria-label="Selection indicator"
+            oncardselect={handleSelectionIndicatorChange}
+          >
+            <template for:each={selectionIndicatorTiles} for:item="tile">
+              <c-pflow-atom-visual-pick
+                key={tile.value}
+                item={tile}
+                selected={tile._selected}
+                selection-mode="single"
+                group-name="pflow-selindicator"
+                size="small"
+                aspect-ratio="1:1"
+                selection-indicator={tile.value}
+              ></c-pflow-atom-visual-pick>
+            </template>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <template lwc:if={showGridMinWidth}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="battery-medium"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Grid density
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Override the grid column width. Picking a size above sets this
+              automatically.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="By default the grid column width is bound to the Tile size. Drag the slider to override — smaller values pack more tiles per row, larger values spread them out."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__slider-stack"
+        >
+          <div class="pflow-studio__slider">
+            <div class="pflow-studio__slider-head">
+              <span class="pflow-studio__slider-label"
+                >Minimum column width</span
+              >
+              <span class="pflow-studio__slider-value"
+                >{gridMinWidthDisplay}</span
+              >
+            </div>
+            <lightning-input
+              type="range"
+              variant="label-hidden"
+              label="Minimum column width"
+              min={gridMinWidthRange.min}
+              max={gridMinWidthRange.max}
+              step={gridMinWidthRange.step}
+              value={gridMinWidthNumber}
+              onchange={handleGridMinWidthChange}
+            ></lightning-input>
+            <div class="pflow-studio__slider-scale">
+              <span>{gridMinWidthScaleMin}</span>
+              <span>{gridMinWidthScaleMax}</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <template lwc:if={showGapCard}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="rows-3"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Tile gaps
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Space between tiles.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Each chip maps to an SLDS 2 spacing token. Horizontal controls column gap (side-by-side tiles); vertical controls row gap (stacked rows)."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <template lwc:if={showGapHorizontal}>
+            <div class="pflow-studio__axis">
+              <div class="pflow-studio__axis-head">
+                <c-pflow-atom-icon
+                  name="move-horizontal"
+                  size="x-small"
+                  alternative-text=""
+                ></c-pflow-atom-icon>
+                <div class="pflow-studio__axis-text">
+                  <h4 class="pflow-studio__axis-title">Horizontal</h4>
+                  <p class="pflow-studio__axis-sub">
+                    Column gap between tiles.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="pflow-studio__pickgroup pflow-studio__pickgroup_compact"
+                role="radiogroup"
+                aria-label="Horizontal gap"
+                oncardselect={handleGapHorizontalToken}
+              >
+                <template for:each={gapHTiles} for:item="tile">
+                  <c-pflow-atom-visual-pick
+                    key={tile.id}
+                    item={tile}
+                    selected={tile._selected}
+                    selection-mode="single"
+                    group-name="pflow-gap-h"
+                    size="small"
+                    aspect-ratio="3:4"
+                    icon-size="small"
+                  ></c-pflow-atom-visual-pick>
+                </template>
+              </div>
+            </div>
+          </template>
+          <template lwc:if={showGapVertical}>
+            <div class="pflow-studio__axis">
+              <div class="pflow-studio__axis-head">
+                <c-pflow-atom-icon
+                  name="move-vertical"
+                  size="x-small"
+                  alternative-text=""
+                ></c-pflow-atom-icon>
+                <div class="pflow-studio__axis-text">
+                  <h4 class="pflow-studio__axis-title">Vertical</h4>
+                  <p class="pflow-studio__axis-sub">Row gap between tiles.</p>
+                </div>
+              </div>
+              <div
+                class="pflow-studio__pickgroup pflow-studio__pickgroup_compact"
+                role="radiogroup"
+                aria-label="Vertical gap"
+                oncardselect={handleGapVerticalToken}
+              >
+                <template for:each={gapVTiles} for:item="tile">
+                  <c-pflow-atom-visual-pick
+                    key={tile.id}
+                    item={tile}
+                    selected={tile._selected}
+                    selection-mode="single"
+                    group-name="pflow-gap-v"
+                    size="small"
+                    aspect-ratio="3:4"
+                    icon-size="small"
+                  ></c-pflow-atom-visual-pick>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </article>
+    </template>
+
+    <template lwc:if={showMarginPadding}>
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="expand"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Outer margin
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Space around the whole picker at runtime.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Link all sides to set one value, or unlink for per-side control. Each side maps to an SLDS 2 spacing token."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <c-pflow-atom-toggle
+            label="Link all sides"
+            message-toggle-active="All four sides share one value"
+            message-toggle-inactive="Set each side independently"
+            checked={marginLinked}
+            ontoggle={handleMarginLinkToggle}
+          ></c-pflow-atom-toggle>
+          <template lwc:if={marginLinked}>
+            <div
+              class="pflow-studio__pickgroup pflow-studio__pickgroup_compact"
+              role="radiogroup"
+              aria-label="Margin — all sides"
+              oncardselect={handleMarginAllChange}
+            >
+              <template for:each={marginAllTiles} for:item="tile">
+                <c-pflow-atom-visual-pick
+                  key={tile.id}
+                  item={tile}
+                  selected={tile._selected}
+                  selection-mode="single"
+                  group-name="pflow-margin-all"
+                  size="small"
+                  aspect-ratio="3:4"
+                  icon-size="small"
+                ></c-pflow-atom-visual-pick>
+              </template>
+            </div>
+          </template>
+          <template lwc:else>
+            <template for:each={marginSideSections} for:item="section">
+              <div
+                key={section.side}
+                class="pflow-studio__axis"
+                data-section-side={section.side}
+              >
+                <div class="pflow-studio__axis-head">
+                  <c-pflow-atom-icon
+                    name={section.icon}
+                    size="x-small"
+                    alternative-text=""
+                  ></c-pflow-atom-icon>
+                  <div class="pflow-studio__axis-text">
+                    <h4 class="pflow-studio__axis-title">{section.label}</h4>
+                  </div>
+                </div>
+                <div
+                  class="pflow-studio__pickgroup pflow-studio__pickgroup_compact"
+                  role="radiogroup"
+                  aria-label={section.label}
+                  data-side={section.side}
+                  oncardselect={handleMarginSideChange}
+                >
+                  <template for:each={section.tiles} for:item="tile">
+                    <c-pflow-atom-visual-pick
+                      key={tile.id}
+                      item={tile}
+                      selected={tile._selected}
+                      selection-mode="single"
+                      group-name="pflow-margin-side"
+                      size="small"
+                      aspect-ratio="1:1"
+                      icon-size="small"
+                    ></c-pflow-atom-visual-pick>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </template>
+        </div>
+      </article>
+
+      <article class="slds-card pflow-studio__card">
+        <header class="slds-card__header pflow-card__head">
+          <span
+            class="pflow-card__glyph pflow-card__glyph_appearance"
+            aria-hidden="true"
+          >
+            <c-pflow-atom-icon
+              name="shrink"
+              size="small"
+              alternative-text=""
+            ></c-pflow-atom-icon>
+          </span>
+          <div class="pflow-card__headings">
+            <h3 class="slds-card__header-title slds-text-heading_small">
+              Inner tile padding
+            </h3>
+            <p
+              class="slds-card__header-subtitle slds-text-body_small slds-text-color_weak"
+            >
+              Space inside each tile between its border and content.
+            </p>
+          </div>
+          <lightning-helptext
+            class="pflow-card__help"
+            content="Padding drives the content gap too — the space between icon and text is always half the padding. Pick Auto to follow the tile size's default."
+          ></lightning-helptext>
+        </header>
+        <div
+          class="slds-card__body slds-card__body_inner pflow-studio__field-block"
+        >
+          <c-pflow-atom-toggle
+            label="Link all sides"
+            message-toggle-active="All four sides share one value"
+            message-toggle-inactive="Set each side independently"
+            checked={paddingLinked}
+            ontoggle={handlePaddingLinkToggle}
+          ></c-pflow-atom-toggle>
+          <template lwc:if={paddingLinked}>
+            <div
+              class="pflow-studio__pickgroup pflow-studio__pickgroup_compact"
+              role="radiogroup"
+              aria-label="Padding — all sides"
+              oncardselect={handlePaddingAllChange}
+            >
+              <template for:each={paddingAllTiles} for:item="tile">
+                <c-pflow-atom-visual-pick
+                  key={tile.id}
+                  item={tile}
+                  selected={tile._selected}
+                  selection-mode="single"
+                  group-name="pflow-padding-all"
+                  size="small"
+                  aspect-ratio="3:4"
+                  icon-size="small"
+                ></c-pflow-atom-visual-pick>
+              </template>
+            </div>
+          </template>
+          <template lwc:else>
+            <template for:each={paddingSideSections} for:item="section">
+              <div
+                key={section.side}
+                class="pflow-studio__axis"
+                data-section-side={section.side}
+              >
+                <div class="pflow-studio__axis-head">
+                  <c-pflow-atom-icon
+                    name={section.icon}
+                    size="x-small"
+                    alternative-text=""
+                  ></c-pflow-atom-icon>
+                  <div class="pflow-studio__axis-text">
+                    <h4 class="pflow-studio__axis-title">{section.label}</h4>
+                  </div>
+                </div>
+                <div
+                  class="pflow-studio__pickgroup pflow-studio__pickgroup_compact"
+                  role="radiogroup"
+                  aria-label={section.label}
+                  data-side={section.side}
+                  oncardselect={handlePaddingSideChange}
+                >
+                  <template for:each={section.tiles} for:item="tile">
+                    <c-pflow-atom-visual-pick
+                      key={tile.id}
+                      item={tile}
+                      selected={tile._selected}
+                      selection-mode="single"
+                      group-name="pflow-padding-side"
+                      size="small"
+                      aspect-ratio="1:1"
+                      icon-size="small"
+                    ></c-pflow-atom-visual-pick>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </template>
+        </div>
+      </article>
+    </template>
+  </template>
+</template>

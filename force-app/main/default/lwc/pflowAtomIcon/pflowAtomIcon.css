@@ -1,32 +1,83 @@
 :host {
-    display: inline-flex;
-    line-height: var(--slds-g-font-line-height-1, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: var(--slds-g-font-line-height-1, 1);
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .pflow-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: currentColor;
-    flex-shrink: 0;
+  --pflow-icon-size: var(--slds-g-sizing-7, 1.5rem);
+  --pflow-icon-box-size: var(--pflow-icon-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  flex-shrink: 0;
+  width: var(--pflow-icon-box-size);
+  height: var(--pflow-icon-box-size);
+  max-width: var(--pflow-static-v-100-percent, 100%);
+  max-height: var(--pflow-static-v-100-percent, 100%);
 }
 
 .pflow-icon__svg {
-    width: 100%;
-    height: 100%;
-    display: block;
+  width: var(--pflow-icon-size);
+  height: var(--pflow-icon-size);
+  display: block;
+  color: currentColor;
+  overflow: visible;
+  forced-color-adjust: auto;
+  max-width: var(--pflow-static-v-100-percent, 100%);
+  max-height: var(--pflow-static-v-100-percent, 100%);
 }
 
 /* Size tokens mirror Lightning's size scale so existing `size="medium"` etc. call sites keep working. */
-.pflow-icon_size-xs { width: var(--slds-g-sizing-4, 0.75rem); height: var(--slds-g-sizing-4, 0.75rem); }
-.pflow-icon_size-sm { width: var(--slds-g-sizing-5, 1rem);    height: var(--slds-g-sizing-5, 1rem); }
-.pflow-icon_size-md { width: var(--slds-g-sizing-7, 1.5rem);  height: var(--slds-g-sizing-7, 1.5rem); }
-.pflow-icon_size-lg { width: var(--slds-g-sizing-9, 2rem);    height: var(--slds-g-sizing-9, 2rem); }
-.pflow-icon_size-xl { width: var(--slds-g-sizing-10, 3rem);    height: var(--slds-g-sizing-10, 3rem); }
+.pflow-icon_size-xs {
+  --pflow-icon-size: var(--slds-g-sizing-4, 0.75rem);
+}
+.pflow-icon_size-sm {
+  --pflow-icon-size: var(--slds-g-sizing-5, 1rem);
+}
+.pflow-icon_size-md {
+  --pflow-icon-size: var(--slds-g-sizing-7, 1.5rem);
+}
+.pflow-icon_size-lg {
+  --pflow-icon-size: var(--slds-g-sizing-9, 2rem);
+}
+.pflow-icon_size-xl {
+  --pflow-icon-size: var(--slds-g-sizing-10, 3rem);
+}
 
-/* Variant hooks — mirror lightning-icon variant coloring via SLDS 2 color tokens. */
-.pflow-icon_variant-error   { color: var(--slds-g-color-error-base-40, #ba0517); }
-.pflow-icon_variant-warning { color: var(--slds-g-color-warning-base-50, #9a6700); }
-.pflow-icon_variant-success { color: var(--slds-g-color-success-base-40, #2e844a); }
-.pflow-icon_variant-brand   { color: var(--slds-g-color-brand-base-50, #0176d3); }
-.pflow-icon_variant-inverse { color: var(--slds-g-color-neutral-base-100, #ffffff); }
+.pflow-icon_box-input {
+  --pflow-icon-box-size: var(--slds-g-sizing-5, 1rem);
+}
+
+.pflow-icon_box-button {
+  --pflow-icon-box-size: var(--slds-g-sizing-6, 1.25rem);
+}
+
+.pflow-icon_box-option {
+  --pflow-icon-box-size: var(--slds-g-sizing-7, 1.5rem);
+}
+
+.pflow-icon_box-tile {
+  --pflow-icon-box-size: var(--slds-g-sizing-8, 1.75rem);
+}
+
+/* Variants use SLDS 2 color tokens while the Lucide SVG inherits currentColor. */
+.pflow-icon_variant-error {
+  color: var(--slds-g-color-error-base-40, #ba0517);
+}
+.pflow-icon_variant-warning {
+  color: var(--slds-g-color-warning-base-50, #9a6700);
+}
+.pflow-icon_variant-success {
+  color: var(--slds-g-color-success-base-40, #2e844a);
+}
+.pflow-icon_variant-brand {
+  color: var(--slds-g-color-brand-base-50, #0176d3);
+}
+.pflow-icon_variant-inverse {
+  color: var(--slds-g-color-neutral-base-100, #ffffff);
+}

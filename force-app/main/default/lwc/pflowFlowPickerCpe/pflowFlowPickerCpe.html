@@ -1,96 +1,127 @@
 <template>
-    <div class="pflow-cpe">
-        <!-- Validation errors strip -->
-        <template lwc:if={hasValidationErrors}>
-            <div class="pflow-cpe__errors" role="alert">
-                <c-pflow-atom-icon name="utility:error" size="x-small" variant="error" alternative-text="Errors"></c-pflow-atom-icon>
-                <ul class="pflow-cpe__errors-list">
-                    <template for:each={validationMessages} for:item="msg">
-                        <li key={msg.key}>{msg.message}</li>
-                    </template>
-                </ul>
-            </div>
+  <div class="pflow-cpe">
+    <!-- Validation errors strip -->
+    <template lwc:if={hasValidationErrors}>
+      <div class="pflow-cpe__errors" role="alert">
+        <c-pflow-atom-icon
+          name="circle-alert"
+          size="x-small"
+          box="option"
+          variant="error"
+          alternative-text="Errors"
+        ></c-pflow-atom-icon>
+        <ul class="pflow-cpe__errors-list">
+          <template for:each={validationMessages} for:item="msg">
+            <li key={msg.key}>{msg.message}</li>
+          </template>
+        </ul>
+      </div>
+    </template>
+
+    <!-- Configured state · readable summary -->
+    <template lwc:if={hasDataSource}>
+      <button
+        type="button"
+        class="pflow-cpe__cta"
+        onclick={handleOpenConfigure}
+      >
+        <c-pflow-atom-icon
+          name="settings-2"
+          size="x-small"
+          box="button"
+          alternative-text=""
+        ></c-pflow-atom-icon>
+        <span>Edit configuration</span>
+      </button>
+
+      <article
+        class="pflow-cpe__card"
+        aria-label="Picker configuration summary"
+      >
+        <header class="pflow-cpe__card-head">
+          <p class="pflow-cpe__card-eyebrow">Visual Picker</p>
+          <h2 class="pflow-cpe__card-title">Current configuration</h2>
+        </header>
+
+        <!-- Data source -->
+        <template lwc:if={dataSection}>
+          <section class="pflow-cpe__section">
+            <h3 class="pflow-cpe__section-title">Data source</h3>
+            <p class="pflow-cpe__section-kind">{dataSection.kind}</p>
+            <template for:each={dataSection.lines} for:item="line">
+              <p
+                key={line.key}
+                class="pflow-cpe__line"
+                data-muted={line.muted}
+                data-mono={line.mono}
+              >
+                {line.text}
+              </p>
+            </template>
+          </section>
         </template>
 
-        <!-- Configured state · readable summary -->
-        <template lwc:if={hasDataSource}>
-            <button
-                type="button"
-                class="pflow-cpe__cta"
-                onclick={handleOpenConfigure}
-            >
-                <c-pflow-atom-icon name="utility:setup" size="x-small" alternative-text=""></c-pflow-atom-icon>
-                <span>Edit configuration</span>
-            </button>
+        <!-- Label -->
+        <section class="pflow-cpe__section">
+          <h3 class="pflow-cpe__section-title">Label</h3>
+          <template for:each={labelSection.lines} for:item="line">
+            <p key={line.key} class="pflow-cpe__line" data-muted={line.muted}>
+              {line.text}
+            </p>
+          </template>
+        </section>
 
-            <article class="pflow-cpe__card" aria-label="Picker configuration summary">
-                <header class="pflow-cpe__card-head">
-                    <p class="pflow-cpe__card-eyebrow">Visual Picker</p>
-                    <h2 class="pflow-cpe__card-title">Current configuration</h2>
-                </header>
+        <!-- Behavior -->
+        <section class="pflow-cpe__section">
+          <h3 class="pflow-cpe__section-title">Behavior</h3>
+          <template for:each={behaviorLines} for:item="line">
+            <p key={line.key} class="pflow-cpe__line" data-muted={line.muted}>
+              {line.text}
+            </p>
+          </template>
+        </section>
 
-                <!-- Data source -->
-                <template lwc:if={dataSection}>
-                    <section class="pflow-cpe__section">
-                        <h3 class="pflow-cpe__section-title">Data source</h3>
-                        <p class="pflow-cpe__section-kind">{dataSection.kind}</p>
-                        <template for:each={dataSection.lines} for:item="line">
-                            <p key={line.key} class="pflow-cpe__line" data-muted={line.muted} data-mono={line.mono}>
-                                {line.text}
-                            </p>
-                        </template>
-                    </section>
-                </template>
+        <!-- Appearance -->
+        <section class="pflow-cpe__section">
+          <h3 class="pflow-cpe__section-title">Appearance</h3>
+          <template for:each={appearanceLines} for:item="line">
+            <p key={line.key} class="pflow-cpe__line" data-muted={line.muted}>
+              {line.text}
+            </p>
+          </template>
+        </section>
+      </article>
+    </template>
 
-                <!-- Label -->
-                <section class="pflow-cpe__section">
-                    <h3 class="pflow-cpe__section-title">Label</h3>
-                    <template for:each={labelSection.lines} for:item="line">
-                        <p key={line.key} class="pflow-cpe__line" data-muted={line.muted}>
-                            {line.text}
-                        </p>
-                    </template>
-                </section>
-
-                <!-- Behavior -->
-                <section class="pflow-cpe__section">
-                    <h3 class="pflow-cpe__section-title">Behavior</h3>
-                    <template for:each={behaviorLines} for:item="line">
-                        <p key={line.key} class="pflow-cpe__line" data-muted={line.muted}>
-                            {line.text}
-                        </p>
-                    </template>
-                </section>
-
-                <!-- Appearance -->
-                <section class="pflow-cpe__section">
-                    <h3 class="pflow-cpe__section-title">Appearance</h3>
-                    <template for:each={appearanceLines} for:item="line">
-                        <p key={line.key} class="pflow-cpe__line" data-muted={line.muted}>
-                            {line.text}
-                        </p>
-                    </template>
-                </section>
-            </article>
-        </template>
-
-        <!-- Empty state · first-use CTA -->
-        <template lwc:else>
-            <div class="pflow-cpe__empty">
-                <span class="pflow-cpe__empty-glyph" aria-hidden="true">
-                    <c-pflow-atom-icon name="utility:picklist" size="small" alternative-text=""></c-pflow-atom-icon>
-                </span>
-                <p class="pflow-cpe__empty-title">Not configured yet</p>
-                <p class="pflow-cpe__empty-copy">Pick a data source, layout, and behavior to build your tile picker.</p>
-                <button
-                    type="button"
-                    class="pflow-cpe__cta pflow-cpe__cta_primary"
-                    onclick={handleOpenConfigure}
-                >
-                    <c-pflow-atom-icon name="utility:setup" size="x-small" alternative-text=""></c-pflow-atom-icon>
-                    <span>Configure picker</span>
-                </button>
-            </div>
-        </template>
-    </div>
+    <!-- Empty state · first-use CTA -->
+    <template lwc:else>
+      <div class="pflow-cpe__empty">
+        <span class="pflow-cpe__empty-glyph" aria-hidden="true">
+          <c-pflow-atom-icon
+            name="list"
+            size="small"
+            box="tile"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+        </span>
+        <p class="pflow-cpe__empty-title">Not configured yet</p>
+        <p class="pflow-cpe__empty-copy">
+          Pick a data source, layout, and behavior to build your tile picker.
+        </p>
+        <button
+          type="button"
+          class="pflow-cpe__cta pflow-cpe__cta_primary"
+          onclick={handleOpenConfigure}
+        >
+          <c-pflow-atom-icon
+            name="settings-2"
+            size="x-small"
+            box="button"
+            alternative-text=""
+          ></c-pflow-atom-icon>
+          <span>Configure picker</span>
+        </button>
+      </div>
+    </template>
+  </div>
 </template>

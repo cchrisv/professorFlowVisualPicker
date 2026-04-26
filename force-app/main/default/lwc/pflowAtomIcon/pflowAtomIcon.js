@@ -1,50 +1,94 @@
-import { LightningElement, api } from 'lwc';
-import { resolveIconContent } from './iconPaths';
+import { LightningElement, api } from "lwc";
+import {
+  DEFAULT_ICON_NAME,
+  normalizeIconName,
+  resolveIconContent
+} from "./lucideIconPaths";
 
 const SIZE_ALIASES = {
-    'xx-small': 'xs',
-    'x-small':  'sm',
-    'small':    'sm',
-    'medium':   'md',
-    'large':    'lg',
-    'xs': 'xs', 'sm': 'sm', 'md': 'md', 'lg': 'lg', 'xl': 'xl'
+  "xx-small": "xs",
+  "x-small": "sm",
+  small: "md",
+  medium: "lg",
+  large: "xl",
+  xs: "xs",
+  sm: "sm",
+  md: "md",
+  lg: "lg",
+  xl: "xl"
 };
 
-const VALID_VARIANTS = new Set(['error', 'warning', 'success', 'brand', 'inverse']);
+const VALID_VARIANTS = new Set([
+  "error",
+  "warning",
+  "success",
+  "brand",
+  "inverse"
+]);
+const VALID_BOXES = new Set(["input", "button", "option", "tile"]);
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 export default class PflowAtomIcon extends LightningElement {
-    @api name = '';
-    @api size = 'md';
-    @api alternativeText = '';
-    @api title = '';
-    /** @type {'error'|'warning'|'success'|'brand'|'inverse'|undefined} */
-    @api variant;
+  @api name = "";
+  @api size = "md";
+  @api alternativeText = "";
+  @api title = "";
+  @api box = "";
+  /** @type {'error'|'warning'|'success'|'brand'|'inverse'|undefined} */
+  @api variant;
 
-    get resolvedSize() {
-        return SIZE_ALIASES[this.size] || 'md';
-    }
+  _renderedIconContent;
 
-    get wrapperClass() {
-        const cls = ['pflow-icon', `pflow-icon_size-${this.resolvedSize}`];
-        if (VALID_VARIANTS.has(this.variant)) {
-            cls.push(`pflow-icon_variant-${this.variant}`);
-        }
-        return cls.join(' ');
+  renderedCallback() {
+    const svg = this.template.querySelector(".pflow-icon__svg");
+    const iconContent = this.iconContent;
+    if (svg && this._renderedIconContent !== iconContent) {
+      this.replaceIconNodes(svg, iconContent);
+      this._renderedIconContent = iconContent;
     }
+  }
 
-    get role() {
-        return this.alternativeText ? 'img' : null;
-    }
+  replaceIconNodes(svg, iconContent) {
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(
+      `<svg xmlns="${SVG_NAMESPACE}">${iconContent}</svg>`,
+      "image/svg+xml"
+    );
+    const nodes = Array.from(parsed.documentElement.childNodes).map((node) =>
+      document.importNode(node, true)
+    );
 
-    get ariaHidden() {
-        return this.alternativeText ? null : 'true';
-    }
+    svg.replaceChildren(...nodes);
+  }
 
-    renderedCallback() {
-        const svg = this.template.querySelector('svg');
-        if (!svg) return;
-        if (svg.dataset.iconName === this.name) return;
-        svg.innerHTML = resolveIconContent(this.name);
-        svg.dataset.iconName = this.name || '';
+  get resolvedSize() {
+    return SIZE_ALIASES[this.size] || "md";
+  }
+
+  get resolvedIconName() {
+    return normalizeIconName(this.name || DEFAULT_ICON_NAME);
+  }
+
+  get iconContent() {
+    return resolveIconContent(this.resolvedIconName);
+  }
+
+  get wrapperClass() {
+    const cls = ["pflow-icon", `pflow-icon_size-${this.resolvedSize}`];
+    if (VALID_BOXES.has(this.box)) {
+      cls.push(`pflow-icon_box-${this.box}`);
     }
+    if (VALID_VARIANTS.has(this.variant)) {
+      cls.push(`pflow-icon_variant-${this.variant}`);
+    }
+    return cls.join(" ");
+  }
+
+  get role() {
+    return this.alternativeText ? "img" : null;
+  }
+
+  get ariaHidden() {
+    return this.alternativeText ? null : "true";
+  }
 }
