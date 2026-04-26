@@ -106,12 +106,53 @@ describe("c-pflow-organism-picker-appearance-config events", () => {
     }
   });
 
-  it("emits layout patches and prevents single-select layouts for multi-select", () => {
-    const element = mount({ ...BASE_CONFIG, selectionMode: "multi" });
+  it("orders appearance sections in the builder workflow", () => {
+    const element = mount();
+    const sectionTitles = [
+      ...element.shadowRoot.querySelectorAll(".pflow-studio__subchapter-title")
+    ].map((node) => node.textContent.replace(/\s+/g, " ").trim());
+
+    expect(sectionTitles).toEqual([
+      "Layout & shape",
+      "Card surface & state",
+      "Icon",
+      "Badge",
+      "Spacing & layout"
+    ]);
+
+    const cardTitles = [
+      ...element.shadowRoot.querySelectorAll(".slds-card__header-title")
+    ].map((node) => node.textContent.replace(/\s+/g, " ").trim());
+
+    expect(cardTitles.indexOf("Surface style")).toBeLessThan(
+      cardTitles.indexOf("Pattern overlay")
+    );
+    expect(cardTitles.indexOf("Pattern overlay")).toBeLessThan(
+      cardTitles.indexOf("Corner flourish")
+    );
+  });
+
+  it("emits layout patches without changing selection mode", () => {
+    const element = mount({ ...BASE_CONFIG, selectionMode: "single" });
     const patches = collect(element);
 
-    cardSelect(group(element.shadowRoot, "Layout"), "dropdown");
-    expect(patches[0].value.layout).toBe("grid");
+    cardSelect(group(element.shadowRoot, "Layout"), "dualListbox");
+    expect(patches[0].value.layout).toBe("dualListbox");
+    expect(patches[0].value.selectionMode).toBe("single");
+
+    cardSelect(group(element.shadowRoot, "Layout"), "columns");
+    expect(patches[1].value.layout).toBe("columns");
+    expect(patches[1].value.selectionMode).toBe("single");
+
+    const multiElement = mount({ ...BASE_CONFIG, selectionMode: "multi" });
+    const multiPatches = collect(multiElement);
+    cardSelect(group(multiElement.shadowRoot, "Layout"), "picklist");
+    expect(multiPatches[0].value.layout).toBe("picklist");
+    expect(multiPatches[0].value.selectionMode).toBe("multi");
+
+    cardSelect(group(multiElement.shadowRoot, "Layout"), "radio");
+    expect(multiPatches[1].value.layout).toBe("radio");
+    expect(multiPatches[1].value.selectionMode).toBe("multi");
 
     const singleSelect = mount(BASE_CONFIG);
     const singlePatches = collect(singleSelect);
@@ -141,6 +182,34 @@ describe("c-pflow-organism-picker-appearance-config events", () => {
     expect(patches.at(-3).value.gridConfig.columns).toBe(3);
     expect(patches.at(-2).value.gridConfig.gapH).toBe("8");
     expect(patches.at(-1).value.gridConfig.minWidth).toBe("18rem");
+  });
+
+  it("emits redesigned elevation patches and omits removed spotlight indicator", () => {
+    const element = mount();
+    const patches = collect(element);
+
+    const elevationGroup = group(element.shadowRoot, "Card elevation");
+    const elevationValues = [
+      ...elevationGroup.querySelectorAll("c-pflow-atom-visual-pick")
+    ].map((card) => card.item.value);
+    expect(elevationValues).toEqual([
+      "plain",
+      "subtle",
+      "outlined",
+      "raised",
+      "floating",
+      "inset"
+    ]);
+
+    cardSelect(elevationGroup, "floating");
+    expect(patches.at(-1).value.gridConfig.elevation).toBe("floating");
+
+    const indicatorValues = [
+      ...group(element.shadowRoot, "Selection indicator").querySelectorAll(
+        "c-pflow-atom-visual-pick"
+      )
+    ].map((card) => card.item.value);
+    expect(indicatorValues).not.toContain("spotlight");
   });
 
   it("emits surface, icon, and badge patches from rendered controls", () => {
@@ -176,6 +245,89 @@ describe("c-pflow-organism-picker-appearance-config events", () => {
     expect(patches.at(-3).value.gridConfig.showIcons).toBe(false);
     expect(patches.at(-2).value.gridConfig.badge.position).toBe("top-right");
     expect(patches.at(-1).value.gridConfig.badge.variantHex).toBe("#123456");
+  });
+
+  it("emits state-specific pattern and surface color patches", () => {
+    const element = mount({
+      ...BASE_CONFIG,
+      gridConfig: {
+        ...BASE_CONFIG.gridConfig,
+        pattern: "dots",
+        patternSelectedTone: "custom",
+        surfaceSelectedTone: "custom"
+      }
+    });
+    const patches = collect(element);
+
+    click(
+      group(element.shadowRoot, "Pattern hover color").querySelector(
+        "[data-value='warning']"
+      )
+    );
+    inputChange(
+      element.shadowRoot.querySelector(
+        'input[aria-label="Pattern selected hex color value"]'
+      ),
+      "#112233"
+    );
+    click(
+      group(element.shadowRoot, "Surface hover color").querySelector(
+        "[data-value='teal']"
+      )
+    );
+    inputChange(
+      element.shadowRoot.querySelector(
+        'input[aria-label="Surface selected hex color value"]'
+      ),
+      "#445566"
+    );
+
+    expect(patches.at(-4).value.gridConfig.patternHoverTone).toBe("warning");
+    expect(patches.at(-3).value.gridConfig.patternSelectedToneHex).toBe(
+      "#112233"
+    );
+    expect(patches.at(-2).value.gridConfig.surfaceHoverTone).toBe("teal");
+    expect(patches.at(-1).value.gridConfig.surfaceSelectedToneHex).toBe(
+      "#445566"
+    );
+  });
+
+  it("emits icon decoration, style, color, and glyph color patches", () => {
+    const element = mount({
+      ...BASE_CONFIG,
+      gridConfig: {
+        ...BASE_CONFIG.gridConfig,
+        iconDecor: "ring",
+        iconTone: "custom",
+        iconGlyphTone: "custom"
+      }
+    });
+    const patches = collect(element);
+
+    cardSelect(group(element.shadowRoot, "Icon decoration"), "badge");
+    cardSelect(group(element.shadowRoot, "Icon style"), "outlined");
+    click(
+      group(element.shadowRoot, "Icon color").querySelector(
+        "[data-value='brand']"
+      )
+    );
+    click(
+      group(element.shadowRoot, "Icon glyph color").querySelector(
+        "[data-value='contrast']"
+      )
+    );
+    inputChange(
+      element.shadowRoot.querySelector(
+        'input[aria-label="Icon decoration hex color value"]'
+      ),
+      "#654321"
+    );
+
+    expect(patches.at(-5).value.gridConfig.iconDecor).toBe("badge");
+    expect(patches.at(-4).value.gridConfig.iconStyle).toBe("outlined");
+    expect(patches.at(-3).value.gridConfig.iconTone).toBe("brand");
+    expect(patches.at(-2).value.gridConfig.iconGlyphTone).toBe("contrast");
+    expect(patches.at(-1).value.gridConfig.iconToneHex).toBe("#654321");
   });
 
   it("uses toggle event detail so icon and badge off switches hide dependent CPE controls", async () => {

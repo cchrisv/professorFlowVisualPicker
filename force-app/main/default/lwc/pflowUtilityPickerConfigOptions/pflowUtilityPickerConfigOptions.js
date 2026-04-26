@@ -56,15 +56,27 @@ export const LAYOUT_TILES = [
     icon: "panel-left"
   },
   {
-    value: "dropdown",
-    label: "Dropdown",
-    sublabel: "Compact combobox",
+    value: "picklist",
+    label: "Picklist",
+    sublabel: "Card dropdown",
     icon: "list"
   },
   {
     value: "radio",
     label: "Radio",
-    sublabel: "Native radio group",
+    sublabel: "Card radio group",
+    icon: "list-checks"
+  },
+  {
+    value: "columns",
+    label: "Columns",
+    sublabel: "Drag/drop card columns",
+    icon: "columns-2"
+  },
+  {
+    value: "dualListbox",
+    label: "Multi-select",
+    sublabel: "Salesforce picker pattern",
     icon: "list-checks"
   }
 ];
@@ -281,14 +293,8 @@ export const SELECTION_INDICATOR_TILES = [
   {
     value: "frame",
     label: "Frame",
-    sublabel: "Luminous outline",
+    sublabel: "Inset outline",
     icon: "focus"
-  },
-  {
-    value: "spotlight",
-    label: "Spotlight",
-    sublabel: "Radial aura",
-    icon: "lightbulb"
   },
   {
     value: "ribbon",
@@ -306,22 +312,40 @@ export const SELECTION_INDICATOR_TILES = [
 
 export const ELEVATION_TILES = [
   {
+    value: "plain",
+    label: "Plain",
+    sublabel: "No edge",
+    icon: "minus"
+  },
+  {
+    value: "subtle",
+    label: "Soft",
+    sublabel: "Tinted edge",
+    icon: "circle"
+  },
+  {
     value: "outlined",
     label: "Outlined",
-    sublabel: "Border + hover shadow",
-    icon: "snowflake"
+    sublabel: "Crisp edge",
+    icon: "square"
   },
   {
-    value: "flat",
-    label: "Flat",
-    sublabel: "No border, tinted",
-    icon: "circle-question-mark"
-  },
-  {
-    value: "elevated",
-    label: "Elevated",
-    sublabel: "Always-on shadow",
+    value: "raised",
+    label: "Raised",
+    sublabel: "Soft depth",
     icon: "upload"
+  },
+  {
+    value: "floating",
+    label: "Floating",
+    sublabel: "More depth",
+    icon: "layers"
+  },
+  {
+    value: "inset",
+    label: "Inset",
+    sublabel: "Inner edge",
+    icon: "scan"
   }
 ];
 
@@ -483,6 +507,39 @@ export const SURFACE_TILES = [
     label: "Tint",
     sublabel: "Flat soft fill",
     icon: "palette"
+  }
+];
+
+export const ICON_DECOR_TILES = [
+  {
+    value: "none",
+    label: "None",
+    sublabel: "Plain glyph",
+    icon: "ban"
+  },
+  {
+    value: "ring",
+    label: "Ring",
+    sublabel: "Circular outline",
+    icon: "circle"
+  },
+  {
+    value: "halo",
+    label: "Halo",
+    sublabel: "Soft aura",
+    icon: "lightbulb"
+  },
+  {
+    value: "badge",
+    label: "Badge",
+    sublabel: "Filled circle",
+    icon: "award"
+  },
+  {
+    value: "square",
+    label: "Square",
+    sublabel: "Filled square",
+    icon: "square"
   }
 ];
 

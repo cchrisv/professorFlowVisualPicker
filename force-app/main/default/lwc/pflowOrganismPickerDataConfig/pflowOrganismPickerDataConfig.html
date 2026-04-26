@@ -460,6 +460,8 @@
               <div class="pflow-studio__custom-grid">
                 <c-pflow-atom-toggle
                   label="Hide option"
+                  active-label="Hidden"
+                  inactive-label="Visible"
                   checked={row.hidden}
                   data-index={row.index}
                   message-toggle-active="Hidden from preview and runtime"
@@ -689,23 +691,6 @@
                 </span>
               </template>
             </div>
-            <ol class="pflow-overrides-flow" aria-label="Override progress">
-              <template for:each={overrideFlowSteps} for:item="step">
-                <li key={step.key} class={step.className}>
-                  <span class="pflow-overrides-flow__dot" aria-hidden="true">
-                    <c-pflow-atom-icon
-                      name="check"
-                      size="xx-small"
-                      alternative-text=""
-                    ></c-pflow-atom-icon>
-                  </span>
-                  <span class="pflow-overrides-flow__copy">
-                    <strong>{step.label}</strong>
-                    <span>{step.detail}</span>
-                  </span>
-                </li>
-              </template>
-            </ol>
           </section>
           <div class="pflow-studio__overrides-toolbar">
             <div class="slds-form-element pflow-studio__search">
@@ -825,6 +810,8 @@
                       <div class="pflow-studio__overrides-grid">
                         <c-pflow-atom-toggle
                           label="Hide option"
+                          active-label="Hidden"
+                          inactive-label="Visible"
                           checked={row.hidden}
                           data-value={row.value}
                           message-toggle-active="Hidden from preview and runtime"
@@ -984,6 +971,8 @@
                       <div class="pflow-studio__overrides-grid">
                         <c-pflow-atom-toggle
                           label="Hide option"
+                          active-label="Hidden"
+                          inactive-label="Visible"
                           checked={row.hidden}
                           data-value={row.value}
                           message-toggle-active="Hidden from preview and runtime"
@@ -1161,6 +1150,8 @@
                       <div class="pflow-studio__overrides-grid">
                         <c-pflow-atom-toggle
                           label="Hide option"
+                          active-label="Hidden"
+                          inactive-label="Visible"
                           checked={row.hidden}
                           data-value={row.value}
                           message-toggle-active="Hidden from preview and runtime"

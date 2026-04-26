@@ -8,7 +8,8 @@ import {
   normalizeCustom,
   normalizeStringCollection,
   applyOverrides,
-  applyDisplay
+  applyDisplay,
+  MANUAL_INPUT_VALUE
 } from "c/pflowUtilityPickerDataSources";
 
 const SOURCE_PICKLIST = "picklist";
@@ -31,8 +32,8 @@ export default class PflowOrganismDataPicker extends LightningElement {
   @api previewMode = false;
   @api emptyStateMessage = "No options available.";
   @api errorStateMessage = "Could not load options.";
-  // Prepend a "None" tile as the first option (single-select only). Value
-  // is empty string, so picking it clears the selection downstream.
+  // Insert a "None" tile as an option in any selection mode. Its empty value
+  // clears the selection downstream rather than being persisted as a choice.
   @track _sourceType = SOURCE_CUSTOM;
   @track _picklistConfig;
   @track _collectionConfig;
@@ -44,6 +45,10 @@ export default class PflowOrganismDataPicker extends LightningElement {
   _includeNoneOption = false;
   _noneOptionLabel = "--None--";
   _noneOptionPosition = "start";
+  _allowManualInput = false;
+  _manualInputLabel = "Other";
+  _manualInputValue = "";
+  _manualInputSelected = false;
   _enableSearch = false;
 
   @api
@@ -91,6 +96,31 @@ export default class PflowOrganismDataPicker extends LightningElement {
     this._noneOptionPosition = next;
     this.refreshItemsForNoneOptionConfig();
   }
+
+  @api
+  get allowManualInput() {
+    return this._allowManualInput;
+  }
+  set allowManualInput(v) {
+    const next = v === true || v === "true" || v === "";
+    if (this._allowManualInput === next) return;
+    this._allowManualInput = next;
+    this.refreshItemsForNoneOptionConfig();
+  }
+
+  @api
+  get manualInputLabel() {
+    return this._manualInputLabel;
+  }
+  set manualInputLabel(v) {
+    const next = v === undefined || v === null ? "Other" : String(v);
+    if (this._manualInputLabel === next) return;
+    this._manualInputLabel = next;
+    this.refreshItemsForNoneOptionConfig();
+  }
+
+  @api manualInputMinLength = 0;
+  @api manualInputMaxLength;
 
   @api
   get enableSearch() {
@@ -209,10 +239,16 @@ export default class PflowOrganismDataPicker extends LightningElement {
   // Pattern / corner / surface / icon-decor with tone siblings.
   @api pattern = "none";
   @api patternTone = "neutral";
+  @api patternHoverTone = "neutral";
+  @api patternSelectedTone = "brand";
+  @api patternDisabledTone = "neutral";
   @api cornerStyle = "none";
   @api cornerTone = "neutral";
   @api surfaceStyle = "solid";
   @api surfaceTone = "neutral";
+  @api surfaceHoverTone = "neutral";
+  @api surfaceSelectedTone = "brand";
+  @api surfaceDisabledTone = "neutral";
   @api iconDecor = "none";
   @api iconStyle = "filled";
   @api iconShading = "flat";
@@ -221,8 +257,14 @@ export default class PflowOrganismDataPicker extends LightningElement {
   @api iconGlyphToneHex = "";
   @api iconToneHex = "";
   @api patternToneHex = "";
+  @api patternHoverToneHex = "";
+  @api patternSelectedToneHex = "";
+  @api patternDisabledToneHex = "";
   @api cornerToneHex = "";
   @api surfaceToneHex = "";
+  @api surfaceHoverToneHex = "";
+  @api surfaceSelectedToneHex = "";
+  @api surfaceDisabledToneHex = "";
   @api badgeVariantHex = "";
   // undefined → render (default ON); explicit `false` → hide globally.
   @api showIcons;
@@ -424,10 +466,11 @@ export default class PflowOrganismDataPicker extends LightningElement {
   enrichItems(items) {
     const overridden = applyOverrides(items, this._overrides);
     const displayed = applyDisplay(overridden, this._displayConfig);
-    // "None" option — single-select only. Empty value means "no pick",
-    // which Flow treats as null on output. Inserted after sort+limit so
-    // its position is deterministic regardless of display rules.
-    if (this.includeNoneOption && this.selectionMode === "single") {
+    // "None" option. Empty value means "no pick", which Flow treats as null
+    // on output. Inserted after sort+limit so its position is deterministic
+    // regardless of display rules.
+    let next = displayed;
+    if (this.includeNoneOption) {
       const none = {
         id: "__none__",
         label: this.noneOptionLabel || "--None--",
@@ -438,11 +481,26 @@ export default class PflowOrganismDataPicker extends LightningElement {
         value: "",
         disabled: false
       };
-      return this.noneOptionPosition === "end"
-        ? [...displayed, none]
-        : [none, ...displayed];
+      next =
+        this.noneOptionPosition === "end" ? [...next, none] : [none, ...next];
     }
-    return displayed;
+    if (this.allowManualInput) {
+      next = [
+        ...next,
+        {
+          id: MANUAL_INPUT_VALUE,
+          label: this.manualInputLabel || "Other",
+          sublabel: "Enter a custom value",
+          icon: "square-pen",
+          badge: "",
+          helpText: "",
+          value: MANUAL_INPUT_VALUE,
+          disabled: false,
+          manualInput: true
+        }
+      ];
+    }
+    return next;
   }
 
   // Central setter — emits an `itemschange` event with `allValues` and
@@ -515,13 +573,37 @@ export default class PflowOrganismDataPicker extends LightningElement {
 
   // --- Selection ---
   handleSelectionChange(event) {
-    const { values, items } = event.detail;
-    const labels = (items || []).map((i) => String(i?.label ?? ""));
+    const { values, items, manualValue } = event.detail;
+    const selectedValues = Array.isArray(values) ? values : [];
+    const selectedItems = Array.isArray(items) ? items : [];
+    const noneWasPicked = selectedValues.includes("");
+    const manualWasPicked = selectedValues.includes(MANUAL_INPUT_VALUE);
+    this._manualInputSelected = !noneWasPicked && manualWasPicked;
+    if (manualValue !== undefined && manualValue !== null) {
+      this._manualInputValue = String(manualValue);
+    }
+    if (noneWasPicked) {
+      this._manualInputValue = "";
+    }
+    const normalValues = selectedValues.filter(
+      (value) => value !== "" && value !== MANUAL_INPUT_VALUE
+    );
+    const effectiveValues =
+      !noneWasPicked && manualWasPicked && this._manualInputValue
+        ? [...normalValues, this._manualInputValue]
+        : normalValues;
+    const effectiveItems = noneWasPicked
+      ? []
+      : selectedItems.filter((item) => item?.value !== MANUAL_INPUT_VALUE);
+    const labels = effectiveItems.map((i) => String(i?.label ?? ""));
+    const manualLabel = this._manualInputValue || this.manualInputLabel;
     if (this.selectionMode === "single") {
-      this._value = values[0] || "";
+      this._value = manualWasPicked
+        ? this._manualInputValue || ""
+        : effectiveValues[0] || "";
       this._values = [];
     } else {
-      this._values = values;
+      this._values = effectiveValues;
       this._value = "";
     }
     this.dispatchEvent(
@@ -529,10 +611,18 @@ export default class PflowOrganismDataPicker extends LightningElement {
         detail: {
           value: this._value,
           values: this._values,
-          label: labels[0] || "",
-          labels,
-          record: items[0] || null,
-          records: items
+          label: noneWasPicked
+            ? ""
+            : manualWasPicked
+              ? manualLabel
+              : labels[0] || "",
+          labels: noneWasPicked
+            ? []
+            : manualWasPicked && this.selectionMode === "multi"
+              ? [...labels, manualLabel]
+              : labels,
+          record: manualWasPicked ? null : effectiveItems[0] || null,
+          records: effectiveItems
         },
         bubbles: true,
         composed: false
@@ -543,7 +633,12 @@ export default class PflowOrganismDataPicker extends LightningElement {
   get selectedValuesForMolecule() {
     if (this.previewMode && !this._value && this._values.length === 0) {
       const previewValues = (this._items || [])
-        .filter((item) => !item.disabled && item.value !== "")
+        .filter(
+          (item) =>
+            !item.disabled &&
+            item.value !== "" &&
+            item.value !== MANUAL_INPUT_VALUE
+        )
         .map((item) => item.value);
       if (this.selectionMode === "single") {
         return previewValues.length ? [previewValues[0]] : [];
@@ -553,9 +648,43 @@ export default class PflowOrganismDataPicker extends LightningElement {
       return previewValues.slice(0, cap);
     }
     if (this.selectionMode === "single") {
+      if (this.hasActiveManualSelection) {
+        return [MANUAL_INPUT_VALUE];
+      }
       return this._value ? [this._value] : [];
     }
-    return this._values;
+    const values = this._values.filter((value) => !this.isManualValue(value));
+    return this.hasActiveManualSelection ||
+      this._values.some((value) => this.isManualValue(value))
+      ? [...values, MANUAL_INPUT_VALUE]
+      : values;
+  }
+
+  get manualValueForMolecule() {
+    if (this._manualInputValue) return this._manualInputValue;
+    if (this.selectionMode === "single" && this.isManualValue(this._value)) {
+      return this._value;
+    }
+    const manual = this._values.find((value) => this.isManualValue(value));
+    return manual || "";
+  }
+
+  get hasActiveManualSelection() {
+    if (!this._allowManualInput) return false;
+    return (
+      this._manualInputSelected ||
+      this.isManualValue(this._value) ||
+      this._values.some((value) => this.isManualValue(value))
+    );
+  }
+
+  isManualValue(value) {
+    if (!this._allowManualInput || !value) return false;
+    return !this.renderedValueSet.has(String(value));
+  }
+
+  get renderedValueSet() {
+    return new Set((this._items || []).map((item) => String(item.value ?? "")));
   }
 
   // --- State flags ---
@@ -609,6 +738,8 @@ export default class PflowOrganismDataPicker extends LightningElement {
         return { isValid: false, errorMessage: "Please make a selection." };
       }
     }
+    const manualValidation = this.validateManualInput();
+    if (!manualValidation.isValid) return manualValidation;
     if (this.selectionMode === "multi") {
       const min = Number(this.minSelections) || 0;
       if (this._values.length < min) {
@@ -629,6 +760,40 @@ export default class PflowOrganismDataPicker extends LightningElement {
             errorMessage: `Please select no more than ${max} option(s).`
           };
         }
+      }
+    }
+    return { isValid: true };
+  }
+
+  validateManualInput() {
+    if (!this.hasActiveManualSelection && !this.isManualValue(this._value)) {
+      return { isValid: true };
+    }
+    const value = (this.manualValueForMolecule || "").trim();
+    if (!value) {
+      return {
+        isValid: false,
+        errorMessage: "Enter a value for the manual option."
+      };
+    }
+    const min = Number(this.manualInputMinLength || 0);
+    if (Number.isFinite(min) && min > 0 && value.length < min) {
+      return {
+        isValid: false,
+        errorMessage: `Enter at least ${min} character(s).`
+      };
+    }
+    if (
+      this.manualInputMaxLength !== undefined &&
+      this.manualInputMaxLength !== null &&
+      this.manualInputMaxLength !== ""
+    ) {
+      const max = Number(this.manualInputMaxLength);
+      if (Number.isFinite(max) && max > 0 && value.length > max) {
+        return {
+          isValid: false,
+          errorMessage: `Enter no more than ${max} character(s).`
+        };
       }
     }
     return { isValid: true };

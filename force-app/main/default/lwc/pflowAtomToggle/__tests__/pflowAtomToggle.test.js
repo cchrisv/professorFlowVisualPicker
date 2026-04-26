@@ -8,14 +8,8 @@ function mount(props = {}) {
   return el;
 }
 
-function fireInputChange(el, { checked, name }) {
-  const input = el.shadowRoot.querySelector("lightning-input");
-  Object.defineProperty(input, "checked", {
-    value: checked,
-    configurable: true
-  });
-  Object.defineProperty(input, "name", { value: name, configurable: true });
-  input.dispatchEvent(new CustomEvent("change"));
+function choice(el, checked) {
+  return el.shadowRoot.querySelector(`button[data-checked="${checked}"]`);
 }
 
 describe("c-pflow-atom-toggle", () => {
@@ -25,12 +19,14 @@ describe("c-pflow-atom-toggle", () => {
     }
   });
 
-  it("renders a lightning-input toggle with the provided label", () => {
+  it("renders a two-state selector with the provided label", () => {
     const el = mount({ label: "Show Border", name: "showBorder" });
-    const input = el.shadowRoot.querySelector("lightning-input");
-    expect(input).not.toBeNull();
-    expect(input.type).toBe("toggle");
-    expect(input.label).toBe("Show Border");
+    const group = el.shadowRoot.querySelector('[role="radiogroup"]');
+
+    expect(group).not.toBeNull();
+    expect(group.getAttribute("aria-label")).toBe("Show Border");
+    expect(choice(el, "false").textContent).toContain("Off");
+    expect(choice(el, "true").textContent).toContain("On");
   });
 
   describe("isChecked value coercion", () => {
@@ -60,7 +56,7 @@ describe("c-pflow-atom-toggle", () => {
       const handler = jest.fn();
       el.addEventListener("toggle", handler);
 
-      fireInputChange(el, { checked: true, name: "enableThing" });
+      choice(el, "true").click();
 
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler.mock.calls[0][0].detail).toEqual({
@@ -74,7 +70,7 @@ describe("c-pflow-atom-toggle", () => {
       const handler = jest.fn();
       el.addEventListener("toggle", handler);
 
-      fireInputChange(el, { checked: false, name: "enableThing" });
+      choice(el, "false").click();
 
       expect(handler.mock.calls[0][0].detail).toEqual({
         name: "enableThing",
@@ -89,7 +85,7 @@ describe("c-pflow-atom-toggle", () => {
       const handler = jest.fn();
       el.addEventListener("toggle", handler);
 
-      fireInputChange(el, { checked: true, name: "enableThing" });
+      choice(el, "true").click();
 
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler.mock.calls[0][0].detail).toEqual({
@@ -109,29 +105,48 @@ describe("c-pflow-atom-toggle", () => {
       const handler = jest.fn();
       el.addEventListener("toggle", handler);
 
-      fireInputChange(el, { checked: false, name: "enableThing" });
+      choice(el, "false").click();
 
       expect(handler.mock.calls[0][0].detail.newStringValue).toBe("CB_FALSE");
     });
   });
 
-  it("passes fieldLevelHelp through to lightning-input as native field-level-help (tooltip)", () => {
+  it("renders fieldLevelHelp as a help tooltip beside the visible label", () => {
     const help = "Toggle to enable the border";
-    const el = mount({ fieldLevelHelp: help });
+    const el = mount({ label: "Show border", fieldLevelHelp: help });
     return Promise.resolve().then(() => {
-      const input = el.shadowRoot.querySelector("lightning-input");
-      expect(input.fieldLevelHelp).toBe(help);
-      expect(
-        el.shadowRoot.querySelector(".slds-form-element__help")
-      ).toBeNull();
+      const helptext = el.shadowRoot.querySelector("lightning-helptext");
+      expect(helptext).not.toBeNull();
+      expect(helptext.content).toBe(help);
     });
   });
 
   it("respects the disabled prop", () => {
     const el = mount({ disabled: true });
     return Promise.resolve().then(() => {
-      const input = el.shadowRoot.querySelector("lightning-input");
-      expect(input.disabled).toBe(true);
+      expect(choice(el, "false").disabled).toBe(true);
+      expect(choice(el, "true").disabled).toBe(true);
     });
+  });
+
+  it("uses short active and inactive labels when provided", () => {
+    const el = mount({
+      label: "Required",
+      activeLabel: "Required",
+      inactiveLabel: "Optional"
+    });
+
+    expect(choice(el, "false").textContent).toContain("Optional");
+    expect(choice(el, "true").textContent).toContain("Required");
+  });
+
+  it("does not fire duplicate events when the selected option is clicked", () => {
+    const el = mount({ checked: true });
+    const handler = jest.fn();
+    el.addEventListener("toggle", handler);
+
+    choice(el, "true").click();
+
+    expect(handler).not.toHaveBeenCalled();
   });
 });

@@ -9,6 +9,12 @@ const BASE_CONFIG = {
   dataSource: "custom",
   selectionMode: "single",
   custom: { items: [{ label: "One", value: "one" }] },
+  manualInput: {
+    enabled: false,
+    label: "Other",
+    minLength: 0,
+    maxLength: null
+  },
   collection: { fieldMap: { label: "Name" } },
   stringCollection: { sampleValues: "" },
   picklist: { objectApiName: "Account", fieldApiName: "Type" },
@@ -70,6 +76,40 @@ describe("c-pflow-utility-picker-config-validation", () => {
     );
     expect(sectionIssues("data", incompleteConfig).warnings).toContain(
       "1 item missing a label."
+    );
+  });
+
+  it("allows custom mode without static items when manual input is enabled", () => {
+    const config = {
+      ...BASE_CONFIG,
+      dataSource: "custom",
+      custom: { items: [] },
+      manualInput: {
+        enabled: true,
+        label: "Other",
+        minLength: 1,
+        maxLength: 20
+      }
+    };
+
+    expect(sectionIssues("data", config).errors).not.toContain(
+      "Add at least one custom item."
+    );
+  });
+
+  it("blocks invalid manual input character ranges", () => {
+    const config = {
+      ...BASE_CONFIG,
+      manualInput: {
+        enabled: true,
+        label: "Other",
+        minLength: 5,
+        maxLength: 3
+      }
+    };
+
+    expect(sectionIssues("behavior", config).errors).toContain(
+      "Manual input maximum characters must be ≥ minimum characters (and ≥ 1)."
     );
   });
 

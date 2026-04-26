@@ -639,39 +639,6 @@ export default class PflowOrganismPickerDataConfig extends LightningElement {
       }
     ];
   }
-  get overrideFlowSteps() {
-    return [
-      {
-        key: "source",
-        label: "Load values",
-        detail: this.overrideSourceLabel,
-        className: this.overrideTotalCount
-          ? "pflow-overrides-flow__step pflow-overrides-flow__step_done"
-          : "pflow-overrides-flow__step pflow-overrides-flow__step_active"
-      },
-      {
-        key: "focus",
-        label: "Focus rows",
-        detail: this.filteredOverrideCount
-          ? `${this.filteredOverrideCount} visible`
-          : "No rows visible",
-        className: this.hasFilteredOverrideRows
-          ? "pflow-overrides-flow__step pflow-overrides-flow__step_active"
-          : "pflow-overrides-flow__step"
-      },
-      {
-        key: "customize",
-        label: "Apply polish",
-        detail: this.customizedOverrideCount
-          ? `${this.customizedOverrideCount} customized`
-          : "Open a row to edit",
-        className: this.customizedOverrideCount
-          ? "pflow-overrides-flow__step pflow-overrides-flow__step_done"
-          : "pflow-overrides-flow__step"
-      }
-    ];
-  }
-
   handleOverrideSearch(event) {
     this._overrideSearch = event.target.value || "";
   }

@@ -322,12 +322,17 @@ function defaultConfig(overrides = {}) {
       elevation: "outlined",
       pattern: "none",
       patternTone: "neutral",
+      patternHoverTone: "",
+      patternSelectedTone: "brand",
+      patternDisabledTone: "neutral",
       cornerStyle: "none",
       cornerTone: "neutral",
       surfaceStyle: "solid",
       surfaceTone: "neutral",
+      surfaceHoverTone: "",
+      surfaceSelectedTone: "brand",
+      surfaceDisabledTone: "neutral",
       iconDecor: "none",
-      iconShape: "none",
       iconStyle: "filled",
       iconShading: "flat",
       iconTone: "neutral",
@@ -335,8 +340,14 @@ function defaultConfig(overrides = {}) {
       iconGlyphTone: "auto",
       iconGlyphToneHex: "",
       patternToneHex: "",
+      patternHoverToneHex: "",
+      patternSelectedToneHex: "",
+      patternDisabledToneHex: "",
       cornerToneHex: "",
       surfaceToneHex: "",
+      surfaceHoverToneHex: "",
+      surfaceSelectedToneHex: "",
+      surfaceDisabledToneHex: "",
       showIcons: true,
       showBadges: true
     },
@@ -822,8 +833,16 @@ function retrieveAndAssertPersistedConfig() {
     `Saved picker aspect ratio did not persist. Got ${config.gridConfig?.aspectRatio}`
   );
   assert(
-    config.gridConfig?.iconShape === "circle",
-    `Saved picker icon shape did not persist. Got ${config.gridConfig?.iconShape}`
+    config.gridConfig?.iconDecor === "ring",
+    `Saved picker icon decoration did not persist. Got ${config.gridConfig?.iconDecor}`
+  );
+  assert(
+    config.gridConfig?.patternSelectedTone === "brand",
+    `Saved picker selected pattern color did not persist. Got ${config.gridConfig?.patternSelectedTone}`
+  );
+  assert(
+    config.gridConfig?.surfaceHoverTone === "teal",
+    `Saved picker hover surface color did not persist. Got ${config.gridConfig?.surfaceHoverTone}`
   );
 
   return { flowXmlPath, config };
@@ -1070,8 +1089,10 @@ async function exerciseAllConfigChapters(page) {
     ["Layout", "grid"],
     ["Layout", "list"],
     ["Layout", "horizontal"],
-    ["Layout", "dropdown"],
+    ["Layout", "picklist"],
     ["Layout", "radio"],
+    ["Layout", "columns"],
+    ["Layout", "dualListbox"],
     ["Layout", "grid"],
     ["Tile size", "small"],
     ["Tile size", "medium"],
@@ -1101,12 +1122,11 @@ async function exerciseAllConfigChapters(page) {
     ["Surface style", "gradient-radial"],
     ["Surface style", "gradient-diagonal"],
     ["Surface style", "tint"],
-    ["Icon shape", "circle"],
-    ["Icon shape", "square"],
-    ["Icon shape", "squircle"],
-    ["Icon shape", "pill"],
-    ["Icon shape", "hexagon"],
-    ["Icon shape", "diamond"],
+    ["Icon decoration", "none"],
+    ["Icon decoration", "ring"],
+    ["Icon decoration", "halo"],
+    ["Icon decoration", "badge"],
+    ["Icon decoration", "square"],
     ["Icon style", "filled"],
     ["Icon style", "outlined"],
     ["Icon style", "soft"],
@@ -1143,11 +1163,11 @@ async function exerciseAllConfigChapters(page) {
   const appearance = page.locator("c-pflow-organism-picker-appearance-config");
   for (const [label, value] of [
     ["Columns", "3"],
-    ["Pattern color", "brand"],
+    ["Pattern selected color", "brand"],
     ["Corner color", "success"],
-    ["Surface color", "teal"],
+    ["Surface hover color", "teal"],
     ["Icon color", "warning"],
-    ["Glyph color", "contrast"],
+    ["Icon glyph color", "contrast"],
     ["Badge position", "top-right"],
     ["Badge color", "brand"],
     ["Badge shape", "square"]
@@ -1172,7 +1192,7 @@ async function exerciseAllConfigChapters(page) {
   await dispatchCardSelect(page, "Pattern", "none");
   await dispatchCardSelect(page, "Surface style", "solid");
   await dispatchCardSelect(page, "Corner style", "none");
-  await dispatchCardSelect(page, "Icon shape", "circle");
+  await dispatchCardSelect(page, "Icon decoration", "ring");
   await dispatchCardSelect(page, "Selection indicator", "checkmark");
 
   await page.screenshot({ path: screenshots.modal, fullPage: true });

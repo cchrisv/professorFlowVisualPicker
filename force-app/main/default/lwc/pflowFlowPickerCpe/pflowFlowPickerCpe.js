@@ -55,6 +55,12 @@ const DEFAULT_CONFIG = {
   includeNoneOption: false,
   noneOptionLabel: "--None--",
   noneOptionPosition: "start",
+  manualInput: {
+    enabled: false,
+    label: "Other",
+    minLength: 0,
+    maxLength: null
+  },
   overrides: {},
   display: { sortBy: "none", sortDirection: "asc", limit: null },
   gridConfig: {
@@ -82,18 +88,32 @@ const DEFAULT_CONFIG = {
     elevation: "outlined",
     pattern: "none",
     patternTone: "neutral",
+    patternHoverTone: "neutral",
+    patternSelectedTone: "brand",
+    patternDisabledTone: "neutral",
     cornerStyle: "none",
     cornerTone: "neutral",
     surfaceStyle: "solid",
     surfaceTone: "neutral",
+    surfaceHoverTone: "neutral",
+    surfaceSelectedTone: "brand",
+    surfaceDisabledTone: "neutral",
     iconDecor: "none",
     iconStyle: "filled",
     iconShading: "flat",
     iconTone: "neutral",
     iconToneHex: "",
+    iconGlyphTone: "auto",
+    iconGlyphToneHex: "",
     patternToneHex: "",
+    patternHoverToneHex: "",
+    patternSelectedToneHex: "",
+    patternDisabledToneHex: "",
     cornerToneHex: "",
     surfaceToneHex: "",
+    surfaceHoverToneHex: "",
+    surfaceSelectedToneHex: "",
+    surfaceDisabledToneHex: "",
     showIcons: true,
     showBadges: true
   }
@@ -162,7 +182,14 @@ export default class PflowFlowPickerCpe extends LightningElement {
     if (json && json !== this._lastHydratedJson) {
       try {
         const parsed = JSON.parse(json);
-        this._config = { ...DEFAULT_CONFIG, ...parsed };
+        this._config = {
+          ...DEFAULT_CONFIG,
+          ...parsed,
+          manualInput: {
+            ...DEFAULT_CONFIG.manualInput,
+            ...(parsed.manualInput || {})
+          }
+        };
         this._lastHydratedJson = json;
       } catch {
         this._config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -351,6 +378,20 @@ export default class PflowFlowPickerCpe extends LightningElement {
         muted: true
       });
     }
+    if (c.manualInput?.enabled) {
+      const label = (c.manualInput.label || "Other").trim() || "Other";
+      const min = Number(c.manualInput.minLength || 0);
+      const max = c.manualInput.maxLength;
+      let limits = "";
+      if (min > 0 && max) limits = `, ${min}-${max} characters`;
+      else if (min > 0) limits = `, at least ${min} characters`;
+      else if (max) limits = `, up to ${max} characters`;
+      lines.push({
+        key: "manual",
+        text: `Manual "${label}" input${limits}`,
+        muted: true
+      });
+    }
     if (c.enableSearch) {
       lines.push({ key: "search", text: "Search bar enabled", muted: true });
     }
@@ -375,16 +416,13 @@ export default class PflowFlowPickerCpe extends LightningElement {
       grid: "Grid",
       list: "List",
       horizontal: "Horizontal scroll",
-      dropdown: "Dropdown",
-      radio: "Radio group"
+      picklist: "Picklist",
+      dropdown: "Picklist",
+      radio: "Radio cards",
+      columns: "Drag/drop columns",
+      dualListbox: "Multi-select picker"
     };
     const layoutName = layoutNames[c.layout] || "Grid";
-
-    // Native layouts don't expose tile knobs — one clean line.
-    if (c.layout === "dropdown" || c.layout === "radio") {
-      lines.push({ key: "layout", text: `${layoutName} (native control)` });
-      return lines;
-    }
 
     // Primary layout line — includes columns when pinned.
     const cols = Number(g.columns);
@@ -458,11 +496,15 @@ export default class PflowFlowPickerCpe extends LightningElement {
     // color is active.
     const decorParts = [];
     if (g.pattern && g.pattern !== "none") {
-      decorParts.push(`${g.pattern} pattern (${g.patternTone || "neutral"})`);
+      decorParts.push(
+        `${g.pattern} pattern (${g.patternTone || "neutral"}, selected ${g.patternSelectedTone || "brand"})`
+      );
     }
     if (g.surfaceStyle && g.surfaceStyle !== "solid") {
       const nice = g.surfaceStyle.replace("gradient-", "");
-      decorParts.push(`${nice} surface (${g.surfaceTone || "neutral"})`);
+      decorParts.push(
+        `${nice} surface (${g.surfaceTone || "neutral"}, selected ${g.surfaceSelectedTone || "brand"})`
+      );
     }
     if (g.cornerStyle && g.cornerStyle !== "none") {
       decorParts.push(
@@ -562,11 +604,41 @@ export default class PflowFlowPickerCpe extends LightningElement {
         });
     }
     if (this.isCustomMode) {
-      if ((this._config.custom.items?.length || 0) === 0)
+      if (
+        (this._config.custom.items?.length || 0) === 0 &&
+        !this._config.manualInput?.enabled
+      )
         errors.push({
           key: "pickerConfigJson",
           errorString: "Add at least one custom item."
         });
+    }
+    const manual = this._config.manualInput || {};
+    if (manual.enabled) {
+      const min = Number(manual.minLength || 0);
+      const max =
+        manual.maxLength === null || manual.maxLength === undefined
+          ? null
+          : Number(manual.maxLength);
+      if (!manual.label || !String(manual.label).trim()) {
+        errors.push({
+          key: "pickerConfigJson",
+          errorString: "Manual input needs an option label."
+        });
+      }
+      if (!Number.isFinite(min) || min < 0) {
+        errors.push({
+          key: "pickerConfigJson",
+          errorString: "Manual input minimum characters must be 0 or greater."
+        });
+      }
+      if (max !== null && (!Number.isFinite(max) || max < Math.max(min, 1))) {
+        errors.push({
+          key: "pickerConfigJson",
+          errorString:
+            "Manual input maximum characters must be at least the minimum."
+        });
+      }
     }
     return errors;
   }
@@ -600,7 +672,14 @@ export default class PflowFlowPickerCpe extends LightningElement {
 
     if (!result || result.action !== "save") return;
 
-    this._config = { ...DEFAULT_CONFIG, ...result.config };
+    this._config = {
+      ...DEFAULT_CONFIG,
+      ...result.config,
+      manualInput: {
+        ...DEFAULT_CONFIG.manualInput,
+        ...(result.config.manualInput || {})
+      }
+    };
     if (result.sourceRecordsRef !== this._sourceRecordsRef) {
       this._sourceRecordsRef = result.sourceRecordsRef || "";
       this.dispatchCpeChange(

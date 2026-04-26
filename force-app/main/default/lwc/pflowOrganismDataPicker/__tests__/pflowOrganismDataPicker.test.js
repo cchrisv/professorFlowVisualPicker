@@ -1,5 +1,6 @@
 import { createElement } from "lwc";
 import PflowOrganismDataPicker from "c/pflowOrganismDataPicker";
+import { MANUAL_INPUT_VALUE } from "c/pflowUtilityPickerDataSources";
 
 function mount(overrides = {}) {
   const el = createElement("c-pflow-organism-data-picker", {
@@ -187,6 +188,107 @@ describe("c-pflow-organism-data-picker", () => {
 
     group = el.shadowRoot.querySelector("c-pflow-molecule-picker-group");
     expect(group.items.map((item) => item.label)).toEqual(["A", "B", "Skip"]);
+  });
+
+  it("adds the none option in multi-select mode and clears selected values when picked", async () => {
+    const el = mount({
+      selectionMode: "multi",
+      values: ["a"],
+      includeNoneOption: true,
+      noneOptionLabel: "No choice",
+      customConfig: {
+        items: [
+          { label: "A", value: "a" },
+          { label: "B", value: "b" }
+        ]
+      }
+    });
+    const handler = jest.fn();
+    el.addEventListener("valuechange", handler);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const group = el.shadowRoot.querySelector("c-pflow-molecule-picker-group");
+    expect(group.items.map((item) => item.label)).toEqual([
+      "No choice",
+      "A",
+      "B"
+    ]);
+
+    group.dispatchEvent(
+      new CustomEvent("selectionchange", {
+        detail: {
+          values: [""],
+          items: [group.items[0]]
+        },
+        bubbles: true
+      })
+    );
+
+    expect(handler.mock.calls[0][0].detail.values).toEqual([]);
+    expect(handler.mock.calls[0][0].detail.records).toEqual([]);
+  });
+
+  it("returns manual input text through the value output", async () => {
+    const el = mount({
+      allowManualInput: true,
+      manualInputLabel: "Other",
+      manualInputMinLength: 3,
+      customConfig: {
+        items: [{ label: "A", value: "a" }]
+      }
+    });
+    const handler = jest.fn();
+    el.addEventListener("valuechange", handler);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const group = el.shadowRoot.querySelector("c-pflow-molecule-picker-group");
+    expect(group.items.map((item) => item.value)).toEqual([
+      "a",
+      MANUAL_INPUT_VALUE
+    ]);
+
+    group.dispatchEvent(
+      new CustomEvent("selectionchange", {
+        detail: {
+          values: [MANUAL_INPUT_VALUE],
+          items: [group.items[1]],
+          manualValue: "Manual answer"
+        },
+        bubbles: true
+      })
+    );
+
+    expect(handler.mock.calls[0][0].detail.value).toBe("Manual answer");
+    expect(handler.mock.calls[0][0].detail.label).toBe("Manual answer");
+    expect(el.validate().isValid).toBe(true);
+  });
+
+  it("validates manual input character limits", async () => {
+    const el = mount({
+      allowManualInput: true,
+      manualInputMinLength: 3,
+      manualInputMaxLength: 6,
+      customConfig: {
+        items: [{ label: "A", value: "a" }]
+      }
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const group = el.shadowRoot.querySelector("c-pflow-molecule-picker-group");
+    group.dispatchEvent(
+      new CustomEvent("selectionchange", {
+        detail: {
+          values: [MANUAL_INPUT_VALUE],
+          items: [group.items[1]],
+          manualValue: "No"
+        },
+        bubbles: true
+      })
+    );
+    expect(el.validate()).toEqual(expect.objectContaining({ isValid: false }));
   });
 
   it("updates the preview search bar when enableSearch changes after render", async () => {

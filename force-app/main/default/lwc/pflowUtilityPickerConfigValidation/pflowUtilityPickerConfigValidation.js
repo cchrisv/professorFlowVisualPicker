@@ -26,7 +26,9 @@ export function sectionIssues(key, config, refs = {}) {
       if (!c.sobject?.labelField) warnings.push("Set a label field.");
     } else if (dataSource === "custom") {
       const items = c.custom?.items || [];
-      if (items.length === 0) errors.push("Add at least one custom item.");
+      if (items.length === 0 && !c.manualInput?.enabled) {
+        errors.push("Add at least one custom item.");
+      }
       const missingLabel = items.filter((item) => !item.label).length;
       if (missingLabel) {
         warnings.push(
@@ -37,8 +39,30 @@ export function sectionIssues(key, config, refs = {}) {
   } else if (key === "behavior") {
     const min = Number(c.minSelections || 0);
     const max = c.maxSelections == null ? null : Number(c.maxSelections);
+    const manual = c.manualInput || {};
+    const manualMin = Number(manual.minLength || 0);
+    const manualMax =
+      manual.maxLength === null || manual.maxLength === undefined
+        ? null
+        : Number(manual.maxLength);
     if (c.selectionMode === "multi" && max != null && max < Math.max(min, 1)) {
       errors.push("Max selections must be ≥ min selections (and ≥ 1).");
+    }
+    if (manual.enabled) {
+      if (!manual.label || !String(manual.label).trim()) {
+        errors.push("Manual input needs an option label.");
+      }
+      if (!Number.isFinite(manualMin) || manualMin < 0) {
+        errors.push("Manual input minimum characters must be 0 or greater.");
+      }
+      if (
+        manualMax !== null &&
+        (!Number.isFinite(manualMax) || manualMax < Math.max(manualMin, 1))
+      ) {
+        errors.push(
+          "Manual input maximum characters must be ≥ minimum characters (and ≥ 1)."
+        );
+      }
     }
     if (c.selectionMode === "multi" && c.autoAdvance) {
       warnings.push(

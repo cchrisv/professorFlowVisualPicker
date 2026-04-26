@@ -33,6 +33,42 @@ function mount(overrides = {}) {
   if (overrides.badgeShape !== undefined) el.badgeShape = overrides.badgeShape;
   if (overrides.selectionIndicator !== undefined)
     el.selectionIndicator = overrides.selectionIndicator;
+  if (overrides.elevation !== undefined) el.elevation = overrides.elevation;
+  if (overrides.pattern !== undefined) el.pattern = overrides.pattern;
+  if (overrides.patternTone !== undefined)
+    el.patternTone = overrides.patternTone;
+  if (overrides.patternHoverTone !== undefined)
+    el.patternHoverTone = overrides.patternHoverTone;
+  if (overrides.patternSelectedTone !== undefined)
+    el.patternSelectedTone = overrides.patternSelectedTone;
+  if (overrides.patternDisabledTone !== undefined)
+    el.patternDisabledTone = overrides.patternDisabledTone;
+  if (overrides.surfaceStyle !== undefined)
+    el.surfaceStyle = overrides.surfaceStyle;
+  if (overrides.surfaceTone !== undefined)
+    el.surfaceTone = overrides.surfaceTone;
+  if (overrides.surfaceHoverTone !== undefined)
+    el.surfaceHoverTone = overrides.surfaceHoverTone;
+  if (overrides.surfaceSelectedTone !== undefined)
+    el.surfaceSelectedTone = overrides.surfaceSelectedTone;
+  if (overrides.surfaceDisabledTone !== undefined)
+    el.surfaceDisabledTone = overrides.surfaceDisabledTone;
+  if (overrides.patternToneHex !== undefined)
+    el.patternToneHex = overrides.patternToneHex;
+  if (overrides.patternHoverToneHex !== undefined)
+    el.patternHoverToneHex = overrides.patternHoverToneHex;
+  if (overrides.patternSelectedToneHex !== undefined)
+    el.patternSelectedToneHex = overrides.patternSelectedToneHex;
+  if (overrides.patternDisabledToneHex !== undefined)
+    el.patternDisabledToneHex = overrides.patternDisabledToneHex;
+  if (overrides.surfaceToneHex !== undefined)
+    el.surfaceToneHex = overrides.surfaceToneHex;
+  if (overrides.surfaceHoverToneHex !== undefined)
+    el.surfaceHoverToneHex = overrides.surfaceHoverToneHex;
+  if (overrides.surfaceSelectedToneHex !== undefined)
+    el.surfaceSelectedToneHex = overrides.surfaceSelectedToneHex;
+  if (overrides.surfaceDisabledToneHex !== undefined)
+    el.surfaceDisabledToneHex = overrides.surfaceDisabledToneHex;
   if (overrides.iconDecor !== undefined) el.iconDecor = overrides.iconDecor;
   if (overrides.iconTone !== undefined) el.iconTone = overrides.iconTone;
   if (overrides.showIcons !== undefined) el.showIcons = overrides.showIcons;
@@ -220,7 +256,7 @@ describe("c-pflow-atom-visual-pick", () => {
   });
 
   it("applies the expanded selection indicator modifier classes", () => {
-    ["frame", "spotlight", "ribbon", "pulse"].forEach((indicator) => {
+    ["fill", "bar", "frame", "ribbon", "pulse"].forEach((indicator) => {
       const el = mount({ selected: true, selectionIndicator: indicator });
       const wrapper = el.shadowRoot.querySelector(".pflow-vpick");
       expect(wrapper.classList.contains(`pflow-vpick_sel-${indicator}`)).toBe(
@@ -230,10 +266,85 @@ describe("c-pflow-atom-visual-pick", () => {
     });
   });
 
+  it("normalizes removed spotlight selection indicator to checkmark", () => {
+    const el = mount({ selectionIndicator: "spotlight" });
+    const wrapper = el.shadowRoot.querySelector(".pflow-vpick");
+    expect(wrapper.classList.contains("pflow-vpick_sel-checkmark")).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_sel-spotlight")).toBe(false);
+  });
+
   it("normalizes invalid selection indicator values to checkmark", () => {
     const el = mount({ selectionIndicator: "sparkle" });
     const wrapper = el.shadowRoot.querySelector(".pflow-vpick");
     expect(wrapper.classList.contains("pflow-vpick_sel-checkmark")).toBe(true);
+  });
+
+  it("applies redesigned elevation classes and legacy aliases", () => {
+    ["plain", "subtle", "outlined", "raised", "floating", "inset"].forEach(
+      (elevation) => {
+        const el = mount({ elevation });
+        const wrapper = el.shadowRoot.querySelector(".pflow-vpick");
+        expect(
+          wrapper.classList.contains(`pflow-vpick_elev-${elevation}`)
+        ).toBe(true);
+        document.body.removeChild(el);
+      }
+    );
+
+    const flat = mount({ elevation: "flat" });
+    expect(
+      flat.shadowRoot
+        .querySelector(".pflow-vpick")
+        .classList.contains("pflow-vpick_elev-plain")
+    ).toBe(true);
+    document.body.removeChild(flat);
+
+    const elevated = mount({ elevation: "elevated" });
+    expect(
+      elevated.shadowRoot
+        .querySelector(".pflow-vpick")
+        .classList.contains("pflow-vpick_elev-raised")
+    ).toBe(true);
+  });
+
+  it("applies state-specific pattern and surface tone classes", () => {
+    const el = mount({
+      pattern: "dots",
+      patternTone: "custom",
+      patternHoverTone: "warning",
+      patternSelectedTone: "custom",
+      patternDisabledTone: "teal",
+      patternToneHex: "#123456",
+      patternSelectedToneHex: "#abcdef",
+      surfaceStyle: "gradient-radial",
+      surfaceTone: "violet",
+      surfaceHoverTone: "success",
+      surfaceSelectedTone: "custom",
+      surfaceDisabledTone: "error",
+      surfaceSelectedToneHex: "#654321"
+    });
+    const wrapper = el.shadowRoot.querySelector(".pflow-vpick");
+    expect(wrapper.classList.contains("pflow-vpick_pattern-dots")).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_ptone-custom")).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_phtone-warning")).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_pstone-custom")).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_pdtone-teal")).toBe(true);
+    expect(
+      wrapper.classList.contains("pflow-vpick_surface-gradient-radial")
+    ).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_stone-violet")).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_shtone-success")).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_sstone-custom")).toBe(true);
+    expect(wrapper.classList.contains("pflow-vpick_sdtone-error")).toBe(true);
+    expect(wrapper.getAttribute("style")).toContain(
+      "--_ptn-color-custom: #123456"
+    );
+    expect(wrapper.getAttribute("style")).toContain(
+      "--_ptn-selected-color-custom: #abcdef"
+    );
+    expect(wrapper.getAttribute("style")).toContain(
+      "--_srf-selected-color-custom: #654321"
+    );
   });
 
   it("keeps no-decoration Lucide icons visible with the configured icon tone", () => {

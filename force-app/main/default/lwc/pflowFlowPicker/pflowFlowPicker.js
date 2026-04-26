@@ -10,8 +10,11 @@ const VALID_LAYOUTS = new Set([
   "grid",
   "list",
   "horizontal",
+  "picklist",
   "dropdown",
-  "radio"
+  "radio",
+  "columns",
+  "dualListbox"
 ]);
 
 const DEFAULT_CONFIG = {
@@ -33,6 +36,12 @@ const DEFAULT_CONFIG = {
   includeNoneOption: false,
   noneOptionLabel: "--None--",
   noneOptionPosition: "start",
+  manualInput: {
+    enabled: false,
+    label: "Other",
+    minLength: 0,
+    maxLength: null
+  },
   picklist: {},
   collection: {},
   sobject: {},
@@ -64,18 +73,32 @@ const DEFAULT_CONFIG = {
     elevation: "outlined",
     pattern: "none",
     patternTone: "neutral",
+    patternHoverTone: "neutral",
+    patternSelectedTone: "brand",
+    patternDisabledTone: "neutral",
     cornerStyle: "none",
     cornerTone: "neutral",
     surfaceStyle: "solid",
     surfaceTone: "neutral",
+    surfaceHoverTone: "neutral",
+    surfaceSelectedTone: "brand",
+    surfaceDisabledTone: "neutral",
     iconDecor: "none",
     iconStyle: "filled",
     iconShading: "flat",
     iconTone: "neutral",
     iconToneHex: "",
+    iconGlyphTone: "auto",
+    iconGlyphToneHex: "",
     patternToneHex: "",
+    patternHoverToneHex: "",
+    patternSelectedToneHex: "",
+    patternDisabledToneHex: "",
     cornerToneHex: "",
     surfaceToneHex: "",
+    surfaceHoverToneHex: "",
+    surfaceSelectedToneHex: "",
+    surfaceDisabledToneHex: "",
     showIcons: true,
     showBadges: true
   }
@@ -118,7 +141,14 @@ export default class PflowFlowPicker extends LightningElement {
     if (v === this._lastParsedJson) return; // identical payload; skip re-parse
     try {
       const parsed = JSON.parse(v);
-      this._config = { ...DEFAULT_CONFIG, ...parsed };
+      this._config = {
+        ...DEFAULT_CONFIG,
+        ...parsed,
+        manualInput: {
+          ...DEFAULT_CONFIG.manualInput,
+          ...(parsed.manualInput || {})
+        }
+      };
       this._lastParsedJson = v;
     } catch {
       // Parse error — keep the last good _config rather than flashing to
@@ -213,12 +243,13 @@ export default class PflowFlowPicker extends LightningElement {
     return this._config.dataSource;
   }
   get layout() {
-    return VALID_LAYOUTS.has(this._config.layout)
+    const layout = VALID_LAYOUTS.has(this._config.layout)
       ? this._config.layout
       : "grid";
+    return layout === "dropdown" ? "picklist" : layout;
   }
   get selectionMode() {
-    return this._config.selectionMode;
+    return this._config.selectionMode === "multi" ? "multi" : "single";
   }
   get required() {
     return this._config.required;
@@ -319,6 +350,15 @@ export default class PflowFlowPicker extends LightningElement {
   get patternTone() {
     return this.gridCfg.patternTone || "neutral";
   }
+  get patternHoverTone() {
+    return this.gridCfg.patternHoverTone || this.patternTone;
+  }
+  get patternSelectedTone() {
+    return this.gridCfg.patternSelectedTone || "brand";
+  }
+  get patternDisabledTone() {
+    return this.gridCfg.patternDisabledTone || "neutral";
+  }
   get cornerStyle() {
     return this.gridCfg.cornerStyle || "none";
   }
@@ -330,6 +370,15 @@ export default class PflowFlowPicker extends LightningElement {
   }
   get surfaceTone() {
     return this.gridCfg.surfaceTone || "neutral";
+  }
+  get surfaceHoverTone() {
+    return this.gridCfg.surfaceHoverTone || this.surfaceTone;
+  }
+  get surfaceSelectedTone() {
+    return this.gridCfg.surfaceSelectedTone || "brand";
+  }
+  get surfaceDisabledTone() {
+    return this.gridCfg.surfaceDisabledTone || "neutral";
   }
   get iconDecor() {
     return this.gridCfg.iconDecor || "none";
@@ -363,11 +412,29 @@ export default class PflowFlowPicker extends LightningElement {
   get patternToneHex() {
     return this.gridCfg.patternToneHex || "";
   }
+  get patternHoverToneHex() {
+    return this.gridCfg.patternHoverToneHex || "";
+  }
+  get patternSelectedToneHex() {
+    return this.gridCfg.patternSelectedToneHex || "";
+  }
+  get patternDisabledToneHex() {
+    return this.gridCfg.patternDisabledToneHex || "";
+  }
   get cornerToneHex() {
     return this.gridCfg.cornerToneHex || "";
   }
   get surfaceToneHex() {
     return this.gridCfg.surfaceToneHex || "";
+  }
+  get surfaceHoverToneHex() {
+    return this.gridCfg.surfaceHoverToneHex || "";
+  }
+  get surfaceSelectedToneHex() {
+    return this.gridCfg.surfaceSelectedToneHex || "";
+  }
+  get surfaceDisabledToneHex() {
+    return this.gridCfg.surfaceDisabledToneHex || "";
   }
   get badgeVariantHex() {
     return this.badgeCfg?.variantHex || "";
@@ -394,6 +461,27 @@ export default class PflowFlowPicker extends LightningElement {
     // Only 'start' and 'end' are legal; anything else quietly maps to
     // 'start' so old saved configs don't break when this setting is added.
     return this._config.noneOptionPosition === "end" ? "end" : "start";
+  }
+
+  get manualInputConfig() {
+    return this._config.manualInput || DEFAULT_CONFIG.manualInput;
+  }
+  get allowManualInput() {
+    return Boolean(this.manualInputConfig.enabled);
+  }
+  get manualInputLabel() {
+    const label = this.manualInputConfig.label;
+    return label && String(label).trim() ? String(label) : "Other";
+  }
+  get manualInputMinLength() {
+    const min = Number(this.manualInputConfig.minLength || 0);
+    return Number.isFinite(min) && min > 0 ? min : 0;
+  }
+  get manualInputMaxLength() {
+    const max = this.manualInputConfig.maxLength;
+    if (max === null || max === undefined || max === "") return undefined;
+    const n = Number(max);
+    return Number.isFinite(n) && n > 0 ? n : undefined;
   }
 
   // Margin + padding — empty string means "no override"; the molecule

@@ -11,8 +11,12 @@ import {
   COLUMN_CHIPS,
   CORNER_TILES,
   ELEVATION_TILES,
+  GLYPH_TONE_SWATCHES,
   GRID_SLIDER_RANGES,
+  ICON_DECOR_TILES,
+  ICON_SHADING_TILES,
   ICON_SIZE_TILES,
+  ICON_STYLE_TILES,
   LAYOUT_TILES,
   PADDING_TILES,
   PATTERN_TILES,
@@ -49,12 +53,10 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
   }
 
   get _currentLayout() {
-    return this._config.layout || "grid";
+    return this.normalizeLayout(this._config.layout || "grid");
   }
   get isTileLayout() {
-    return (
-      this._currentLayout !== "dropdown" && this._currentLayout !== "radio"
-    );
+    return true;
   }
   get showTileSize() {
     return this.isTileLayout;
@@ -74,11 +76,21 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
   }
   get showGapHorizontal() {
     return (
-      this._currentLayout === "grid" || this._currentLayout === "horizontal"
+      this._currentLayout === "grid" ||
+      this._currentLayout === "horizontal" ||
+      this._currentLayout === "columns" ||
+      this._currentLayout === "dualListbox"
     );
   }
   get showGapVertical() {
-    return this._currentLayout === "grid" || this._currentLayout === "list";
+    return (
+      this._currentLayout === "grid" ||
+      this._currentLayout === "list" ||
+      this._currentLayout === "picklist" ||
+      this._currentLayout === "radio" ||
+      this._currentLayout === "columns" ||
+      this._currentLayout === "dualListbox"
+    );
   }
   get showGapCard() {
     return this.showGapHorizontal || this.showGapVertical;
@@ -97,17 +109,15 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
   }
 
   get layoutTiles() {
-    const active = this._config.layout || "grid";
-    const multi = this._config.selectionMode === "multi";
+    const active = this._currentLayout;
     return LAYOUT_TILES.map((tile) => {
-      const singleOnly = tile.value === "dropdown" || tile.value === "radio";
-      const disabled = multi && singleOnly;
+      const normalizedValue = this.normalizeLayout(tile.value);
       return {
         ...tile,
         id: tile.value,
-        sublabel: disabled ? "Single-select only" : tile.sublabel,
-        _selected: tile.value === active,
-        _disabled: disabled
+        sublabel: tile.sublabel,
+        _selected: normalizedValue === active,
+        _disabled: false
       };
     });
   }
@@ -138,18 +148,27 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
   get selectionIndicatorTiles() {
     return this.selectedTiles(
       SELECTION_INDICATOR_TILES,
-      this.gridConfig.selectionIndicator || "checkmark"
+      this.normalizeSelectionIndicator(
+        this.gridConfig.selectionIndicator || "checkmark"
+      )
     );
   }
   get elevationTiles() {
     return this.selectedTiles(
       ELEVATION_TILES,
-      this.gridConfig.elevation || "outlined"
+      this.normalizeElevation(this.gridConfig.elevation || "outlined")
     );
   }
 
   get patternTiles() {
     return this.selectedTiles(PATTERN_TILES, this.gridConfig.pattern || "none");
+  }
+  get patternToneRows() {
+    return this.buildStateToneRows(
+      "pattern",
+      "Pattern",
+      (this.gridConfig.pattern || "none") !== "none"
+    );
   }
   get patternToneChips() {
     return this.buildToneChips(
@@ -189,11 +208,11 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
       this.gridConfig.surfaceStyle || "solid"
     );
   }
+  get surfaceToneRows() {
+    return this.buildStateToneRows("surface", "Surface", true);
+  }
   get surfaceToneChips() {
-    return this.buildToneChips(
-      this.gridConfig.surfaceTone || "neutral",
-      (this.gridConfig.surfaceStyle || "solid") !== "solid"
-    );
+    return this.buildToneChips(this.gridConfig.surfaceTone || "neutral", true);
   }
   get surfaceToneIsCustom() {
     return this.gridConfig.surfaceTone === "custom";
@@ -209,14 +228,12 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
     return this.gridConfig.showBadges !== false;
   }
   get iconSubchapterClass() {
-    return this.showIconsValue
-      ? "pflow-studio__subchapter"
-      : "pflow-studio__subchapter pflow-studio__subchapter_off";
+    const base = "pflow-studio__subchapter pflow-studio__subchapter_icon";
+    return this.showIconsValue ? base : `${base} pflow-studio__subchapter_off`;
   }
   get badgeSubchapterClass() {
-    return this.showBadgesValue
-      ? "pflow-studio__subchapter"
-      : "pflow-studio__subchapter pflow-studio__subchapter_off";
+    const base = "pflow-studio__subchapter pflow-studio__subchapter_badge";
+    return this.showBadgesValue ? base : `${base} pflow-studio__subchapter_off`;
   }
 
   get iconSizeTiles() {
@@ -233,6 +250,74 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
       this.gridConfig.iconSize || "auto",
       this.showIconsValue
     );
+  }
+
+  get iconDecorTiles() {
+    return this.selectedTiles(
+      ICON_DECOR_TILES,
+      this.gridConfig.iconDecor || "none",
+      this.showIconsValue
+    );
+  }
+  get hasIconDecor() {
+    return (this.gridConfig.iconDecor || "none") !== "none";
+  }
+  get showIconTreatment() {
+    return this.showIconsValue && this.hasIconDecor;
+  }
+  get iconStyleTiles() {
+    return this.selectedTiles(
+      ICON_STYLE_TILES,
+      this.gridConfig.iconStyle || "filled",
+      this.showIconTreatment
+    );
+  }
+  get iconShadingTiles() {
+    return this.selectedTiles(
+      ICON_SHADING_TILES,
+      this.gridConfig.iconShading || "flat",
+      this.showIconTreatment &&
+        (this.gridConfig.iconStyle || "filled") === "filled"
+    );
+  }
+  get showIconShading() {
+    return (
+      this.showIconTreatment &&
+      (this.gridConfig.iconStyle || "filled") === "filled"
+    );
+  }
+  get iconToneChips() {
+    return this.buildToneChips(
+      this.gridConfig.iconTone || "neutral",
+      this.showIconTreatment
+    );
+  }
+  get iconToneIsCustom() {
+    return this.gridConfig.iconTone === "custom";
+  }
+  get iconToneHexValue() {
+    return this.gridConfig.iconToneHex || "";
+  }
+  get iconGlyphToneChips() {
+    return GLYPH_TONE_SWATCHES.map((tone) => ({
+      ...tone,
+      className: this.toneChipClass(
+        tone.value,
+        this.gridConfig.iconGlyphTone || "auto",
+        this.showIconTreatment
+      ),
+      ariaPressed: String(
+        tone.value === (this.gridConfig.iconGlyphTone || "auto")
+      ),
+      dotClassName: `pflow-tone-chip__dot pflow-tone-chip__dot_${tone.value}`,
+      disabled: !this.showIconTreatment
+    }));
+  }
+  get iconGlyphToneIsCustom() {
+    return this.gridConfig.iconGlyphTone === "custom";
+  }
+  get iconGlyphToneHexValue() {
+    return this.gridConfig.iconGlyphToneHex || "";
   }
 
   get showBadgeGroupCards() {
@@ -335,15 +420,28 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
   }
 
   handleLayoutTileChange(event) {
-    const value = event.detail?.value || "grid";
-    if (
-      this._config.selectionMode === "multi" &&
-      (value === "dropdown" || value === "radio")
-    ) {
-      this._config = { ...this._config, layout: "grid" };
-      return;
-    }
-    this._config = { ...this._config, layout: value };
+    const value = this.normalizeLayout(event.detail?.value || "grid");
+    this._config = {
+      ...this._config,
+      layout: value
+    };
+  }
+  normalizeLayout(value) {
+    if (value === "dropdown") return "picklist";
+    return value;
+  }
+  normalizeSelectionIndicator(value) {
+    if (value === "spotlight") return "checkmark";
+    return SELECTION_INDICATOR_TILES.some((tile) => tile.value === value)
+      ? value
+      : "checkmark";
+  }
+  normalizeElevation(value) {
+    const normalized =
+      value === "flat" ? "plain" : value === "elevated" ? "raised" : value;
+    return ELEVATION_TILES.some((tile) => tile.value === normalized)
+      ? normalized
+      : "outlined";
   }
   handleSizeTileChange(event) {
     const value = event.detail?.value || "medium";
@@ -358,10 +456,16 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
     this.patchGrid({ columns: raw === "" ? null : Number(raw) });
   }
   handleSelectionIndicatorChange(event) {
-    this.patchGrid({ selectionIndicator: event.detail?.value || "checkmark" });
+    this.patchGrid({
+      selectionIndicator: this.normalizeSelectionIndicator(
+        event.detail?.value || "checkmark"
+      )
+    });
   }
   handleElevationChange(event) {
-    this.patchGrid({ elevation: event.detail?.value || "outlined" });
+    this.patchGrid({
+      elevation: this.normalizeElevation(event.detail?.value || "outlined")
+    });
   }
   handlePatternChange(event) {
     this.patchGrid({ pattern: event.detail?.value || "none" });
@@ -374,6 +478,15 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
   }
   handleIconSizeChange(event) {
     this.patchGrid({ iconSize: event.detail?.value || "auto" });
+  }
+  handleIconDecorChange(event) {
+    this.patchGrid({ iconDecor: event.detail?.value || "none" });
+  }
+  handleIconStyleChange(event) {
+    this.patchGrid({ iconStyle: event.detail?.value || "filled" });
+  }
+  handleIconShadingChange(event) {
+    this.patchGrid({ iconShading: event.detail?.value || "flat" });
   }
   handleGapHorizontalToken(event) {
     this.patchGrid({ gapH: event.detail?.value ?? "7" });
@@ -393,20 +506,44 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
   handlePatternToneChange(event) {
     this.patchDatasetGrid(event, "patternTone");
   }
+  handlePatternStateToneChange(event) {
+    this.patchStateTone(event);
+  }
   handleCornerToneChange(event) {
     this.patchDatasetGrid(event, "cornerTone");
   }
   handleSurfaceToneChange(event) {
     this.patchDatasetGrid(event, "surfaceTone");
   }
+  handleSurfaceStateToneChange(event) {
+    this.patchStateTone(event);
+  }
+  handleIconToneChange(event) {
+    this.patchDatasetGrid(event, "iconTone");
+  }
+  handleIconGlyphToneChange(event) {
+    this.patchDatasetGrid(event, "iconGlyphTone");
+  }
   handlePatternToneHexChange(event) {
     this.patchGrid({ patternToneHex: event.target?.value || "" });
+  }
+  handlePatternStateToneHexChange(event) {
+    this.patchStateToneHex(event);
   }
   handleCornerToneHexChange(event) {
     this.patchGrid({ cornerToneHex: event.target?.value || "" });
   }
   handleSurfaceToneHexChange(event) {
     this.patchGrid({ surfaceToneHex: event.target?.value || "" });
+  }
+  handleSurfaceStateToneHexChange(event) {
+    this.patchStateToneHex(event);
+  }
+  handleIconToneHexChange(event) {
+    this.patchGrid({ iconToneHex: event.target?.value || "" });
+  }
+  handleIconGlyphToneHexChange(event) {
+    this.patchGrid({ iconGlyphToneHex: event.target?.value || "" });
   }
   handleShowIconsToggle(event) {
     this.patchGrid({
@@ -475,6 +612,53 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
       disabled: !enabled
     }));
   }
+  buildStateToneRows(axis, axisLabel, enabled) {
+    const stateDefs = [
+      {
+        key: "normal",
+        label: "Normal",
+        toneKey: `${axis}Tone`,
+        hexKey: `${axis}ToneHex`,
+        fallback: "neutral"
+      },
+      {
+        key: "hover",
+        label: "Hover",
+        toneKey: `${axis}HoverTone`,
+        hexKey: `${axis}HoverToneHex`,
+        fallback: this.gridConfig[`${axis}Tone`] || "neutral"
+      },
+      {
+        key: "selected",
+        label: "Selected",
+        toneKey: `${axis}SelectedTone`,
+        hexKey: `${axis}SelectedToneHex`,
+        fallback: "brand"
+      },
+      {
+        key: "disabled",
+        label: "Disabled",
+        toneKey: `${axis}DisabledTone`,
+        hexKey: `${axis}DisabledToneHex`,
+        fallback: "neutral"
+      }
+    ];
+    return stateDefs.map((def) => {
+      const active = this.gridConfig[def.toneKey] || def.fallback;
+      const stateLabel = def.label.toLowerCase();
+      return {
+        ...def,
+        rowKey: `${axis}-${def.key}`,
+        ariaLabel: `${axisLabel} ${stateLabel} color`,
+        chips: this.buildToneChips(active, enabled),
+        isCustom: enabled && active === "custom",
+        hexValue: this.gridConfig[def.hexKey] || "",
+        hexId: `${axis}-${def.key}-tone-hex`,
+        colorAriaLabel: `Pick ${axisLabel.toLowerCase()} ${stateLabel} color`,
+        hexAriaLabel: `${axisLabel} ${stateLabel} hex color value`
+      };
+    });
+  }
   toneChipClass(value, active, enabled) {
     return [
       "pflow-tone-chip",
@@ -494,6 +678,16 @@ export default class PflowOrganismPickerAppearanceConfig extends LightningElemen
   patchDatasetGrid(event, key) {
     const value = event.currentTarget?.dataset?.value;
     if (value) this.patchGrid({ [key]: value });
+  }
+  patchStateTone(event) {
+    const key = event.currentTarget?.dataset?.toneKey;
+    const value = event.currentTarget?.dataset?.value;
+    if (key && value) this.patchGrid({ [key]: value });
+  }
+  patchStateToneHex(event) {
+    const key =
+      event.currentTarget?.dataset?.hexKey || event.target?.dataset?.hexKey;
+    if (key) this.patchGrid({ [key]: event.target?.value || "" });
   }
   patchDatasetBadge(event, key) {
     const value = event.currentTarget?.dataset?.value;

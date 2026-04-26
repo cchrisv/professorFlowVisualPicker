@@ -103,8 +103,11 @@ export default class PflowOrganismPickerConfigPreview extends LightningElement {
       grid: "Grid",
       list: "List",
       horizontal: "Horizontal",
-      dropdown: "Dropdown",
-      radio: "Radio"
+      picklist: "Picklist",
+      dropdown: "Picklist",
+      radio: "Radio",
+      columns: "Columns",
+      dualListbox: "Multi-select"
     };
     return labels[this.c.layout] || "Grid";
   }
@@ -140,6 +143,22 @@ export default class PflowOrganismPickerConfigPreview extends LightningElement {
   }
   get noneOptionPositionValue() {
     return this.c.noneOptionPosition || "start";
+  }
+  get manualInputConfig() {
+    return this.c.manualInput || {};
+  }
+  get manualInputValue() {
+    return Boolean(this.manualInputConfig.enabled);
+  }
+  get manualInputLabelValue() {
+    return this.manualInputConfig.label || "Other";
+  }
+  get manualInputMinLengthValue() {
+    return this.manualInputConfig.minLength || 0;
+  }
+  get manualInputMaxLengthValue() {
+    const max = this.manualInputConfig.maxLength;
+    return max === null || max === undefined || max === "" ? undefined : max;
   }
   get orgGridMinWidth() {
     return this.gridConfig.minWidth || "16rem";
@@ -181,6 +200,15 @@ export default class PflowOrganismPickerConfigPreview extends LightningElement {
   get orgPatternTone() {
     return this.gridConfig.patternTone || "neutral";
   }
+  get orgPatternHoverTone() {
+    return this.gridConfig.patternHoverTone || this.orgPatternTone;
+  }
+  get orgPatternSelectedTone() {
+    return this.gridConfig.patternSelectedTone || "brand";
+  }
+  get orgPatternDisabledTone() {
+    return this.gridConfig.patternDisabledTone || "neutral";
+  }
   get orgCornerStyle() {
     return this.gridConfig.cornerStyle || "none";
   }
@@ -192,6 +220,15 @@ export default class PflowOrganismPickerConfigPreview extends LightningElement {
   }
   get orgSurfaceTone() {
     return this.gridConfig.surfaceTone || "neutral";
+  }
+  get orgSurfaceHoverTone() {
+    return this.gridConfig.surfaceHoverTone || this.orgSurfaceTone;
+  }
+  get orgSurfaceSelectedTone() {
+    return this.gridConfig.surfaceSelectedTone || "brand";
+  }
+  get orgSurfaceDisabledTone() {
+    return this.gridConfig.surfaceDisabledTone || "neutral";
   }
   get orgIconDecor() {
     return this.gridConfig.iconDecor || "none";
@@ -221,11 +258,29 @@ export default class PflowOrganismPickerConfigPreview extends LightningElement {
   get orgPatternToneHex() {
     return this.gridConfig.patternToneHex || "";
   }
+  get orgPatternHoverToneHex() {
+    return this.gridConfig.patternHoverToneHex || "";
+  }
+  get orgPatternSelectedToneHex() {
+    return this.gridConfig.patternSelectedToneHex || "";
+  }
+  get orgPatternDisabledToneHex() {
+    return this.gridConfig.patternDisabledToneHex || "";
+  }
   get orgCornerToneHex() {
     return this.gridConfig.cornerToneHex || "";
   }
   get orgSurfaceToneHex() {
     return this.gridConfig.surfaceToneHex || "";
+  }
+  get orgSurfaceHoverToneHex() {
+    return this.gridConfig.surfaceHoverToneHex || "";
+  }
+  get orgSurfaceSelectedToneHex() {
+    return this.gridConfig.surfaceSelectedToneHex || "";
+  }
+  get orgSurfaceDisabledToneHex() {
+    return this.gridConfig.surfaceDisabledToneHex || "";
   }
   get orgBadgeVariantHex() {
     return this.badgeConfig.variantHex || "";

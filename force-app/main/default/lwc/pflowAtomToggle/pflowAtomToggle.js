@@ -13,14 +13,14 @@ const WIRE_BOOLEAN = "boolean";
 const WIRE_CB_SENTINEL = "cb-sentinel";
 
 /**
- * Reusable toggle switch atom.
+ * Reusable two-state setting atom.
  *
  * Default emits a plain `{ name, checked }` detail on a `toggle` event. Set
- * `wireFormat="cb-sentinel"` to emit the legacy Flow Builder CPE protocol
- * shape (`{ id, newValue, newValueDataType, newStringValue }` with
- * CB_TRUE/CB_FALSE sentinels) instead.
+ * `wireFormat="cb-sentinel"` to emit the legacy Flow Builder CPE protocol shape
+ * (`{ id, newValue, newValueDataType, newStringValue }` with CB_TRUE/CB_FALSE
+ * sentinels) instead.
  *
- * @slot none — renders only a lightning-input toggle.
+ * @slot none — renders only the setting selector.
  * @fires toggle — detail shape depends on `wireFormat`.
  */
 export default class PflowAtomToggle extends LightningElement {
@@ -40,6 +40,10 @@ export default class PflowAtomToggle extends LightningElement {
   @api messageToggleActive = "";
   /** @type {string} Text shown next to the switch when off. Empty by default. */
   @api messageToggleInactive = "";
+  /** @type {string} Short label for the active option. */
+  @api activeLabel = "";
+  /** @type {string} Short label for the inactive option. */
+  @api inactiveLabel = "";
   /** @type {'boolean'|'cb-sentinel'} Event detail shape. Default 'boolean'. */
   @api wireFormat = WIRE_BOOLEAN;
 
@@ -56,11 +60,73 @@ export default class PflowAtomToggle extends LightningElement {
     );
   }
 
-  cbClass = "slds-p-top_xxx-small";
+  get rootClass() {
+    const classes = ["pflow-toggle"];
+    if (this.variant === "label-hidden") {
+      classes.push("pflow-toggle_label-hidden");
+    }
+    if (this.disabled) {
+      classes.push("pflow-toggle_disabled");
+    }
+    return classes.join(" ");
+  }
+
+  get hasVisibleLabel() {
+    return Boolean(this.label) && this.variant !== "label-hidden";
+  }
+
+  get computedAriaLabel() {
+    return this.label || this.name || "Toggle setting";
+  }
+
+  get activeText() {
+    return this.activeLabel || this.messageToggleActive || "On";
+  }
+
+  get inactiveText() {
+    return this.inactiveLabel || this.messageToggleInactive || "Off";
+  }
+
+  get activeOptionClass() {
+    return this.optionClass(true);
+  }
+
+  get inactiveOptionClass() {
+    return this.optionClass(false);
+  }
+
+  get activeAriaChecked() {
+    return this.isChecked ? "true" : "false";
+  }
+
+  get inactiveAriaChecked() {
+    return this.isChecked ? "false" : "true";
+  }
+
+  optionClass(optionValue) {
+    const classes = [
+      "pflow-toggle__option",
+      optionValue ? "pflow-toggle__option_on" : "pflow-toggle__option_off"
+    ];
+    if (this.isChecked === optionValue) {
+      classes.push("pflow-toggle__option_active");
+    }
+    return classes.join(" ");
+  }
+
+  handleChoiceClick(event) {
+    const isOn = event.currentTarget.dataset.checked === "true";
+    if (this.disabled || isOn === this.isChecked) {
+      return;
+    }
+    this.dispatchToggle(this.name, isOn);
+  }
 
   handleToggle(event) {
-    const isOn = event.target.checked;
-    const name = event.target.name;
+    this.dispatchToggle(event.target.name, event.target.checked);
+  }
+
+  dispatchToggle(name, isOn) {
     const detail =
       this.wireFormat === WIRE_CB_SENTINEL
         ? {

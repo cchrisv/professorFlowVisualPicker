@@ -25,6 +25,52 @@
   --_vpick-focus: var(--slds-g-color-brand-base-60, #0b5cab);
   --_vpick-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --_vpick-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --_ptn-color-normal: var(
+    --_ptn-color,
+    var(--slds-g-color-neutral-base-40, #5c5c5c)
+  );
+  --_ptn-color-hover: var(--_ptn-color-normal);
+  --_ptn-color-selected: var(--slds-g-color-brand-base-50, #0176d3);
+  --_ptn-color-disabled: var(--slds-g-color-neutral-base-60, #9a9a9a);
+  --_ptn-state-color: var(--_ptn-color-normal);
+  --_srf-color-normal: var(
+    --_srf-color,
+    var(--slds-g-color-neutral-base-50, #747474)
+  );
+  --_srf-color-hover: var(--_srf-color-normal);
+  --_srf-color-selected: var(--slds-g-color-brand-base-50, #0176d3);
+  --_srf-color-disabled: var(--slds-g-color-neutral-base-60, #9a9a9a);
+  --_srf-state-color: var(--_srf-color-normal);
+  --_srf-bg-base: var(--slds-g-color-neutral-base-100, #ffffff);
+  --_srf-solid-bg-normal: color-mix(
+    in oklab,
+    var(--_srf-color-normal) 3%,
+    var(--_srf-bg-base)
+  );
+  --_srf-solid-bg-hover: color-mix(
+    in oklab,
+    var(--_srf-color-hover) 6%,
+    var(--_srf-bg-base)
+  );
+  --_srf-solid-bg-selected: color-mix(
+    in oklab,
+    var(--_srf-color-selected) 12%,
+    var(--_srf-bg-base)
+  );
+  --_srf-solid-bg-disabled: color-mix(
+    in oklab,
+    var(--_srf-color-disabled) 4%,
+    var(--_srf-bg-base)
+  );
+  --_srf-solid-bg-current: var(--_srf-solid-bg-normal);
+  --_vpick-transparent-shadow: 0 0 0 0 transparent;
+  --_vpick-elev-shadow-rest: var(--_vpick-transparent-shadow);
+  --_vpick-elev-shadow-hover: var(--_vpick-transparent-shadow);
+  --_vpick-elev-shadow-current: var(--_vpick-elev-shadow-rest);
+  --_vpick-state-shadow: var(--_vpick-transparent-shadow);
+  --_vpick-indicator-shadow: var(--_vpick-transparent-shadow);
+  --_vpick-hover-transform: none;
+  --_vpick-transform-current: none;
 
   position: relative;
   display: block;
@@ -104,12 +150,16 @@
   padding-right: var(--_vpick-pad-r);
   padding-bottom: var(--_vpick-pad-b);
   padding-left: var(--_vpick-pad-l);
-  background: var(--_vpick-surface);
+  background: var(--_srf-solid-bg-current, var(--_vpick-surface));
   border: var(--slds-g-sizing-border-1, 1px) solid var(--_vpick-border);
   border-radius: var(--_vpick-radius);
   color: var(--_vpick-ink);
   text-align: center;
   box-sizing: border-box;
+  box-shadow:
+    var(--_vpick-indicator-shadow), var(--_vpick-state-shadow),
+    var(--_vpick-elev-shadow-current);
+  transform: var(--_vpick-transform-current);
   transition:
     border-color 160ms var(--_vpick-ease),
     background-color 160ms var(--_vpick-ease),
@@ -349,9 +399,10 @@
   right: var(--slds-g-spacing-2, 0.5rem);
 }
 
-/* When the tile is selected, the check mark lives at top-right. A top-right
-   badge would collide — fade it out so the check reads cleanly. */
-.pflow-vpick_selected .pflow-vpick__badge_pos-top-right {
+/* When the checkmark indicator is selected, the floating check lives at
+   top-right. A top-right badge would collide, so fade only in that mode. */
+.pflow-vpick_sel-checkmark.pflow-vpick_selected
+  .pflow-vpick__badge_pos-top-right {
   opacity: 0;
   transform: scale(0.85);
   pointer-events: none;
@@ -433,7 +484,7 @@
   --slds-c-icon-color-foreground: #ffffff;
 }
 
-.pflow-vpick_selected .pflow-vpick__check {
+.pflow-vpick_sel-checkmark.pflow-vpick_selected .pflow-vpick__check {
   opacity: 1;
   transform: scale(1);
 }
@@ -444,19 +495,24 @@
 
 .pflow-vpick:not(.pflow-vpick_disabled):hover .pflow-vpick__figure {
   border-color: var(--_vpick-border-hover);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  transform: translateY(-1px);
+}
+
+.pflow-vpick:not(.pflow-vpick_disabled):hover {
+  --_vpick-elev-shadow-current: var(--_vpick-elev-shadow-hover);
+  --_vpick-transform-current: var(--_vpick-hover-transform);
+  --_ptn-state-color: var(--_ptn-color-hover);
+  --_srf-state-color: var(--_srf-color-hover);
+  --_srf-solid-bg-current: var(--_srf-solid-bg-hover);
+}
+
+.pflow-vpick_selected {
+  --_ptn-state-color: var(--_ptn-color-selected);
+  --_srf-state-color: var(--_srf-color-selected);
+  --_srf-solid-bg-current: var(--_srf-solid-bg-selected);
 }
 
 .pflow-vpick_selected .pflow-vpick__figure {
   border-color: var(--_vpick-border-selected);
-  border-width: var(--slds-g-sizing-border-2, 2px);
-  background: var(--_vpick-surface-selected);
-  box-shadow: 0 4px 16px rgba(1, 94, 170, 0.12);
-}
-
-.pflow-vpick_selected:hover .pflow-vpick__figure {
-  box-shadow: 0 6px 20px rgba(1, 94, 170, 0.18);
 }
 
 .pflow-vpick__input:focus-visible + .pflow-vpick__label .pflow-vpick__figure {
@@ -465,7 +521,10 @@
 }
 
 .pflow-vpick_disabled {
-  opacity: 0.55;
+  --_ptn-state-color: var(--_ptn-color-disabled);
+  --_srf-state-color: var(--_srf-color-disabled);
+  --_srf-solid-bg-current: var(--_srf-solid-bg-disabled);
+  opacity: 0.62;
   pointer-events: none;
 }
 
@@ -473,38 +532,92 @@
    MODIFIER · Elevation (card depth style)
    ============================================================================= */
 
-/* Flat — no border, subtle surface-alt fill. Good for dense forms where
-   the picker needs to recede visually. */
-.pflow-vpick_elev-flat .pflow-vpick__figure {
+/* Elevation now contributes only neutral depth/edge treatment. Selection
+   indicators add selection affordances separately so the styles compose. */
+.pflow-vpick_elev-plain .pflow-vpick__figure {
+  --_srf-bg-base: var(--slds-g-color-neutral-base-100, #ffffff);
   border-color: transparent;
-  background: var(--slds-g-color-neutral-base-95, #f3f3f3);
-}
-.pflow-vpick_elev-flat:not(.pflow-vpick_disabled):hover .pflow-vpick__figure {
-  background: var(--slds-g-color-neutral-base-90, #ececec);
-  border-color: var(--_vpick-border);
-  box-shadow: none;
-  transform: translateY(-1px);
-}
-.pflow-vpick_elev-flat.pflow-vpick_selected .pflow-vpick__figure {
-  background: var(--_vpick-surface-selected);
 }
 
-/* Elevated — permanent drop shadow so the tile reads as a physical card. */
-.pflow-vpick_elev-elevated .pflow-vpick__figure {
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.04);
+.pflow-vpick_elev-plain:not(.pflow-vpick_disabled):hover .pflow-vpick__figure {
+  border-color: transparent;
 }
-.pflow-vpick_elev-elevated:not(.pflow-vpick_disabled):hover
-  .pflow-vpick__figure {
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.12),
-    0 2px 6px rgba(0, 0, 0, 0.06);
+
+.pflow-vpick_elev-subtle .pflow-vpick__figure {
+  --_srf-bg-base: var(--slds-g-color-neutral-base-95, #f3f3f3);
+  border-color: color-mix(
+    in oklab,
+    var(--slds-g-color-neutral-base-50, #747474) 18%,
+    transparent
+  );
 }
-.pflow-vpick_elev-elevated.pflow-vpick_selected .pflow-vpick__figure {
-  box-shadow:
-    0 6px 20px rgba(1, 94, 170, 0.2),
-    0 2px 6px rgba(1, 94, 170, 0.08);
+
+.pflow-vpick_elev-outlined {
+  --_vpick-elev-shadow-hover: 0 var(--slds-g-sizing-border-2, 2px)
+    var(--slds-g-spacing-3, 0.75rem)
+    color-mix(
+      in oklab,
+      var(--slds-g-color-neutral-base-10, #181818) 8%,
+      transparent
+    );
+  --_vpick-hover-transform: translateY(
+    calc(var(--slds-g-sizing-border-1, 1px) * -1)
+  );
+}
+
+.pflow-vpick_elev-raised {
+  --_vpick-elev-shadow-rest: 0 var(--slds-g-sizing-border-2, 2px)
+    var(--slds-g-spacing-3, 0.75rem)
+    color-mix(
+      in oklab,
+      var(--slds-g-color-neutral-base-10, #181818) 10%,
+      transparent
+    );
+  --_vpick-elev-shadow-hover: 0 var(--slds-g-spacing-2, 0.5rem)
+    var(--slds-g-spacing-5, 1.25rem)
+    color-mix(
+      in oklab,
+      var(--slds-g-color-neutral-base-10, #181818) 13%,
+      transparent
+    );
+  --_vpick-hover-transform: translateY(
+    calc(var(--slds-g-sizing-border-1, 1px) * -1)
+  );
+}
+
+.pflow-vpick_elev-floating {
+  --_vpick-elev-shadow-rest: 0 var(--slds-g-spacing-3, 0.75rem)
+    var(--slds-g-spacing-6, 1.5rem)
+    color-mix(
+      in oklab,
+      var(--slds-g-color-neutral-base-10, #181818) 14%,
+      transparent
+    );
+  --_vpick-elev-shadow-hover: 0 var(--slds-g-spacing-4, 1rem)
+    var(--slds-g-spacing-8, 2.5rem)
+    color-mix(
+      in oklab,
+      var(--slds-g-color-neutral-base-10, #181818) 16%,
+      transparent
+    );
+  --_vpick-hover-transform: translateY(
+    calc(var(--slds-g-sizing-border-2, 2px) * -1)
+  );
+}
+
+.pflow-vpick_elev-inset {
+  --_vpick-elev-shadow-rest: inset 0 0 0 var(--slds-g-sizing-border-1, 1px)
+    color-mix(
+      in oklab,
+      var(--slds-g-color-neutral-base-50, #747474) 18%,
+      transparent
+    );
+  --_vpick-elev-shadow-hover: inset 0 0 0 var(--slds-g-sizing-border-2, 2px)
+    color-mix(
+      in oklab,
+      var(--slds-g-color-neutral-base-50, #747474) 22%,
+      transparent
+    );
 }
 
 /* =============================================================================
@@ -514,8 +627,8 @@
 /* Fill variant — tile surface fills with brand-weak, check badge hidden.
    Higher-contrast pick state, suits rating-style pickers. */
 .pflow-vpick_sel-fill.pflow-vpick_selected .pflow-vpick__figure {
-  background: var(--slds-g-color-brand-base-50, #0176d3);
-  border-color: var(--slds-g-color-brand-base-50, #0176d3);
+  background: var(--_srf-color-selected);
+  border-color: var(--_srf-color-selected);
   color: var(--slds-g-color-on-accent-1, #ffffff);
 }
 .pflow-vpick_sel-fill.pflow-vpick_selected .pflow-vpick__title,
@@ -525,183 +638,80 @@
 .pflow-vpick_sel-fill.pflow-vpick_selected .pflow-vpick__shape {
   background: var(--slds-g-color-on-accent-1, #ffffff);
 }
-.pflow-vpick_sel-fill .pflow-vpick__check {
-  display: none;
-}
 
-/* Bar variant — thick brand-colored bar on the leading edge. Grid mode puts
-   it on the left; list mode puts it on the bottom (horizontal rhythm). */
-.pflow-vpick_sel-bar .pflow-vpick__check {
-  display: none;
-}
-.pflow-vpick_sel-bar.pflow-vpick_grid .pflow-vpick__figure {
-  position: relative;
-  overflow: hidden;
-}
-.pflow-vpick_sel-bar.pflow-vpick_grid.pflow-vpick_selected
-  .pflow-vpick__figure::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: var(--slds-g-sizing-border-3, 4px);
-  background: var(--slds-g-color-brand-base-50, #0176d3);
-}
-.pflow-vpick_sel-bar.pflow-vpick_list.pflow-vpick_selected
-  .pflow-vpick__figure::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: var(--slds-g-sizing-border-3, 4px);
-  background: var(--slds-g-color-brand-base-50, #0176d3);
-}
-
-/* Frame variant — an inset luminous rail that keeps the checkmark visible.
-   It reads like an active focus frame without replacing keyboard focus. */
-.pflow-vpick_sel-frame.pflow-vpick_selected .pflow-vpick__figure {
-  box-shadow:
-    inset 0 0 0 var(--slds-g-sizing-border-2, 2px)
-      var(--slds-g-color-brand-base-50, #0176d3),
-    inset 0 0 0 var(--slds-g-spacing-1, 0.25rem)
-      color-mix(
-        in oklab,
-        var(--slds-g-color-brand-base-50, #0176d3) 12%,
-        transparent
-      ),
-    0 var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-5, 1.25rem)
-      color-mix(
-        in oklab,
-        var(--slds-g-color-brand-base-50, #0176d3) 18%,
-        transparent
-      );
-}
-
-/* Spotlight variant — a selected tile gets a radial aura under the content.
-   The overlay is clipped to the tile so it works in grid and list layouts. */
-.pflow-vpick_sel-spotlight .pflow-vpick__figure {
+/* Bar variant — a leading-edge accent that never changes tile dimensions. */
+.pflow-vpick_sel-bar .pflow-vpick__figure {
   overflow: hidden;
 }
 
-.pflow-vpick_sel-spotlight.pflow-vpick_selected .pflow-vpick__figure::before {
+.pflow-vpick_sel-bar.pflow-vpick_selected .pflow-vpick__figure {
+  border-color: color-mix(
+    in oklab,
+    var(--_srf-color-selected) 55%,
+    var(--_vpick-border)
+  );
+}
+
+.pflow-vpick_sel-bar.pflow-vpick_selected .pflow-vpick__figure::after {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background:
-    radial-gradient(
-      circle at 50% 15%,
-      color-mix(
-          in oklab,
-          var(--slds-g-color-brand-base-50, #0176d3) 26%,
-          transparent
-        )
-        0%,
-      color-mix(
-          in oklab,
-          var(--slds-g-color-brand-base-50, #0176d3) 10%,
-          transparent
-        )
-        42%,
-      transparent 72%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(
-          in oklab,
-          var(--slds-g-color-brand-base-50, #0176d3) 10%,
-          transparent
-        )
-        0%,
-      transparent 70%
-    );
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--slds-g-sizing-border-3, 4px);
+  background: var(--_srf-color-selected);
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
 }
 
-.pflow-vpick_sel-spotlight.pflow-vpick_selected .pflow-vpick__shape,
-.pflow-vpick_sel-spotlight.pflow-vpick_selected .pflow-vpick__icon-wrap,
-.pflow-vpick_sel-spotlight.pflow-vpick_selected .pflow-vpick__text,
-.pflow-vpick_sel-spotlight.pflow-vpick_selected .pflow-vpick__badge,
-.pflow-vpick_sel-spotlight.pflow-vpick_selected .pflow-vpick__check {
-  position: relative;
-  z-index: 1;
+/* Frame variant — a clean inset selected frame, layered above elevation. */
+.pflow-vpick_sel-frame.pflow-vpick_selected .pflow-vpick__figure {
+  --_vpick-indicator-shadow:
+    inset 0 0 0 var(--slds-g-sizing-border-2, 2px)
+      color-mix(in oklab, var(--_srf-color-selected) 74%, transparent),
+    inset 0 0 0 var(--slds-g-spacing-1, 0.25rem)
+      color-mix(in oklab, var(--_srf-color-selected) 10%, transparent);
 }
 
-/* Ribbon variant — a folded brand corner with an embedded white check. */
+/* Ribbon variant — a responsive folded brand corner with no extra check. */
 .pflow-vpick_sel-ribbon .pflow-vpick__figure {
   overflow: hidden;
-}
-
-.pflow-vpick_sel-ribbon .pflow-vpick__check {
-  display: none;
 }
 
 .pflow-vpick_sel-ribbon.pflow-vpick_selected .pflow-vpick__figure::after {
   content: "";
   position: absolute;
-  top: 0;
-  right: 0;
-  width: var(--slds-g-sizing-12, 3rem);
-  height: var(--slds-g-sizing-12, 3rem);
-  background: linear-gradient(
-    135deg,
-    transparent 0 48%,
-    color-mix(
-        in oklab,
-        var(--slds-g-color-brand-base-50, #0176d3) 82%,
-        var(--slds-g-color-neutral-base-10, #181818)
-      )
-      49% 57%,
-    var(--slds-g-color-brand-base-50, #0176d3) 58% 100%
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: clamp(
+    var(--slds-g-sizing-7, 1.5rem),
+    24%,
+    var(--slds-g-sizing-11, 2.5rem)
   );
-  box-shadow: calc(var(--slds-g-spacing-3, 0.75rem) * -1)
-    var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-5, 1.25rem)
-    color-mix(
-      in oklab,
-      var(--slds-g-color-brand-base-50, #0176d3) 18%,
-      transparent
-    );
+  block-size: clamp(
+    var(--slds-g-sizing-7, 1.5rem),
+    24%,
+    var(--slds-g-sizing-11, 2.5rem)
+  );
+  background: var(--_srf-color-selected);
   clip-path: polygon(100% 0, 100% 100%, 0 0);
   pointer-events: none;
   z-index: 2;
 }
 
-.pflow-vpick_sel-ribbon.pflow-vpick_selected .pflow-vpick__figure::before {
+/* Pulse variant — a subtle breathing halo layered above elevation. */
+.pflow-vpick_sel-pulse.pflow-vpick_selected .pflow-vpick__figure::after {
   content: "";
   position: absolute;
-  top: var(--slds-g-spacing-1, 0.25rem);
-  right: var(--slds-g-spacing-1, 0.25rem);
-  width: var(--slds-g-sizing-5, 1rem);
-  height: var(--slds-g-sizing-4, 0.75rem);
-  border-right: var(--slds-g-sizing-border-2, 2px) solid
-    var(--slds-g-color-on-accent-1, #ffffff);
-  border-bottom: var(--slds-g-sizing-border-2, 2px) solid
-    var(--slds-g-color-on-accent-1, #ffffff);
-  transform: rotate(45deg);
-  transform-origin: center;
-  pointer-events: none;
-  z-index: 3;
-}
-
-/* Pulse variant — a subtle breathing halo for high-emphasis selections. */
-.pflow-vpick_sel-pulse.pflow-vpick_selected .pflow-vpick__figure {
+  inset: 0;
+  border-radius: inherit;
   animation: pflow-vpick-pulse 1800ms ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
   box-shadow:
     0 0 0 var(--slds-g-sizing-border-2, 2px)
-      color-mix(
-        in oklab,
-        var(--slds-g-color-brand-base-50, #0176d3) 30%,
-        transparent
-      ),
+      color-mix(in oklab, var(--_srf-color-selected) 30%, transparent),
     0 0 0 var(--slds-g-spacing-2, 0.5rem)
-      color-mix(
-        in oklab,
-        var(--slds-g-color-brand-base-50, #0176d3) 8%,
-        transparent
-      );
+      color-mix(in oklab, var(--_srf-color-selected) 8%, transparent);
 }
 
 @keyframes pflow-vpick-pulse {
@@ -709,37 +719,21 @@
   100% {
     box-shadow:
       0 0 0 var(--slds-g-sizing-border-2, 2px)
-        color-mix(
-          in oklab,
-          var(--slds-g-color-brand-base-50, #0176d3) 28%,
-          transparent
-        ),
+        color-mix(in oklab, var(--_srf-color-selected) 28%, transparent),
       0 0 0 var(--slds-g-spacing-2, 0.5rem)
-        color-mix(
-          in oklab,
-          var(--slds-g-color-brand-base-50, #0176d3) 8%,
-          transparent
-        );
+        color-mix(in oklab, var(--_srf-color-selected) 8%, transparent);
   }
   50% {
     box-shadow:
       0 0 0 var(--slds-g-sizing-border-2, 2px)
-        color-mix(
-          in oklab,
-          var(--slds-g-color-brand-base-50, #0176d3) 48%,
-          transparent
-        ),
+        color-mix(in oklab, var(--_srf-color-selected) 48%, transparent),
       0 0 0 var(--slds-g-spacing-4, 1rem)
-        color-mix(
-          in oklab,
-          var(--slds-g-color-brand-base-50, #0176d3) 14%,
-          transparent
-        );
+        color-mix(in oklab, var(--_srf-color-selected) 14%, transparent);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pflow-vpick_sel-pulse.pflow-vpick_selected .pflow-vpick__figure {
+  .pflow-vpick_sel-pulse.pflow-vpick_selected .pflow-vpick__figure::after {
     animation: none;
   }
 }
@@ -855,8 +849,7 @@
   overflow: hidden;
 }
 
-.pflow-vpick_list.pflow-vpick_sel-fill .pflow-vpick__figure,
-.pflow-vpick_list.pflow-vpick_sel-bar .pflow-vpick__figure {
+.pflow-vpick_list:not(.pflow-vpick_sel-checkmark) .pflow-vpick__figure {
   padding-right: var(--_vpick-pad-r);
 }
 
@@ -883,7 +876,8 @@
   transform: translateY(-50%) scale(0.4);
 }
 
-.pflow-vpick_list.pflow-vpick_selected .pflow-vpick__check {
+.pflow-vpick_list.pflow-vpick_sel-checkmark.pflow-vpick_selected
+  .pflow-vpick__check {
   transform: translateY(-50%) scale(1);
 }
 
@@ -902,7 +896,8 @@
   .pflow-vpick_list .pflow-vpick__check {
     transform: translateY(-50%);
   }
-  .pflow-vpick_list.pflow-vpick_selected .pflow-vpick__check {
+  .pflow-vpick_list.pflow-vpick_sel-checkmark.pflow-vpick_selected
+    .pflow-vpick__check {
     transform: translateY(-50%);
   }
 }
@@ -948,6 +943,96 @@
   );
 }
 
+.pflow-vpick_phtone-neutral {
+  --_ptn-color-hover: var(--slds-g-color-neutral-base-40, #5c5c5c);
+}
+.pflow-vpick_phtone-brand {
+  --_ptn-color-hover: var(--slds-g-color-brand-base-50, #0176d3);
+}
+.pflow-vpick_phtone-success {
+  --_ptn-color-hover: var(--slds-g-color-success-base-50, #3baa6f);
+}
+.pflow-vpick_phtone-warning {
+  --_ptn-color-hover: var(--slds-g-color-warning-base-50, #b25900);
+}
+.pflow-vpick_phtone-error {
+  --_ptn-color-hover: var(--slds-g-color-error-base-50, #ba0517);
+}
+.pflow-vpick_phtone-violet {
+  --_ptn-color-hover: var(--slds-g-color-palette-purple-50, #6d42c1);
+}
+.pflow-vpick_phtone-pink {
+  --_ptn-color-hover: var(--slds-g-color-palette-pink-50, #c9257b);
+}
+.pflow-vpick_phtone-teal {
+  --_ptn-color-hover: var(--slds-g-color-palette-teal-50, #0f7b82);
+}
+.pflow-vpick_phtone-custom {
+  --_ptn-color-hover: var(--_ptn-hover-color-custom, var(--_ptn-color-normal));
+}
+
+.pflow-vpick_pstone-neutral {
+  --_ptn-color-selected: var(--slds-g-color-neutral-base-40, #5c5c5c);
+}
+.pflow-vpick_pstone-brand {
+  --_ptn-color-selected: var(--slds-g-color-brand-base-50, #0176d3);
+}
+.pflow-vpick_pstone-success {
+  --_ptn-color-selected: var(--slds-g-color-success-base-50, #3baa6f);
+}
+.pflow-vpick_pstone-warning {
+  --_ptn-color-selected: var(--slds-g-color-warning-base-50, #b25900);
+}
+.pflow-vpick_pstone-error {
+  --_ptn-color-selected: var(--slds-g-color-error-base-50, #ba0517);
+}
+.pflow-vpick_pstone-violet {
+  --_ptn-color-selected: var(--slds-g-color-palette-purple-50, #6d42c1);
+}
+.pflow-vpick_pstone-pink {
+  --_ptn-color-selected: var(--slds-g-color-palette-pink-50, #c9257b);
+}
+.pflow-vpick_pstone-teal {
+  --_ptn-color-selected: var(--slds-g-color-palette-teal-50, #0f7b82);
+}
+.pflow-vpick_pstone-custom {
+  --_ptn-color-selected: var(
+    --_ptn-selected-color-custom,
+    var(--_ptn-color-normal)
+  );
+}
+
+.pflow-vpick_pdtone-neutral {
+  --_ptn-color-disabled: var(--slds-g-color-neutral-base-60, #9a9a9a);
+}
+.pflow-vpick_pdtone-brand {
+  --_ptn-color-disabled: var(--slds-g-color-brand-base-50, #0176d3);
+}
+.pflow-vpick_pdtone-success {
+  --_ptn-color-disabled: var(--slds-g-color-success-base-50, #3baa6f);
+}
+.pflow-vpick_pdtone-warning {
+  --_ptn-color-disabled: var(--slds-g-color-warning-base-50, #b25900);
+}
+.pflow-vpick_pdtone-error {
+  --_ptn-color-disabled: var(--slds-g-color-error-base-50, #ba0517);
+}
+.pflow-vpick_pdtone-violet {
+  --_ptn-color-disabled: var(--slds-g-color-palette-purple-50, #6d42c1);
+}
+.pflow-vpick_pdtone-pink {
+  --_ptn-color-disabled: var(--slds-g-color-palette-pink-50, #c9257b);
+}
+.pflow-vpick_pdtone-teal {
+  --_ptn-color-disabled: var(--slds-g-color-palette-teal-50, #0f7b82);
+}
+.pflow-vpick_pdtone-custom {
+  --_ptn-color-disabled: var(
+    --_ptn-disabled-color-custom,
+    var(--_ptn-color-normal)
+  );
+}
+
 .pflow-vpick_ctone-neutral {
   --_cnr-color: var(--slds-g-color-neutral-base-40, #5c5c5c);
 }
@@ -987,7 +1072,7 @@
   border-radius: inherit;
   pointer-events: none;
   z-index: 0;
-  color: var(--_ptn-color, currentColor);
+  color: var(--_ptn-state-color, currentColor);
   opacity: 1;
   overflow: hidden;
 }
@@ -1271,8 +1356,100 @@
   );
 }
 
-/* Solid — default; relies on the elevation classes to set the surface. */
-/* .pflow-vpick_surface-solid   — no change needed */
+.pflow-vpick_shtone-neutral {
+  --_srf-color-hover: var(--slds-g-color-neutral-base-50, #747474);
+}
+.pflow-vpick_shtone-brand {
+  --_srf-color-hover: var(--slds-g-color-brand-base-50, #0176d3);
+}
+.pflow-vpick_shtone-success {
+  --_srf-color-hover: var(--slds-g-color-success-base-50, #3baa6f);
+}
+.pflow-vpick_shtone-warning {
+  --_srf-color-hover: var(--slds-g-color-warning-base-50, #b25900);
+}
+.pflow-vpick_shtone-error {
+  --_srf-color-hover: var(--slds-g-color-error-base-50, #ba0517);
+}
+.pflow-vpick_shtone-violet {
+  --_srf-color-hover: var(--slds-g-color-palette-purple-50, #6d42c1);
+}
+.pflow-vpick_shtone-pink {
+  --_srf-color-hover: var(--slds-g-color-palette-pink-50, #c9257b);
+}
+.pflow-vpick_shtone-teal {
+  --_srf-color-hover: var(--slds-g-color-palette-teal-50, #0f7b82);
+}
+.pflow-vpick_shtone-custom {
+  --_srf-color-hover: var(--_srf-hover-color-custom, var(--_srf-color-normal));
+}
+
+.pflow-vpick_sstone-neutral {
+  --_srf-color-selected: var(--slds-g-color-neutral-base-50, #747474);
+}
+.pflow-vpick_sstone-brand {
+  --_srf-color-selected: var(--slds-g-color-brand-base-50, #0176d3);
+}
+.pflow-vpick_sstone-success {
+  --_srf-color-selected: var(--slds-g-color-success-base-50, #3baa6f);
+}
+.pflow-vpick_sstone-warning {
+  --_srf-color-selected: var(--slds-g-color-warning-base-50, #b25900);
+}
+.pflow-vpick_sstone-error {
+  --_srf-color-selected: var(--slds-g-color-error-base-50, #ba0517);
+}
+.pflow-vpick_sstone-violet {
+  --_srf-color-selected: var(--slds-g-color-palette-purple-50, #6d42c1);
+}
+.pflow-vpick_sstone-pink {
+  --_srf-color-selected: var(--slds-g-color-palette-pink-50, #c9257b);
+}
+.pflow-vpick_sstone-teal {
+  --_srf-color-selected: var(--slds-g-color-palette-teal-50, #0f7b82);
+}
+.pflow-vpick_sstone-custom {
+  --_srf-color-selected: var(
+    --_srf-selected-color-custom,
+    var(--_srf-color-normal)
+  );
+}
+
+.pflow-vpick_sdtone-neutral {
+  --_srf-color-disabled: var(--slds-g-color-neutral-base-60, #9a9a9a);
+}
+.pflow-vpick_sdtone-brand {
+  --_srf-color-disabled: var(--slds-g-color-brand-base-50, #0176d3);
+}
+.pflow-vpick_sdtone-success {
+  --_srf-color-disabled: var(--slds-g-color-success-base-50, #3baa6f);
+}
+.pflow-vpick_sdtone-warning {
+  --_srf-color-disabled: var(--slds-g-color-warning-base-50, #b25900);
+}
+.pflow-vpick_sdtone-error {
+  --_srf-color-disabled: var(--slds-g-color-error-base-50, #ba0517);
+}
+.pflow-vpick_sdtone-violet {
+  --_srf-color-disabled: var(--slds-g-color-palette-purple-50, #6d42c1);
+}
+.pflow-vpick_sdtone-pink {
+  --_srf-color-disabled: var(--slds-g-color-palette-pink-50, #c9257b);
+}
+.pflow-vpick_sdtone-teal {
+  --_srf-color-disabled: var(--slds-g-color-palette-teal-50, #0f7b82);
+}
+.pflow-vpick_sdtone-custom {
+  --_srf-color-disabled: var(
+    --_srf-disabled-color-custom,
+    var(--_srf-color-normal)
+  );
+}
+
+/* Solid — flat state-aware tint. */
+.pflow-vpick_surface-solid .pflow-vpick__figure {
+  background: var(--_srf-solid-bg-current, var(--_vpick-surface));
+}
 
 /* Gradient-top — tinted at top, clean at bottom. Applied to the FIGURE
    (not the label) because the figure paints the tile surface via its own
@@ -1282,7 +1459,7 @@
     180deg,
     color-mix(
         in oklab,
-        var(--_srf-color, #747474) 14%,
+        var(--_srf-state-color, #747474) 14%,
         var(--slds-g-color-neutral-base-100, #ffffff)
       )
       0%,
@@ -1296,7 +1473,7 @@
     ellipse at 50% 0%,
     color-mix(
         in oklab,
-        var(--_srf-color, #747474) 18%,
+        var(--_srf-state-color, #747474) 18%,
         var(--slds-g-color-neutral-base-100, #ffffff)
       )
       0%,
@@ -1310,7 +1487,7 @@
     135deg,
     color-mix(
         in oklab,
-        var(--_srf-color, #747474) 16%,
+        var(--_srf-state-color, #747474) 16%,
         var(--slds-g-color-neutral-base-100, #ffffff)
       )
       0%,
@@ -1322,7 +1499,7 @@
 .pflow-vpick_surface-tint .pflow-vpick__figure {
   background: color-mix(
     in oklab,
-    var(--_srf-color, #747474) 10%,
+    var(--_srf-state-color, #747474) 10%,
     var(--slds-g-color-neutral-base-100, #ffffff)
   );
 }
@@ -1345,6 +1522,10 @@
    is active it also becomes the clipping boundary — the glyph AND decor
    both conform to the shape, not just the decor outline. */
 .pflow-vpick__icon-wrap {
+  --_icn-decor-width: var(--slds-g-sizing-10, 2.5rem);
+  --_icn-decor-height: var(--slds-g-sizing-10, 2.5rem);
+  --_icn-wrap-width: var(--_icn-decor-width);
+  --_icn-wrap-height: var(--_icn-decor-height);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -1356,22 +1537,32 @@
 .pflow-vpick__icon-wrap_shape-circle,
 .pflow-vpick__icon-wrap_shape-square,
 .pflow-vpick__icon-wrap_shape-squircle,
+.pflow-vpick__icon-wrap_shape-pill,
 .pflow-vpick__icon-wrap_shape-hexagon,
 .pflow-vpick__icon-wrap_shape-diamond {
-  width: var(--slds-g-sizing-10, 2.5rem);
-  height: var(--slds-g-sizing-10, 2.5rem);
+  width: var(--_icn-wrap-width);
+  height: var(--_icn-wrap-height);
 }
 
 .pflow-vpick__icon-wrap_shape-pill {
-  width: var(--slds-g-sizing-13, 3.5rem);
-  height: var(--slds-g-sizing-9, 2.25rem);
+  --_icn-decor-width: var(--slds-g-sizing-13, 3.5rem);
+  --_icn-decor-height: var(--slds-g-sizing-9, 2.25rem);
+}
+
+.pflow-vpick__icon-wrap_decor-halo {
+  --_icn-decor-width: var(--slds-g-sizing-12, 3rem);
+  --_icn-decor-height: var(--slds-g-sizing-12, 3rem);
 }
 
 /* Soft / glow styles need extra breathing room around the glyph. */
-.pflow-vpick__icon-wrap_style-soft,
+.pflow-vpick__icon-wrap_style-soft {
+  --_icn-decor-width: var(--slds-g-sizing-12, 3rem);
+  --_icn-decor-height: var(--slds-g-sizing-12, 3rem);
+}
+
 .pflow-vpick__icon-wrap_style-glow {
-  width: var(--slds-g-sizing-12, 3rem);
-  height: var(--slds-g-sizing-12, 3rem);
+  --_icn-decor-width: var(--slds-g-sizing-13, 3.5rem);
+  --_icn-decor-height: var(--slds-g-sizing-13, 3.5rem);
 }
 
 /* Shape-based clipping — applied to the wrap so the glyph conforms to
@@ -1403,11 +1594,9 @@
 .pflow-vpick__icon-wrap_shape-pill .pflow-vpick__icon-decor,
 .pflow-vpick__icon-wrap_shape-hexagon .pflow-vpick__icon-decor,
 .pflow-vpick__icon-wrap_shape-diamond .pflow-vpick__icon-decor {
-  width: var(--pflow-static-v-100-percent, 100%);
-  height: var(--pflow-static-v-100-percent, 100%);
-  top: 0;
-  left: 0;
-  transform: none;
+  top: var(--pflow-static-v-50-percent, 50%);
+  left: var(--pflow-static-v-50-percent, 50%);
+  transform: translate(-50%, -50%);
 }
 
 /* Shared tone palette for icon decoration. */
@@ -1491,8 +1680,8 @@
   transform: translate(-50%, -50%);
   z-index: 0;
   pointer-events: none;
-  width: var(--slds-g-sizing-10, 2.5rem);
-  height: var(--slds-g-sizing-10, 2.5rem);
+  width: var(--_icn-decor-width);
+  height: var(--_icn-decor-height);
 }
 
 /* Icon sits above the decoration. */
@@ -1519,8 +1708,8 @@
     color-mix(in oklab, var(--_icn-color, currentColor) 6%, transparent) 55%,
     transparent 75%
   );
-  width: var(--slds-g-sizing-12, 3rem);
-  height: var(--slds-g-sizing-12, 3rem);
+  width: var(--_icn-decor-width);
+  height: var(--_icn-decor-height);
 }
 
 /* =============================================================================
@@ -1548,27 +1737,27 @@
 .pflow-vpick__icon-wrap_shape-pill .pflow-vpick__icon-decor,
 .pflow-vpick__icon-wrap_shape-hexagon .pflow-vpick__icon-decor,
 .pflow-vpick__icon-wrap_shape-diamond .pflow-vpick__icon-decor {
-  width: var(--slds-g-sizing-10, 2.5rem);
-  height: var(--slds-g-sizing-10, 2.5rem);
+  width: var(--_icn-decor-width);
+  height: var(--_icn-decor-height);
 }
 
 /* Pill is wider than tall — proportions feel "tag"-like. */
 .pflow-vpick__icon-wrap_shape-pill .pflow-vpick__icon-decor {
-  width: var(--slds-g-sizing-13, 3.5rem);
-  height: var(--slds-g-sizing-9, 2.25rem);
+  width: var(--_icn-decor-width);
+  height: var(--_icn-decor-height);
 }
 
 /* Soft style is a "ghost placeholder" — slightly larger so the dashed edge
    sits comfortably outside the glyph baseline. */
 .pflow-vpick__icon-wrap_style-soft .pflow-vpick__icon-decor {
-  width: var(--slds-g-sizing-12, 3rem);
-  height: var(--slds-g-sizing-12, 3rem);
+  width: var(--_icn-decor-width);
+  height: var(--_icn-decor-height);
 }
 
 /* Glow has the largest footprint since its gradient fades out. */
 .pflow-vpick__icon-wrap_style-glow .pflow-vpick__icon-decor {
-  width: var(--slds-g-sizing-13, 3.5rem);
-  height: var(--slds-g-sizing-13, 3.5rem);
+  width: var(--_icn-decor-width);
+  height: var(--_icn-decor-height);
 }
 
 /* --- SHAPE: border-radius-based -------------------------------------- */
@@ -1763,23 +1952,27 @@
 }
 
 /* Size scaling — make decoration scale with tile size. */
-.pflow-vpick_size-small .pflow-vpick__icon-decor {
-  width: var(--slds-g-sizing-9, 2rem);
-  height: var(--slds-g-sizing-9, 2rem);
+.pflow-vpick_size-small .pflow-vpick__icon-wrap_shape-circle,
+.pflow-vpick_size-small .pflow-vpick__icon-wrap_shape-square,
+.pflow-vpick_size-small .pflow-vpick__icon-wrap_shape-squircle,
+.pflow-vpick_size-small .pflow-vpick__icon-wrap_shape-hexagon,
+.pflow-vpick_size-small .pflow-vpick__icon-wrap_shape-diamond {
+  --_icn-decor-width: var(--slds-g-sizing-9, 2rem);
+  --_icn-decor-height: var(--slds-g-sizing-9, 2rem);
 }
-.pflow-vpick_size-large .pflow-vpick__icon-decor {
-  width: var(--slds-g-sizing-10, 3rem);
-  height: var(--slds-g-sizing-10, 3rem);
+.pflow-vpick_size-large .pflow-vpick__icon-wrap_shape-circle,
+.pflow-vpick_size-large .pflow-vpick__icon-wrap_shape-square,
+.pflow-vpick_size-large .pflow-vpick__icon-wrap_shape-squircle,
+.pflow-vpick_size-large .pflow-vpick__icon-wrap_shape-hexagon,
+.pflow-vpick_size-large .pflow-vpick__icon-wrap_shape-diamond {
+  --_icn-decor-width: var(--slds-g-sizing-10, 3rem);
+  --_icn-decor-height: var(--slds-g-sizing-10, 3rem);
 }
-.pflow-vpick_size-small
-  .pflow-vpick__icon-wrap_decor-halo
-  .pflow-vpick__icon-decor {
-  width: var(--pflow-static-v-2-5rem, 2.5rem);
-  height: var(--pflow-static-v-2-5rem, 2.5rem);
+.pflow-vpick_size-small .pflow-vpick__icon-wrap_decor-halo {
+  --_icn-decor-width: var(--pflow-static-v-2-5rem, 2.5rem);
+  --_icn-decor-height: var(--pflow-static-v-2-5rem, 2.5rem);
 }
-.pflow-vpick_size-large
-  .pflow-vpick__icon-wrap_decor-halo
-  .pflow-vpick__icon-decor {
-  width: var(--pflow-static-v-3-5rem, 3.5rem);
-  height: var(--pflow-static-v-3-5rem, 3.5rem);
+.pflow-vpick_size-large .pflow-vpick__icon-wrap_decor-halo {
+  --_icn-decor-width: var(--pflow-static-v-3-5rem, 3.5rem);
+  --_icn-decor-height: var(--pflow-static-v-3-5rem, 3.5rem);
 }

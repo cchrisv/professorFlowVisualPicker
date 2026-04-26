@@ -1,25 +1,21 @@
 <template>
   <div class="pflow-group-wrapper">
-    <!-- Search bar — tile variants only. Dropdown has its own built-in
-             filtering; radio renders the full set and is typically shorter. -->
-    <template lwc:if={enableSearch}>
-      <template lwc:if={isTileVariant}>
-        <div class="pflow-search-bar">
-          <c-pflow-atom-icon
-            name="search"
-            size="sm"
-            box="input"
-          ></c-pflow-atom-icon>
-          <input
-            type="search"
-            class="pflow-search-bar__input"
-            placeholder="Search"
-            value={_searchTerm}
-            oninput={handleSearch}
-            aria-label="Filter items"
-          />
-        </div>
-      </template>
+    <template lwc:if={showOuterSearch}>
+      <div class="pflow-search-bar">
+        <c-pflow-atom-icon
+          name="search"
+          size="sm"
+          box="input"
+        ></c-pflow-atom-icon>
+        <input
+          type="search"
+          class="pflow-search-bar__input"
+          placeholder="Search"
+          value={_searchTerm}
+          oninput={handleSearch}
+          aria-label="Filter items"
+        />
+      </div>
     </template>
 
     <template lwc:if={showToolbar}>
@@ -44,8 +40,7 @@
       </div>
     </template>
 
-    <!-- Tile-based variants (grid, list, horizontal) -->
-    <template lwc:if={isTileVariant}>
+    <template lwc:if={isBasicCardLayout}>
       <div
         class={groupClass}
         style={groupStyle}
@@ -70,10 +65,16 @@
             elevation={elevation}
             pattern={pattern}
             pattern-tone={patternTone}
+            pattern-hover-tone={patternHoverTone}
+            pattern-selected-tone={patternSelectedTone}
+            pattern-disabled-tone={patternDisabledTone}
             corner-style={cornerStyle}
             corner-tone={cornerTone}
             surface-style={surfaceStyle}
             surface-tone={surfaceTone}
+            surface-hover-tone={surfaceHoverTone}
+            surface-selected-tone={surfaceSelectedTone}
+            surface-disabled-tone={surfaceDisabledTone}
             icon-decor={iconDecor}
             icon-style={iconStyle}
             icon-shading={iconShading}
@@ -83,8 +84,14 @@
             icon-glyph-tone-hex={iconGlyphToneHex}
             icon-size={iconSize}
             pattern-tone-hex={patternToneHex}
+            pattern-hover-tone-hex={patternHoverToneHex}
+            pattern-selected-tone-hex={patternSelectedToneHex}
+            pattern-disabled-tone-hex={patternDisabledToneHex}
             corner-tone-hex={cornerToneHex}
             surface-tone-hex={surfaceToneHex}
+            surface-hover-tone-hex={surfaceHoverToneHex}
+            surface-selected-tone-hex={surfaceSelectedToneHex}
+            surface-disabled-tone-hex={surfaceDisabledToneHex}
             badge-variant-hex={badgeVariantHex}
             show-icons={showIcons}
             show-badges={showBadges}
@@ -103,35 +110,517 @@
       </div>
     </template>
 
-    <!-- Rich dropdown (combobox). Single-select only; min/max/selectAll
-             aren't meaningful. Search lives inside the combobox itself. -->
-    <template lwc:if={isDropdown}>
-      <div class="pflow-group pflow-group_dropdown">
-        <c-pflow-molecule-rich-combobox
-          items={items}
-          value={singleSelectedValue}
-          enable-search={enableSearch}
-          badge-variant={badgeVariant}
-          badge-shape={badgeShape}
-          onchange={handleDropdownChange}
-        ></c-pflow-molecule-rich-combobox>
+    <template lwc:if={isPicklist}>
+      <div class={picklistClass} style={groupStyle}>
+        <div
+          class="pflow-picklist__trigger"
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-multiselectable={picklistAriaMultiselectable}
+          aria-expanded={picklistExpanded}
+          tabindex="0"
+          onclick={handlePicklistToggle}
+          onkeydown={handlePicklistKeydown}
+        >
+          <div class="pflow-picklist__selected-shell">
+            <template lwc:if={showPicklistSelectedCard}>
+              <c-pflow-atom-visual-pick
+                item={selectedPicklistItem}
+                variant={atomVariant}
+                selected="true"
+                selection-mode="single"
+                group-name={_groupName}
+                size={size}
+                aspect-ratio={aspectRatio}
+                badge-position={badgePosition}
+                badge-variant={badgeVariant}
+                badge-shape={badgeShape}
+                selection-indicator={selectionIndicator}
+                elevation={elevation}
+                pattern={pattern}
+                pattern-tone={patternTone}
+                pattern-hover-tone={patternHoverTone}
+                pattern-selected-tone={patternSelectedTone}
+                pattern-disabled-tone={patternDisabledTone}
+                corner-style={cornerStyle}
+                corner-tone={cornerTone}
+                surface-style={surfaceStyle}
+                surface-tone={surfaceTone}
+                surface-hover-tone={surfaceHoverTone}
+                surface-selected-tone={surfaceSelectedTone}
+                surface-disabled-tone={surfaceDisabledTone}
+                icon-decor={iconDecor}
+                icon-style={iconStyle}
+                icon-shading={iconShading}
+                icon-tone={iconTone}
+                icon-tone-hex={iconToneHex}
+                icon-glyph-tone={iconGlyphTone}
+                icon-glyph-tone-hex={iconGlyphToneHex}
+                icon-size={iconSize}
+                pattern-tone-hex={patternToneHex}
+                pattern-hover-tone-hex={patternHoverToneHex}
+                pattern-selected-tone-hex={patternSelectedToneHex}
+                pattern-disabled-tone-hex={patternDisabledToneHex}
+                corner-tone-hex={cornerToneHex}
+                surface-tone-hex={surfaceToneHex}
+                surface-hover-tone-hex={surfaceHoverToneHex}
+                surface-selected-tone-hex={surfaceSelectedToneHex}
+                surface-disabled-tone-hex={surfaceDisabledToneHex}
+                badge-variant-hex={badgeVariantHex}
+                show-icons={showIcons}
+                show-badges={showBadges}
+              ></c-pflow-atom-visual-pick>
+            </template>
+            <template lwc:elseif={hasPicklistSelection}>
+              <span class="pflow-picklist__summary">
+                <span class="pflow-picklist__summary-count">
+                  {counterLabel}
+                </span>
+                <span class="pflow-picklist__summary-labels">
+                  {picklistSelectionLabel}
+                </span>
+              </span>
+            </template>
+            <template lwc:else>
+              <span class="pflow-picklist__placeholder">
+                {picklistPlaceholder}
+              </span>
+            </template>
+          </div>
+          <span class="pflow-picklist__chevron" aria-hidden="true">
+            <c-pflow-atom-icon
+              name={picklistChevron}
+              size="x-small"
+              box="button"
+            ></c-pflow-atom-icon>
+          </span>
+        </div>
+
+        <template lwc:if={_picklistOpen}>
+          <div
+            class="pflow-picklist__menu"
+            role="listbox"
+            aria-multiselectable={picklistAriaMultiselectable}
+            aria-label="Picklist options"
+            oncardselect={handlePicklistCardSelect}
+          >
+            <template lwc:if={enableSearch}>
+              <div class="pflow-picklist__search">
+                <c-pflow-atom-icon
+                  name="search"
+                  size="sm"
+                  box="input"
+                ></c-pflow-atom-icon>
+                <input
+                  type="search"
+                  class="pflow-search-bar__input"
+                  placeholder="Search options"
+                  value={_searchTerm}
+                  oninput={handleSearch}
+                  aria-label="Filter picklist options"
+                />
+              </div>
+            </template>
+            <template lwc:if={hasPicklistItems}>
+              <template for:each={picklistItems} for:item="item">
+                <div key={item.id} class={item._class}>
+                  <c-pflow-atom-visual-pick
+                    item={item}
+                    variant={atomVariant}
+                    selected={item._selected}
+                    disabled={item._disabled}
+                    selection-mode={selectionMode}
+                    group-name={_groupName}
+                    size={size}
+                    aspect-ratio={aspectRatio}
+                    badge-position={badgePosition}
+                    badge-variant={badgeVariant}
+                    badge-shape={badgeShape}
+                    selection-indicator={selectionIndicator}
+                    elevation={elevation}
+                    pattern={pattern}
+                    pattern-tone={patternTone}
+                    pattern-hover-tone={patternHoverTone}
+                    pattern-selected-tone={patternSelectedTone}
+                    pattern-disabled-tone={patternDisabledTone}
+                    corner-style={cornerStyle}
+                    corner-tone={cornerTone}
+                    surface-style={surfaceStyle}
+                    surface-tone={surfaceTone}
+                    surface-hover-tone={surfaceHoverTone}
+                    surface-selected-tone={surfaceSelectedTone}
+                    surface-disabled-tone={surfaceDisabledTone}
+                    icon-decor={iconDecor}
+                    icon-style={iconStyle}
+                    icon-shading={iconShading}
+                    icon-tone={iconTone}
+                    icon-tone-hex={iconToneHex}
+                    icon-glyph-tone={iconGlyphTone}
+                    icon-glyph-tone-hex={iconGlyphToneHex}
+                    icon-size={iconSize}
+                    pattern-tone-hex={patternToneHex}
+                    pattern-hover-tone-hex={patternHoverToneHex}
+                    pattern-selected-tone-hex={patternSelectedToneHex}
+                    pattern-disabled-tone-hex={patternDisabledToneHex}
+                    corner-tone-hex={cornerToneHex}
+                    surface-tone-hex={surfaceToneHex}
+                    surface-hover-tone-hex={surfaceHoverToneHex}
+                    surface-selected-tone-hex={surfaceSelectedToneHex}
+                    surface-disabled-tone-hex={surfaceDisabledToneHex}
+                    badge-variant-hex={badgeVariantHex}
+                    show-icons={showIcons}
+                    show-badges={showBadges}
+                  ></c-pflow-atom-visual-pick>
+                </div>
+              </template>
+            </template>
+            <template lwc:else>
+              <p class="pflow-picklist__empty">No options to display.</p>
+            </template>
+          </div>
+        </template>
       </div>
     </template>
 
-    <!-- Native radio group. Single-select; vertical stack by default.
-             Label is supplied by the organism's field wrapper, so we hide
-             the one lightning-radio-group renders. -->
     <template lwc:if={isRadio}>
-      <div class="pflow-group pflow-group_radio">
-        <lightning-radio-group
-          name="pflow-radio"
-          variant="label-hidden"
-          label="Options"
-          options={nativeOptions}
-          value={singleSelectedValue}
-          type="radio"
-          onchange={handleRadioChange}
-        ></lightning-radio-group>
+      <div
+        class={groupClass}
+        style={groupStyle}
+        role={groupRole}
+        oncardselect={handleCardSelect}
+      >
+        <template for:each={radioItems} for:item="item">
+          <div key={item.id} class={item._radioClass}>
+            <span class="pflow-radio-card__marker" aria-hidden="true"></span>
+            <c-pflow-atom-visual-pick
+              item={item}
+              variant={atomVariant}
+              selected={item._selected}
+              disabled={item._disabled}
+              selection-mode={selectionMode}
+              group-name={_groupName}
+              size={size}
+              aspect-ratio={aspectRatio}
+              badge-position={badgePosition}
+              badge-variant={badgeVariant}
+              badge-shape={badgeShape}
+              selection-indicator={selectionIndicator}
+              elevation={elevation}
+              pattern={pattern}
+              pattern-tone={patternTone}
+              pattern-hover-tone={patternHoverTone}
+              pattern-selected-tone={patternSelectedTone}
+              pattern-disabled-tone={patternDisabledTone}
+              corner-style={cornerStyle}
+              corner-tone={cornerTone}
+              surface-style={surfaceStyle}
+              surface-tone={surfaceTone}
+              surface-hover-tone={surfaceHoverTone}
+              surface-selected-tone={surfaceSelectedTone}
+              surface-disabled-tone={surfaceDisabledTone}
+              icon-decor={iconDecor}
+              icon-style={iconStyle}
+              icon-shading={iconShading}
+              icon-tone={iconTone}
+              icon-tone-hex={iconToneHex}
+              icon-glyph-tone={iconGlyphTone}
+              icon-glyph-tone-hex={iconGlyphToneHex}
+              icon-size={iconSize}
+              pattern-tone-hex={patternToneHex}
+              pattern-hover-tone-hex={patternHoverToneHex}
+              pattern-selected-tone-hex={patternSelectedToneHex}
+              pattern-disabled-tone-hex={patternDisabledToneHex}
+              corner-tone-hex={cornerToneHex}
+              surface-tone-hex={surfaceToneHex}
+              surface-hover-tone-hex={surfaceHoverToneHex}
+              surface-selected-tone-hex={surfaceSelectedToneHex}
+              surface-disabled-tone-hex={surfaceDisabledToneHex}
+              badge-variant-hex={badgeVariantHex}
+              show-icons={showIcons}
+              show-badges={showBadges}
+            ></c-pflow-atom-visual-pick>
+          </div>
+        </template>
+        <template lwc:if={isRadioEmpty}>
+          <div class="pflow-empty">
+            <c-pflow-atom-icon
+              name="search"
+              size="sm"
+              box="tile"
+            ></c-pflow-atom-icon>
+            <p>No items to display.</p>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <template lwc:if={isTransferLayout}>
+      <div class={transferClass} style={groupStyle} role="group">
+        <section
+          class={availablePanelClass}
+          data-zone="available"
+          aria-label={availablePanelAriaLabel}
+          ondragover={handleDragOver}
+          ondragleave={handleDragLeave}
+          ondrop={handleDrop}
+        >
+          <header class="pflow-transfer__head">
+            <span class="pflow-transfer__label">{availablePanelLabel}</span>
+            <span class="pflow-transfer__count">{availableCountLabel}</span>
+          </header>
+          <template lwc:if={enableSearch}>
+            <div class="pflow-transfer__search">
+              <c-pflow-atom-icon
+                name="search"
+                size="sm"
+                box="input"
+              ></c-pflow-atom-icon>
+              <input
+                type="search"
+                class="pflow-search-bar__input"
+                placeholder="Filter available"
+                value={_searchTerm}
+                oninput={handleSearch}
+                aria-label="Filter available options"
+              />
+            </div>
+          </template>
+          <div
+            class="pflow-transfer__list"
+            role="listbox"
+            aria-label="Available options"
+            oncardselect={handleAvailableCardSelect}
+          >
+            <template lwc:if={hasAvailableItems}>
+              <template for:each={transferAvailableItems} for:item="item">
+                <div
+                  key={item.id}
+                  class={item._class}
+                  data-value={item.value}
+                  draggable={item._draggable}
+                  ondragstart={handleDragStart}
+                >
+                  <c-pflow-atom-visual-pick
+                    item={item}
+                    variant={atomVariant}
+                    selected={item._selected}
+                    disabled={item._disabled}
+                    selection-mode={selectionMode}
+                    group-name={_groupName}
+                    size={size}
+                    aspect-ratio={aspectRatio}
+                    badge-position={badgePosition}
+                    badge-variant={badgeVariant}
+                    badge-shape={badgeShape}
+                    selection-indicator={selectionIndicator}
+                    elevation={elevation}
+                    pattern={pattern}
+                    pattern-tone={patternTone}
+                    pattern-hover-tone={patternHoverTone}
+                    pattern-selected-tone={patternSelectedTone}
+                    pattern-disabled-tone={patternDisabledTone}
+                    corner-style={cornerStyle}
+                    corner-tone={cornerTone}
+                    surface-style={surfaceStyle}
+                    surface-tone={surfaceTone}
+                    surface-hover-tone={surfaceHoverTone}
+                    surface-selected-tone={surfaceSelectedTone}
+                    surface-disabled-tone={surfaceDisabledTone}
+                    icon-decor={iconDecor}
+                    icon-style={iconStyle}
+                    icon-shading={iconShading}
+                    icon-tone={iconTone}
+                    icon-tone-hex={iconToneHex}
+                    icon-glyph-tone={iconGlyphTone}
+                    icon-glyph-tone-hex={iconGlyphToneHex}
+                    icon-size={iconSize}
+                    pattern-tone-hex={patternToneHex}
+                    pattern-hover-tone-hex={patternHoverToneHex}
+                    pattern-selected-tone-hex={patternSelectedToneHex}
+                    pattern-disabled-tone-hex={patternDisabledToneHex}
+                    corner-tone-hex={cornerToneHex}
+                    surface-tone-hex={surfaceToneHex}
+                    surface-hover-tone-hex={surfaceHoverToneHex}
+                    surface-selected-tone-hex={surfaceSelectedToneHex}
+                    surface-disabled-tone-hex={surfaceDisabledToneHex}
+                    badge-variant-hex={badgeVariantHex}
+                    show-icons={showIcons}
+                    show-badges={showBadges}
+                  ></c-pflow-atom-visual-pick>
+                </div>
+              </template>
+            </template>
+            <template lwc:else>
+              <p class="pflow-transfer__empty">{availableEmptyMessage}</p>
+            </template>
+          </div>
+        </section>
+
+        <template lwc:if={isDualListbox}>
+          <div class="pflow-transfer__controls" aria-label="Move options">
+            <button
+              type="button"
+              class="slds-button slds-button_icon slds-button_icon-border pflow-transfer__control"
+              title="Move selected to chosen"
+              disabled={dualAddDisabled}
+              onclick={handleDualAdd}
+            >
+              <c-pflow-atom-icon
+                name="chevron-right"
+                size="x-small"
+                box="button"
+              ></c-pflow-atom-icon>
+              <span class="slds-assistive-text">Move selected to chosen</span>
+            </button>
+            <button
+              type="button"
+              class="slds-button slds-button_icon slds-button_icon-border pflow-transfer__control"
+              title="Move all to chosen"
+              disabled={dualAddAllDisabled}
+              onclick={handleDualAddAll}
+            >
+              <c-pflow-atom-icon
+                name="chevrons-right"
+                size="x-small"
+                box="button"
+              ></c-pflow-atom-icon>
+              <span class="slds-assistive-text">Move all to chosen</span>
+            </button>
+            <button
+              type="button"
+              class="slds-button slds-button_icon slds-button_icon-border pflow-transfer__control"
+              title="Remove selected"
+              disabled={dualRemoveDisabled}
+              onclick={handleDualRemove}
+            >
+              <c-pflow-atom-icon
+                name="chevron-left"
+                size="x-small"
+                box="button"
+              ></c-pflow-atom-icon>
+              <span class="slds-assistive-text">Remove selected</span>
+            </button>
+            <button
+              type="button"
+              class="slds-button slds-button_icon slds-button_icon-border pflow-transfer__control"
+              title="Remove all"
+              disabled={dualRemoveAllDisabled}
+              onclick={handleDualRemoveAll}
+            >
+              <c-pflow-atom-icon
+                name="chevrons-left"
+                size="x-small"
+                box="button"
+              ></c-pflow-atom-icon>
+              <span class="slds-assistive-text">Remove all</span>
+            </button>
+          </div>
+        </template>
+
+        <section
+          class={selectedPanelClass}
+          data-zone="selected"
+          aria-label={selectedPanelAriaLabel}
+          ondragover={handleDragOver}
+          ondragleave={handleDragLeave}
+          ondrop={handleDrop}
+        >
+          <header class="pflow-transfer__head">
+            <span class="pflow-transfer__label">{selectedPanelLabel}</span>
+            <span class="pflow-transfer__count">{selectedCountLabel}</span>
+          </header>
+          <div
+            class="pflow-transfer__list"
+            role="listbox"
+            aria-label="Selected options"
+            oncardselect={handleSelectedCardSelect}
+          >
+            <template lwc:if={hasSelectedItems}>
+              <template for:each={transferSelectedItems} for:item="item">
+                <div
+                  key={item.id}
+                  class={item._class}
+                  data-value={item.value}
+                  draggable={item._draggable}
+                  ondragstart={handleDragStart}
+                >
+                  <c-pflow-atom-visual-pick
+                    item={item}
+                    variant={atomVariant}
+                    selected={item._selected}
+                    disabled={item._disabled}
+                    selection-mode={selectionMode}
+                    group-name={_groupName}
+                    size={size}
+                    aspect-ratio={aspectRatio}
+                    badge-position={badgePosition}
+                    badge-variant={badgeVariant}
+                    badge-shape={badgeShape}
+                    selection-indicator={selectionIndicator}
+                    elevation={elevation}
+                    pattern={pattern}
+                    pattern-tone={patternTone}
+                    pattern-hover-tone={patternHoverTone}
+                    pattern-selected-tone={patternSelectedTone}
+                    pattern-disabled-tone={patternDisabledTone}
+                    corner-style={cornerStyle}
+                    corner-tone={cornerTone}
+                    surface-style={surfaceStyle}
+                    surface-tone={surfaceTone}
+                    surface-hover-tone={surfaceHoverTone}
+                    surface-selected-tone={surfaceSelectedTone}
+                    surface-disabled-tone={surfaceDisabledTone}
+                    icon-decor={iconDecor}
+                    icon-style={iconStyle}
+                    icon-shading={iconShading}
+                    icon-tone={iconTone}
+                    icon-tone-hex={iconToneHex}
+                    icon-glyph-tone={iconGlyphTone}
+                    icon-glyph-tone-hex={iconGlyphToneHex}
+                    icon-size={iconSize}
+                    pattern-tone-hex={patternToneHex}
+                    pattern-hover-tone-hex={patternHoverToneHex}
+                    pattern-selected-tone-hex={patternSelectedToneHex}
+                    pattern-disabled-tone-hex={patternDisabledToneHex}
+                    corner-tone-hex={cornerToneHex}
+                    surface-tone-hex={surfaceToneHex}
+                    surface-hover-tone-hex={surfaceHoverToneHex}
+                    surface-selected-tone-hex={surfaceSelectedToneHex}
+                    surface-disabled-tone-hex={surfaceDisabledToneHex}
+                    badge-variant-hex={badgeVariantHex}
+                    show-icons={showIcons}
+                    show-badges={showBadges}
+                  ></c-pflow-atom-visual-pick>
+                </div>
+              </template>
+            </template>
+            <template lwc:else>
+              <p class="pflow-transfer__empty">{selectedEmptyMessage}</p>
+            </template>
+          </div>
+        </section>
+      </div>
+    </template>
+
+    <template lwc:if={showManualInput}>
+      <div class="slds-form-element pflow-manual-input">
+        <label class="slds-form-element__label" for="manual-input">
+          {resolvedManualInputLabel}
+        </label>
+        <div class="slds-form-element__control">
+          <input
+            id="manual-input"
+            type="text"
+            class="slds-input pflow-manual-input__control"
+            value={manualInputValue}
+            minlength={manualInputMinLength}
+            maxlength={manualInputMaxLength}
+            oninput={handleManualInput}
+          />
+        </div>
+        <template lwc:if={hasManualInputHelpText}>
+          <div class="slds-form-element__help">{manualInputHelpText}</div>
+        </template>
       </div>
     </template>
   </div>

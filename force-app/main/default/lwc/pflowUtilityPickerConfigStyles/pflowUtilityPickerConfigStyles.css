@@ -884,6 +884,18 @@
   gap: var(--slds-g-spacing-3, 0.75rem);
 }
 
+.pflow-card__head_with-action {
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto 1.25rem;
+}
+
+.pflow-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  min-width: max-content;
+}
+
 .pflow-card__glyph {
   width: var(--pflow-static-v-2-25rem, 2.25rem);
   height: var(--pflow-static-v-2-25rem, 2.25rem);
@@ -1090,6 +1102,20 @@
   display: flex;
   align-items: center;
   gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.pflow-studio__axis-head_with-action {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.pflow-studio__axis-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  min-width: max-content;
 }
 
 .pflow-studio__axis-head c-pflow-atom-icon {
@@ -1431,82 +1457,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   overflow-wrap: anywhere;
-}
-
-.pflow-overrides-flow {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--slds-g-spacing-1, 0.25rem);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.pflow-overrides-flow__step {
-  display: grid;
-  grid-template-columns: var(--slds-g-sizing-5, 1rem) minmax(0, 1fr);
-  align-items: center;
-  gap: var(--slds-g-spacing-1, 0.25rem);
-  min-width: 0;
-  padding: var(--slds-g-spacing-1, 0.25rem) var(--slds-g-spacing-2, 0.5rem);
-  border-radius: var(--pflow-studio-radius);
-  color: var(--pflow-studio-ink-weak);
-  background: color-mix(
-    in oklab,
-    var(--pflow-studio-surface-alt) 60%,
-    transparent
-  );
-}
-
-.pflow-overrides-flow__dot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--slds-g-sizing-5, 1rem);
-  height: var(--slds-g-sizing-5, 1rem);
-  border-radius: var(--pflow-static-v-999px, 999px);
-  color: transparent;
-  background: var(--pflow-studio-surface);
-  border: var(--slds-g-sizing-border-1, 1px) solid var(--pflow-studio-border);
-}
-
-.pflow-overrides-flow__copy {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.pflow-overrides-flow__copy strong {
-  color: var(--pflow-studio-ink);
-  font-size: var(--slds-g-font-scale-neg-2, 0.625rem);
-  line-height: var(--slds-g-font-line-height-2, 1.25);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pflow-overrides-flow__copy span {
-  color: var(--pflow-studio-ink-weak);
-  font-size: var(--slds-g-font-scale-neg-2, 0.625rem);
-  line-height: var(--slds-g-font-line-height-2, 1.25);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pflow-overrides-flow__step_active {
-  color: var(--pflow-studio-brand);
-  background: color-mix(
-    in oklab,
-    var(--pflow-studio-brand-weak) 76%,
-    transparent
-  );
-}
-
-.pflow-overrides-flow__step_done .pflow-overrides-flow__dot {
-  color: var(--slds-g-color-on-accent-1, #ffffff);
-  background: var(--pflow-studio-brand);
-  border-color: var(--pflow-studio-brand);
 }
 
 @media (max-width: 64rem) {
@@ -2323,6 +2273,16 @@
   margin-top: var(--slds-g-spacing-1, 0.25rem);
 }
 
+.pflow-tone-state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-1, 0.25rem);
+}
+
+.pflow-tone-state .pflow-hex-row {
+  padding-top: 0;
+}
+
 .pflow-tone-row__eyebrow {
   font-family:
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -2546,13 +2506,30 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   column-gap: var(--slds-g-spacing-3, 0.75rem);
-  padding: var(--slds-g-spacing-3, 0.75rem) 0 var(--slds-g-spacing-2, 0.5rem);
-  margin-top: var(--slds-g-spacing-2, 0.5rem);
+  padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+  margin: var(--slds-g-spacing-6, 2rem) 0 var(--slds-g-spacing-3, 0.75rem);
+  border: var(--slds-g-sizing-border-1, 1px) solid
+    color-mix(
+      in oklab,
+      var(--_section-accent, var(--pflow-studio-brand)) 18%,
+      transparent
+    );
+  border-left-width: var(--slds-g-sizing-border-3, 3px);
+  border-left-color: var(--_section-accent, var(--pflow-studio-brand));
+  border-radius: var(--pflow-studio-radius-lg, 0.5rem);
+  background: linear-gradient(
+    90deg,
+    color-mix(
+      in oklab,
+      var(--_section-accent, var(--pflow-studio-brand)) 7%,
+      transparent
+    ),
+    color-mix(in oklab, var(--pflow-studio-surface, #ffffff) 88%, transparent)
+  );
 }
 
 .pflow-studio__subchapter:first-of-type {
   margin-top: 0;
-  padding-top: var(--slds-g-spacing-1, 0.25rem);
 }
 
 .pflow-studio__subchapter-eyebrow {
@@ -2566,8 +2543,12 @@
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: var(--slds-g-font-scale-neg-2, 0.625rem);
   font-weight: var(--slds-g-font-weight-7, 700);
-  letter-spacing: 0.08em;
-  color: var(--pflow-studio-ink-soft, #9a9a9a);
+  letter-spacing: 0.06em;
+  color: var(--slds-g-color-on-accent-1, #ffffff);
+  background: var(--_section-accent, var(--pflow-studio-brand));
+  border-radius: var(--pflow-static-v-999px, 999px);
+  padding: var(--pflow-static-v-0-125rem, 0.125rem)
+    var(--slds-g-spacing-2, 0.5rem);
   line-height: var(--slds-g-font-line-height-1, 1);
   font-variant-numeric: tabular-nums;
 }
@@ -2588,13 +2569,64 @@
   height: var(--slds-g-sizing-border-2, 2px);
   background: repeating-linear-gradient(
     -45deg,
-    color-mix(in oklab, var(--pflow-studio-ink, #181818) 18%, transparent) 0,
-    color-mix(in oklab, var(--pflow-studio-ink, #181818) 18%, transparent) 4px,
+    color-mix(
+        in oklab,
+        var(--_section-accent, var(--pflow-studio-brand)) 22%,
+        transparent
+      )
+      0,
+    color-mix(
+        in oklab,
+        var(--_section-accent, var(--pflow-studio-brand)) 22%,
+        transparent
+      )
+      4px,
     transparent 4px,
     transparent 8px
   );
   opacity: 0.9;
   border-radius: var(--slds-g-radius-border-1, 0.125rem);
+}
+
+.pflow-studio__subchapter_layout,
+.pflow-studio__section-card_layout {
+  --_section-accent: var(--slds-g-color-brand-base-50, #0176d3);
+}
+
+.pflow-studio__subchapter_card,
+.pflow-studio__section-card_card {
+  --_section-accent: #6d42c1;
+}
+
+.pflow-studio__subchapter_icon,
+.pflow-studio__section-card_icon {
+  --_section-accent: var(--pflow-studio-brand, #0176d3);
+}
+
+.pflow-studio__subchapter_badge,
+.pflow-studio__section-card_badge {
+  --_section-accent: var(--slds-g-color-success-base-50, #3baa6f);
+}
+
+.pflow-studio__subchapter_spacing,
+.pflow-studio__section-card_spacing {
+  --_section-accent: var(--slds-g-color-warning-base-50, #b25900);
+}
+
+.pflow-studio__section-card {
+  position: relative;
+  border-left: var(--slds-g-sizing-border-3, 3px) solid
+    var(--_section-accent, transparent);
+}
+
+.pflow-studio__section-card::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--slds-g-spacing-3, 0.75rem);
+  inset-inline-start: calc(var(--slds-g-sizing-border-3, 3px) * -1);
+  width: var(--slds-g-sizing-border-3, 3px);
+  border-radius: var(--pflow-static-v-999px, 999px);
+  background: var(--_section-accent, transparent);
 }
 
 /* Inline toggle control — used for the "Show icons" / "Show badges" switches
@@ -2610,6 +2642,10 @@
 
 .pflow-studio__subchapter-toggle lightning-input {
   --slds-c-input-color-background: var(--pflow-studio-surface, #ffffff);
+}
+
+.pflow-studio__subchapter-toggle c-pflow-atom-toggle {
+  display: block;
 }
 
 /* When a sub-chapter is globally disabled (icons/badges hidden), fade the

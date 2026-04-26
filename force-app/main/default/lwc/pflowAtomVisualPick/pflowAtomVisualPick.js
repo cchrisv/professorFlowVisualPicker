@@ -41,10 +41,8 @@ const DEFAULT_BADGE_SHAPE = "pill";
 // Selection indicator style — how the "this tile is picked" state is shown.
 //   checkmark — floating circle badge top-right (default / historical)
 //   fill      — tile surface fills with brand-weak, check hidden
-//   bar       — thick brand-colored bar on the leading edge (left in grid,
-//               bottom in list)
-//   frame     — luminous inset frame with the check badge retained
-//   spotlight — selected tile gets a soft radial aura
+//   bar       — thick brand-colored bar on the leading edge
+//   frame     — inset selected frame
 //   ribbon    — folded branded corner flag
 //   pulse     — animated halo ring around the tile
 const VALID_SELECTION_INDICATORS = new Set([
@@ -52,17 +50,30 @@ const VALID_SELECTION_INDICATORS = new Set([
   "fill",
   "bar",
   "frame",
-  "spotlight",
   "ribbon",
   "pulse"
 ]);
 const DEFAULT_SELECTION_INDICATOR = "checkmark";
 
 // Elevation / card style.
-//   outlined — 1px border, shadow only on hover (default)
-//   flat     — no border, subtle surface tint
-//   elevated — 1px border + permanent drop shadow
-const VALID_ELEVATIONS = new Set(["outlined", "flat", "elevated"]);
+//   plain    — borderless clean surface
+//   subtle   — low-contrast surface and edge
+//   outlined — crisp border, no resting shadow (default)
+//   raised   — soft resting depth
+//   floating — stronger resting depth
+//   inset    — inner edge, grounded surface
+const VALID_ELEVATIONS = new Set([
+  "plain",
+  "subtle",
+  "outlined",
+  "raised",
+  "floating",
+  "inset"
+]);
+const ELEVATION_ALIASES = {
+  flat: "plain",
+  elevated: "raised"
+};
 const DEFAULT_ELEVATION = "outlined";
 
 // Pattern — decorative overlay inspired by the empty/error state
@@ -164,6 +175,16 @@ function aspectClassKey(aspect) {
   return aspect.replace(":", "-");
 }
 
+function resolveTone(itemTone, apiTone, fallback) {
+  if (itemTone && VALID_TONES.has(itemTone)) return itemTone;
+  if (apiTone && VALID_TONES.has(apiTone)) return apiTone;
+  return fallback;
+}
+
+function resolveHex(itemHex, apiHex, fallbackHex = "") {
+  return safeHex(itemHex) || safeHex(apiHex) || fallbackHex;
+}
+
 export default class PflowAtomVisualPick extends LightningElement {
   @api item = {};
   @api variant = VARIANT_GRID;
@@ -181,10 +202,16 @@ export default class PflowAtomVisualPick extends LightningElement {
   @api elevation = DEFAULT_ELEVATION;
   @api pattern = DEFAULT_PATTERN;
   @api patternTone = DEFAULT_TONE;
+  @api patternHoverTone;
+  @api patternSelectedTone;
+  @api patternDisabledTone;
   @api cornerStyle = DEFAULT_CORNER;
   @api cornerTone = DEFAULT_TONE;
   @api surfaceStyle = DEFAULT_SURFACE;
   @api surfaceTone = DEFAULT_TONE;
+  @api surfaceHoverTone;
+  @api surfaceSelectedTone;
+  @api surfaceDisabledTone;
   @api iconDecor = DEFAULT_ICON_DECOR;
   @api iconStyle = DEFAULT_ICON_STYLE;
   @api iconShading = DEFAULT_ICON_SHADING;
@@ -200,8 +227,14 @@ export default class PflowAtomVisualPick extends LightningElement {
   // by setting tone='custom' + providing a hex string.
   @api iconToneHex = "";
   @api patternToneHex = "";
+  @api patternHoverToneHex = "";
+  @api patternSelectedToneHex = "";
+  @api patternDisabledToneHex = "";
   @api cornerToneHex = "";
   @api surfaceToneHex = "";
+  @api surfaceHoverToneHex = "";
+  @api surfaceSelectedToneHex = "";
+  @api surfaceDisabledToneHex = "";
   // Matches the tone/hex pair pattern used by the other color axes —
   // badgeVariant='custom' + badgeVariantHex='#ff6b00' renders a custom-
   // tinted badge.
@@ -262,9 +295,8 @@ export default class PflowAtomVisualPick extends LightningElement {
       : DEFAULT_SELECTION_INDICATOR;
   }
   get resolvedElevation() {
-    return VALID_ELEVATIONS.has(this.elevation)
-      ? this.elevation
-      : DEFAULT_ELEVATION;
+    const value = ELEVATION_ALIASES[this.elevation] || this.elevation;
+    return VALID_ELEVATIONS.has(value) ? value : DEFAULT_ELEVATION;
   }
   get resolvedPattern() {
     const itemPattern = this.item?.pattern;
@@ -273,8 +305,28 @@ export default class PflowAtomVisualPick extends LightningElement {
   }
   get resolvedPatternTone() {
     const itemTone = this.item?.patternTone;
-    if (itemTone && VALID_TONES.has(itemTone)) return itemTone;
-    return VALID_TONES.has(this.patternTone) ? this.patternTone : DEFAULT_TONE;
+    return resolveTone(itemTone, this.patternTone, DEFAULT_TONE);
+  }
+  get resolvedPatternHoverTone() {
+    return resolveTone(
+      this.item?.patternHoverTone,
+      this.patternHoverTone,
+      this.resolvedPatternTone
+    );
+  }
+  get resolvedPatternSelectedTone() {
+    return resolveTone(
+      this.item?.patternSelectedTone,
+      this.patternSelectedTone,
+      "brand"
+    );
+  }
+  get resolvedPatternDisabledTone() {
+    return resolveTone(
+      this.item?.patternDisabledTone,
+      this.patternDisabledTone,
+      "neutral"
+    );
   }
   get resolvedCornerStyle() {
     const itemCorner = this.item?.cornerStyle;
@@ -303,8 +355,28 @@ export default class PflowAtomVisualPick extends LightningElement {
   }
   get resolvedSurfaceTone() {
     const itemTone = this.item?.surfaceTone;
-    if (itemTone && VALID_TONES.has(itemTone)) return itemTone;
-    return VALID_TONES.has(this.surfaceTone) ? this.surfaceTone : DEFAULT_TONE;
+    return resolveTone(itemTone, this.surfaceTone, DEFAULT_TONE);
+  }
+  get resolvedSurfaceHoverTone() {
+    return resolveTone(
+      this.item?.surfaceHoverTone,
+      this.surfaceHoverTone,
+      this.resolvedSurfaceTone
+    );
+  }
+  get resolvedSurfaceSelectedTone() {
+    return resolveTone(
+      this.item?.surfaceSelectedTone,
+      this.surfaceSelectedTone,
+      "brand"
+    );
+  }
+  get resolvedSurfaceDisabledTone() {
+    return resolveTone(
+      this.item?.surfaceDisabledTone,
+      this.surfaceDisabledTone,
+      "neutral"
+    );
   }
   get resolvedIconDecor() {
     const itemDecor = this.item?.iconDecor;
@@ -348,8 +420,7 @@ export default class PflowAtomVisualPick extends LightningElement {
   }
   get resolvedIconTone() {
     const itemTone = this.item?.iconTone;
-    if (itemTone && VALID_TONES.has(itemTone)) return itemTone;
-    return VALID_TONES.has(this.iconTone) ? this.iconTone : DEFAULT_TONE;
+    return resolveTone(itemTone, this.iconTone, DEFAULT_TONE);
   }
   // Glyph tone — if not explicitly set, derive from iconTone. This keeps
   // legacy behaviour (single-color icon + decor) while enabling the split
@@ -386,7 +457,31 @@ export default class PflowAtomVisualPick extends LightningElement {
   }
   get resolvedPatternHex() {
     if (this.resolvedPatternTone !== "custom") return "";
-    return safeHex(this.item?.patternToneHex) || safeHex(this.patternToneHex);
+    return resolveHex(this.item?.patternToneHex, this.patternToneHex);
+  }
+  get resolvedPatternHoverHex() {
+    if (this.resolvedPatternHoverTone !== "custom") return "";
+    return resolveHex(
+      this.item?.patternHoverToneHex,
+      this.patternHoverToneHex,
+      this.resolvedPatternHex
+    );
+  }
+  get resolvedPatternSelectedHex() {
+    if (this.resolvedPatternSelectedTone !== "custom") return "";
+    return resolveHex(
+      this.item?.patternSelectedToneHex,
+      this.patternSelectedToneHex,
+      this.resolvedPatternHex
+    );
+  }
+  get resolvedPatternDisabledHex() {
+    if (this.resolvedPatternDisabledTone !== "custom") return "";
+    return resolveHex(
+      this.item?.patternDisabledToneHex,
+      this.patternDisabledToneHex,
+      this.resolvedPatternHex
+    );
   }
   get resolvedCornerHex() {
     if (this.resolvedCornerTone !== "custom") return "";
@@ -394,7 +489,31 @@ export default class PflowAtomVisualPick extends LightningElement {
   }
   get resolvedSurfaceHex() {
     if (this.resolvedSurfaceTone !== "custom") return "";
-    return safeHex(this.item?.surfaceToneHex) || safeHex(this.surfaceToneHex);
+    return resolveHex(this.item?.surfaceToneHex, this.surfaceToneHex);
+  }
+  get resolvedSurfaceHoverHex() {
+    if (this.resolvedSurfaceHoverTone !== "custom") return "";
+    return resolveHex(
+      this.item?.surfaceHoverToneHex,
+      this.surfaceHoverToneHex,
+      this.resolvedSurfaceHex
+    );
+  }
+  get resolvedSurfaceSelectedHex() {
+    if (this.resolvedSurfaceSelectedTone !== "custom") return "";
+    return resolveHex(
+      this.item?.surfaceSelectedToneHex,
+      this.surfaceSelectedToneHex,
+      this.resolvedSurfaceHex
+    );
+  }
+  get resolvedSurfaceDisabledHex() {
+    if (this.resolvedSurfaceDisabledTone !== "custom") return "";
+    return resolveHex(
+      this.item?.surfaceDisabledToneHex,
+      this.surfaceDisabledToneHex,
+      this.resolvedSurfaceHex
+    );
   }
   // Badge custom hex — active only when resolvedBadgeVariant === 'custom'.
   get resolvedBadgeHex() {
@@ -413,10 +532,34 @@ export default class PflowAtomVisualPick extends LightningElement {
       parts.push(`--_icn-glyph-color-custom: ${this.resolvedIconGlyphHex}`);
     if (this.resolvedPatternHex)
       parts.push(`--_ptn-color-custom: ${this.resolvedPatternHex}`);
+    if (this.resolvedPatternHoverHex)
+      parts.push(`--_ptn-hover-color-custom: ${this.resolvedPatternHoverHex}`);
+    if (this.resolvedPatternSelectedHex) {
+      parts.push(
+        `--_ptn-selected-color-custom: ${this.resolvedPatternSelectedHex}`
+      );
+    }
+    if (this.resolvedPatternDisabledHex) {
+      parts.push(
+        `--_ptn-disabled-color-custom: ${this.resolvedPatternDisabledHex}`
+      );
+    }
     if (this.resolvedCornerHex)
       parts.push(`--_cnr-color-custom: ${this.resolvedCornerHex}`);
     if (this.resolvedSurfaceHex)
       parts.push(`--_srf-color-custom: ${this.resolvedSurfaceHex}`);
+    if (this.resolvedSurfaceHoverHex)
+      parts.push(`--_srf-hover-color-custom: ${this.resolvedSurfaceHoverHex}`);
+    if (this.resolvedSurfaceSelectedHex) {
+      parts.push(
+        `--_srf-selected-color-custom: ${this.resolvedSurfaceSelectedHex}`
+      );
+    }
+    if (this.resolvedSurfaceDisabledHex) {
+      parts.push(
+        `--_srf-disabled-color-custom: ${this.resolvedSurfaceDisabledHex}`
+      );
+    }
     if (this.resolvedBadgeHex)
       parts.push(`--_bdg-color-custom: ${this.resolvedBadgeHex}`);
     return parts.join("; ");
@@ -525,10 +668,16 @@ export default class PflowAtomVisualPick extends LightningElement {
       `pflow-vpick_elev-${this.resolvedElevation}`,
       `pflow-vpick_pattern-${this.resolvedPattern}`,
       `pflow-vpick_ptone-${this.resolvedPatternTone}`,
+      `pflow-vpick_phtone-${this.resolvedPatternHoverTone}`,
+      `pflow-vpick_pstone-${this.resolvedPatternSelectedTone}`,
+      `pflow-vpick_pdtone-${this.resolvedPatternDisabledTone}`,
       `pflow-vpick_corner-${this.resolvedCornerStyle}`,
       `pflow-vpick_ctone-${this.resolvedCornerTone}`,
       `pflow-vpick_surface-${this.resolvedSurfaceStyle}`,
-      `pflow-vpick_stone-${this.resolvedSurfaceTone}`
+      `pflow-vpick_stone-${this.resolvedSurfaceTone}`,
+      `pflow-vpick_shtone-${this.resolvedSurfaceHoverTone}`,
+      `pflow-vpick_sstone-${this.resolvedSurfaceSelectedTone}`,
+      `pflow-vpick_sdtone-${this.resolvedSurfaceDisabledTone}`
     ];
     if (this.selected) parts.push("pflow-vpick_selected");
     if (this.isDisabled) parts.push("pflow-vpick_disabled");

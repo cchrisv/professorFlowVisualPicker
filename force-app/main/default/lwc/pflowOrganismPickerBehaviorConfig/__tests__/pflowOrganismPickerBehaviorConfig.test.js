@@ -4,12 +4,18 @@ import PflowOrganismPickerBehaviorConfig from "c/pflowOrganismPickerBehaviorConf
 const BASE_CONFIG = {
   dataSource: "custom",
   selectionMode: "single",
-  layout: "dropdown",
+  layout: "grid",
   required: false,
   autoAdvance: true,
   includeNoneOption: true,
   noneOptionLabel: "--None--",
   noneOptionPosition: "start",
+  manualInput: {
+    enabled: false,
+    label: "Other",
+    minLength: 0,
+    maxLength: null
+  },
   enableSearch: false,
   showSelectAll: false,
   minSelections: 0,
@@ -94,7 +100,7 @@ describe("c-pflow-organism-picker-behavior-config events", () => {
     }
   });
 
-  it("emits multi-select normalization patch from the selection group", () => {
+  it("emits multi-select patch without changing compatible layout options", () => {
     const element = mount();
     const patches = collect(element);
 
@@ -107,8 +113,40 @@ describe("c-pflow-organism-picker-behavior-config events", () => {
     expect(patches[0].value).toMatchObject({
       selectionMode: "multi",
       autoAdvance: false,
-      includeNoneOption: false,
+      includeNoneOption: true,
       layout: "grid"
+    });
+  });
+
+  it("preserves the selected layout when selection mode changes", () => {
+    const radio = mount({ ...BASE_CONFIG, layout: "radio" });
+    const radioPatches = collect(radio);
+
+    cardSelect(
+      radio.shadowRoot.querySelector('[aria-label="Selection mode"]'),
+      "multi"
+    );
+
+    expect(radioPatches[0].value).toMatchObject({
+      selectionMode: "multi",
+      layout: "radio"
+    });
+
+    const transfer = mount({
+      ...BASE_CONFIG,
+      layout: "dualListbox",
+      selectionMode: "multi"
+    });
+    const transferPatches = collect(transfer);
+
+    cardSelect(
+      transfer.shadowRoot.querySelector('[aria-label="Selection mode"]'),
+      "single"
+    );
+
+    expect(transferPatches[0].value).toMatchObject({
+      selectionMode: "single",
+      layout: "dualListbox"
     });
   });
 
@@ -132,9 +170,14 @@ describe("c-pflow-organism-picker-behavior-config events", () => {
       ),
       true
     );
-    const inputs = [...element.shadowRoot.querySelectorAll("lightning-input")];
-    inputChange(inputs[0], "2");
-    inputChange(inputs[1], "");
+    inputChange(
+      byLabel(element.shadowRoot, "lightning-input", "Minimum selections"),
+      "2"
+    );
+    inputChange(
+      byLabel(element.shadowRoot, "lightning-input", "Maximum selections"),
+      ""
+    );
     valueChanged(
       element.shadowRoot.querySelector("c-pflow-organism-resource-picker"),
       "Pick one"
@@ -191,5 +234,40 @@ describe("c-pflow-organism-picker-behavior-config events", () => {
     expect(patches).toHaveLength(2);
     expect(patches[0].value.noneOptionLabel).toBe("No choice");
     expect(patches[1].value.noneOptionPosition).toBe("end");
+  });
+
+  it("emits manual input patches", () => {
+    const element = mount({
+      ...BASE_CONFIG,
+      manualInput: {
+        enabled: true,
+        label: "Other",
+        minLength: 0,
+        maxLength: null
+      }
+    });
+    const patches = collect(element);
+
+    toggle(
+      byLabel(element.shadowRoot, "c-pflow-atom-toggle", "Allow manual input"),
+      false
+    );
+    inputChange(
+      byLabel(element.shadowRoot, "lightning-input", "Manual option label"),
+      "Something else"
+    );
+    inputChange(
+      byLabel(element.shadowRoot, "lightning-input", "Minimum characters"),
+      "3"
+    );
+    inputChange(
+      byLabel(element.shadowRoot, "lightning-input", "Maximum characters"),
+      "30"
+    );
+
+    expect(patches[0].value.manualInput.enabled).toBe(false);
+    expect(patches[1].value.manualInput.label).toBe("Something else");
+    expect(patches[2].value.manualInput.minLength).toBe(3);
+    expect(patches[3].value.manualInput.maxLength).toBe(30);
   });
 });

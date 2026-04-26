@@ -1,5 +1,6 @@
 import { createElement } from "lwc";
 import PflowMoleculePickerGroup from "c/pflowMoleculePickerGroup";
+import { MANUAL_INPUT_VALUE } from "c/pflowUtilityPickerDataSources";
 
 const ITEMS = [
   {
@@ -46,12 +47,49 @@ function mount(overrides = {}) {
   el.maxSelections = overrides.maxSelections;
   el.showSelectAll = overrides.showSelectAll || false;
   el.enableSearch = overrides.enableSearch || false;
+  if ("manualInputLabel" in overrides) {
+    el.manualInputLabel = overrides.manualInputLabel;
+  }
+  if ("manualInputMinLength" in overrides) {
+    el.manualInputMinLength = overrides.manualInputMinLength;
+  }
+  if ("manualInputMaxLength" in overrides) {
+    el.manualInputMaxLength = overrides.manualInputMaxLength;
+  }
+  if ("pattern" in overrides) el.pattern = overrides.pattern;
+  if ("patternSelectedTone" in overrides) {
+    el.patternSelectedTone = overrides.patternSelectedTone;
+  }
+  if ("surfaceHoverTone" in overrides) {
+    el.surfaceHoverTone = overrides.surfaceHoverTone;
+  }
+  if ("surfaceSelectedToneHex" in overrides) {
+    el.surfaceSelectedToneHex = overrides.surfaceSelectedToneHex;
+  }
+  if ("iconDecor" in overrides) el.iconDecor = overrides.iconDecor;
+  if ("iconStyle" in overrides) el.iconStyle = overrides.iconStyle;
+  if ("selectionIndicator" in overrides) {
+    el.selectionIndicator = overrides.selectionIndicator;
+  }
+  if ("manualInputLabel" in overrides) {
+    el.manualInputLabel = overrides.manualInputLabel;
+  }
+  if ("manualInputMinLength" in overrides) {
+    el.manualInputMinLength = overrides.manualInputMinLength;
+  }
+  if ("manualInputMaxLength" in overrides) {
+    el.manualInputMaxLength = overrides.manualInputMaxLength;
+  }
   document.body.appendChild(el);
   return el;
 }
 
 function dispatchCardSelect(hostEl, value) {
   const card = hostEl.shadowRoot.querySelector("c-pflow-atom-visual-pick");
+  dispatchCardSelectFrom(card, value);
+}
+
+function dispatchCardSelectFrom(card, value) {
   card.dispatchEvent(
     new CustomEvent("cardselect", {
       detail: { value },
@@ -110,9 +148,40 @@ describe("c-pflow-molecule-picker-group", () => {
 
   it("shows Select all / Clear all toolbar in multi with showSelectAll", async () => {
     const el = mount({ selectionMode: "multi", showSelectAll: true });
+    const handler = jest.fn();
+    el.addEventListener("selectionchange", handler);
     await Promise.resolve();
     const buttons = el.shadowRoot.querySelectorAll(".pflow-toolbar__btn");
     expect(buttons.length).toBeGreaterThanOrEqual(2);
+    buttons[0].click();
+    await Promise.resolve();
+    expect(handler.mock.calls[0][0].detail.values).toEqual(["a", "b", "c"]);
+
+    buttons[1].click();
+    await Promise.resolve();
+    expect(handler.mock.calls[1][0].detail.values).toEqual([]);
+  });
+
+  it("applies Select all / Clear all toolbar to the Salesforce-style multi-select layout", async () => {
+    const el = mount({
+      variant: "dualListbox",
+      selectionMode: "multi",
+      selectedValues: ["b"],
+      showSelectAll: true
+    });
+    const handler = jest.fn();
+    el.addEventListener("selectionchange", handler);
+    await Promise.resolve();
+
+    const buttons = el.shadowRoot.querySelectorAll(".pflow-toolbar__btn");
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
+    buttons[0].click();
+    await Promise.resolve();
+    expect(handler.mock.calls[0][0].detail.values).toEqual(["a", "b", "c"]);
+
+    buttons[1].click();
+    await Promise.resolve();
+    expect(handler.mock.calls[1][0].detail.values).toEqual([]);
   });
 
   it("ignores events in preview mode", async () => {
@@ -125,32 +194,295 @@ describe("c-pflow-molecule-picker-group", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it("renders the rich combobox for dropdown variant", async () => {
-    const el = mount({ variant: "dropdown" });
+  it("renders picklist options as customizable cards", async () => {
+    const el = mount({
+      variant: "picklist",
+      selectedValues: ["b"],
+      pattern: "dots",
+      patternSelectedTone: "pink",
+      surfaceHoverTone: "teal",
+      surfaceSelectedToneHex: "#123456",
+      iconDecor: "ring"
+    });
     await Promise.resolve();
-    expect(
-      el.shadowRoot.querySelector("c-pflow-molecule-rich-combobox")
-    ).not.toBeNull();
+
+    const trigger = el.shadowRoot.querySelector(".pflow-picklist__trigger");
+    expect(trigger).not.toBeNull();
+    trigger.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, composed: true })
+    );
+    await Promise.resolve();
+
+    const cards = el.shadowRoot.querySelectorAll(
+      ".pflow-picklist__menu c-pflow-atom-visual-pick"
+    );
+    expect(cards).toHaveLength(3);
+    expect(cards[0].variant).toBe("list");
+    expect(cards[0].pattern).toBe("dots");
+    expect(cards[0].patternSelectedTone).toBe("pink");
+    expect(cards[0].surfaceHoverTone).toBe("teal");
+    expect(cards[0].surfaceSelectedToneHex).toBe("#123456");
+    expect(cards[0].iconDecor).toBe("ring");
+    expect(cards[0].selectionMode).toBe("single");
   });
 
-  it("passes rich dropdown changes through selectionchange", async () => {
-    const el = mount({ variant: "dropdown" });
+  it("keeps multiselect picklist open and toggles card options", async () => {
+    const el = mount({
+      variant: "picklist",
+      selectionMode: "multi",
+      selectedValues: ["a"],
+      enableSearch: true
+    });
     const handler = jest.fn();
     el.addEventListener("selectionchange", handler);
     await Promise.resolve();
 
-    const combobox = el.shadowRoot.querySelector(
-      "c-pflow-molecule-rich-combobox"
-    );
-    combobox.dispatchEvent(
-      new CustomEvent("change", {
-        detail: { value: "c" },
-        bubbles: true
-      })
-    );
+    el.shadowRoot
+      .querySelector(".pflow-picklist__trigger")
+      .dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await Promise.resolve();
 
+    expect(el.shadowRoot.querySelector(".pflow-search-bar")).toBeNull();
+    expect(
+      el.shadowRoot.querySelector(".pflow-picklist__search")
+    ).not.toBeNull();
+    const cards = el.shadowRoot.querySelectorAll(
+      ".pflow-picklist__menu c-pflow-atom-visual-pick"
+    );
+    expect(cards[0].selectionMode).toBe("multi");
+    dispatchCardSelectFrom(cards[1], "b");
+    await Promise.resolve();
+
+    expect(handler.mock.calls[0][0].detail.values).toEqual(["a", "b"]);
+    expect(el.shadowRoot.querySelector(".pflow-picklist__menu")).not.toBeNull();
+  });
+
+  it("renders radio as card-backed radio rows", async () => {
+    const el = mount({
+      variant: "radio",
+      selectedValues: ["a"],
+      selectionIndicator: "frame"
+    });
+    await Promise.resolve();
+
+    expect(el.shadowRoot.querySelector(".pflow-group_radio")).not.toBeNull();
+    expect(el.shadowRoot.querySelectorAll(".pflow-radio-card")).toHaveLength(3);
+    const card = el.shadowRoot.querySelector("c-pflow-atom-visual-pick");
+    expect(card.variant).toBe("list");
+    expect(card.selectionMode).toBe("single");
+    expect(card.selectionIndicator).toBe("frame");
+  });
+
+  it("renders radio layout with checkbox affordances in multiselect mode", async () => {
+    const el = mount({
+      variant: "radio",
+      selectionMode: "multi",
+      selectedValues: ["a", "b"]
+    });
+    await Promise.resolve();
+
+    expect(
+      el.shadowRoot.querySelectorAll(".pflow-radio-card_multi")
+    ).toHaveLength(3);
+    const card = el.shadowRoot.querySelector("c-pflow-atom-visual-pick");
+    expect(card.selectionMode).toBe("multi");
+  });
+
+  it("renders drag/drop columns with available and selected card panels", async () => {
+    const el = mount({
+      variant: "columns",
+      selectionMode: "multi",
+      selectedValues: ["b"]
+    });
+    await Promise.resolve();
+
+    expect(
+      el.shadowRoot.querySelector(".pflow-transfer_columns")
+    ).not.toBeNull();
+    const available = el.shadowRoot.querySelector(
+      'section[aria-label="Available card column"]'
+    );
+    const selected = el.shadowRoot.querySelector(
+      'section[aria-label="Selected card column"]'
+    );
+    expect(available.querySelectorAll("c-pflow-atom-visual-pick")).toHaveLength(
+      2
+    );
+    expect(selected.querySelector("c-pflow-atom-visual-pick").item.value).toBe(
+      "b"
+    );
+  });
+
+  it("moves cards with controls in the Salesforce-style multi-select layout", async () => {
+    const el = mount({
+      variant: "dualListbox",
+      selectionMode: "multi",
+      selectedValues: ["b"]
+    });
+    const handler = jest.fn();
+    el.addEventListener("selectionchange", handler);
+    await Promise.resolve();
+
+    const available = el.shadowRoot.querySelector(
+      'section[aria-label="Available options"]'
+    );
+    const selected = el.shadowRoot.querySelector(
+      'section[aria-label="Chosen options"]'
+    );
+
+    dispatchCardSelectFrom(
+      available.querySelector("c-pflow-atom-visual-pick"),
+      "a"
+    );
+    await Promise.resolve();
+    el.shadowRoot.querySelector('[title="Move selected to chosen"]').click();
+    await Promise.resolve();
+    expect(handler.mock.calls[0][0].detail.values).toEqual(["b", "a"]);
+
+    dispatchCardSelectFrom(
+      selected.querySelector("c-pflow-atom-visual-pick"),
+      "b"
+    );
+    await Promise.resolve();
+    el.shadowRoot.querySelector('[title="Remove selected"]').click();
+    await Promise.resolve();
+    expect(handler.mock.calls[1][0].detail.values).toEqual(["a"]);
+  });
+
+  it("supports single-select transfer layouts without forcing multiselect", async () => {
+    const el = mount({
+      variant: "columns",
+      selectionMode: "single",
+      selectedValues: ["b"]
+    });
+    const handler = jest.fn();
+    el.addEventListener("selectionchange", handler);
+    await Promise.resolve();
+
+    const available = el.shadowRoot.querySelector(
+      'section[aria-label="Available card column"]'
+    );
+    dispatchCardSelectFrom(
+      available.querySelector("c-pflow-atom-visual-pick"),
+      "a"
+    );
+    expect(handler.mock.calls[0][0].detail.values).toEqual(["a"]);
+  });
+
+  it("filters transfer layouts from the available panel", async () => {
+    const el = mount({
+      variant: "dualListbox",
+      selectionMode: "multi",
+      enableSearch: true
+    });
+    await Promise.resolve();
+
+    expect(el.shadowRoot.querySelector(".pflow-search-bar")).toBeNull();
+    const search = el.shadowRoot.querySelector(".pflow-transfer__search input");
+    search.value = "Gamma";
+    search.dispatchEvent(new CustomEvent("input", { bubbles: true }));
+    await Promise.resolve();
+
+    const available = el.shadowRoot.querySelector(
+      'section[aria-label="Available options"]'
+    );
+    expect(available.querySelectorAll("c-pflow-atom-visual-pick")).toHaveLength(
+      1
+    );
+    expect(available.querySelector("c-pflow-atom-visual-pick").item.value).toBe(
+      "c"
+    );
+  });
+
+  it("treats the none option as a clear action in every layout", async () => {
+    const noneItem = {
+      id: "__none__",
+      label: "None",
+      value: "",
+      disabled: false
+    };
+    const el = mount({
+      variant: "grid",
+      selectionMode: "multi",
+      selectedValues: ["a", "b"],
+      items: [noneItem, ...ITEMS]
+    });
+    const handler = jest.fn();
+    el.addEventListener("selectionchange", handler);
+    await Promise.resolve();
+
+    dispatchCardSelectFrom(
+      el.shadowRoot.querySelector("c-pflow-atom-visual-pick"),
+      ""
+    );
+    expect(handler.mock.calls[0][0].detail.values).toEqual([]);
+  });
+
+  it("shows manual input after the manual option is selected", async () => {
+    const manualItem = {
+      id: MANUAL_INPUT_VALUE,
+      label: "Other",
+      value: MANUAL_INPUT_VALUE,
+      disabled: false,
+      manualInput: true
+    };
+    const el = mount({
+      items: [...ITEMS, manualItem],
+      manualInputLabel: "Other response",
+      manualInputMinLength: 2,
+      manualInputMaxLength: 10
+    });
+    const handler = jest.fn();
+    el.addEventListener("selectionchange", handler);
+    await Promise.resolve();
+
+    const cards = el.shadowRoot.querySelectorAll("c-pflow-atom-visual-pick");
+    dispatchCardSelectFrom(cards[cards.length - 1], MANUAL_INPUT_VALUE);
+    await Promise.resolve();
+
+    const input = el.shadowRoot.querySelector(".pflow-manual-input__control");
+    expect(input).not.toBeNull();
+    expect(input.getAttribute("minlength")).toBe("2");
+    expect(input.getAttribute("maxlength")).toBe("10");
+    input.value = "Manual";
+    input.dispatchEvent(new CustomEvent("input", { bubbles: true }));
+
+    expect(handler.mock.calls.at(-1)[0].detail.values).toEqual([
+      MANUAL_INPUT_VALUE
+    ]);
+    expect(handler.mock.calls.at(-1)[0].detail.manualValue).toBe("Manual");
+  });
+
+  it("supports dragging cards between transfer columns", async () => {
+    const el = mount({ variant: "columns", selectionMode: "multi" });
+    const handler = jest.fn();
+    el.addEventListener("selectionchange", handler);
+    await Promise.resolve();
+
+    const availableItem = el.shadowRoot.querySelector(".pflow-transfer__item");
+    const dragData = {};
+    const dragStart = new CustomEvent("dragstart", { bubbles: true });
+    Object.defineProperty(dragStart, "dataTransfer", {
+      value: {
+        setData: jest.fn((type, value) => {
+          dragData[type] = value;
+        })
+      }
+    });
+    availableItem.dispatchEvent(dragStart);
+
+    const selectedPanel = el.shadowRoot.querySelector(
+      'section[aria-label="Selected card column"]'
+    );
+    const drop = new CustomEvent("drop", { bubbles: true });
+    Object.defineProperty(drop, "dataTransfer", {
+      value: {
+        getData: jest.fn((type) => dragData[type])
+      }
+    });
+    selectedPanel.dispatchEvent(drop);
+
     expect(handler).toHaveBeenCalledTimes(1);
-    expect(handler.mock.calls[0][0].detail.values).toEqual(["c"]);
+    expect(handler.mock.calls[0][0].detail.values).toEqual(["a"]);
   });
 });

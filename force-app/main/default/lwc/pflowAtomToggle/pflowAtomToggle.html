@@ -1,17 +1,46 @@
 <template>
-  <div class={cbClass}>
-    <lightning-input
-      type="toggle"
-      label={label}
-      name={name}
-      data-name={name}
-      variant={variant}
-      field-level-help={fieldLevelHelp}
-      message-toggle-active={messageToggleActive}
-      message-toggle-inactive={messageToggleInactive}
-      checked={isChecked}
-      disabled={disabled}
-      onchange={handleToggle}
-    ></lightning-input>
+  <div class={rootClass}>
+    <div class="slds-form-element">
+      <template lwc:if={hasVisibleLabel}>
+        <div class="pflow-toggle__label-row">
+          <span class="slds-form-element__label pflow-toggle__label">
+            {label}
+          </span>
+          <template lwc:if={fieldLevelHelp}>
+            <lightning-helptext content={fieldLevelHelp}></lightning-helptext>
+          </template>
+        </div>
+      </template>
+      <div class="slds-form-element__control">
+        <div
+          class="pflow-toggle__control"
+          role="radiogroup"
+          aria-label={computedAriaLabel}
+        >
+          <button
+            type="button"
+            class={inactiveOptionClass}
+            data-checked="false"
+            role="radio"
+            aria-checked={inactiveAriaChecked}
+            disabled={disabled}
+            onclick={handleChoiceClick}
+          >
+            <span class="pflow-toggle__option-label">{inactiveText}</span>
+          </button>
+          <button
+            type="button"
+            class={activeOptionClass}
+            data-checked="true"
+            role="radio"
+            aria-checked={activeAriaChecked}
+            disabled={disabled}
+            onclick={handleChoiceClick}
+          >
+            <span class="pflow-toggle__option-label">{activeText}</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

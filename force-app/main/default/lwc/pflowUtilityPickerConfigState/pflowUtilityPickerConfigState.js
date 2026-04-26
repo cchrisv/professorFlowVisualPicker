@@ -35,6 +35,10 @@ export function mergePickerConfig(initialConfig) {
     stringCollection: {
       sampleValues: incoming.stringCollection?.sampleValues || ""
     },
+    manualInput: {
+      ...base.manualInput,
+      ...(incoming.manualInput || {})
+    },
     overrides:
       incoming.overrides && typeof incoming.overrides === "object"
         ? incoming.overrides

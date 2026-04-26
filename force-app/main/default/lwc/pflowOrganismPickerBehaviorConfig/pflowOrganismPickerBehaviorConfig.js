@@ -39,9 +39,6 @@ export default class PflowOrganismPickerBehaviorConfig extends LightningElement 
     const next = { ...this._config, selectionMode: value };
     if (value === "multi") {
       next.autoAdvance = false;
-      next.includeNoneOption = false;
-      if (next.layout === "dropdown" || next.layout === "radio")
-        next.layout = "grid";
     }
     this._config = next;
   }
@@ -72,7 +69,7 @@ export default class PflowOrganismPickerBehaviorConfig extends LightningElement 
   }
 
   get isNoneOptionAvailable() {
-    return this.isSingleSelect;
+    return true;
   }
   get noneOptionValue() {
     return Boolean(this._config.includeNoneOption);
@@ -84,7 +81,25 @@ export default class PflowOrganismPickerBehaviorConfig extends LightningElement 
     return this._config.noneOptionPosition === "end" ? "end" : "start";
   }
   get isNoneOptionLabelDisabled() {
-    return !this.isNoneOptionAvailable || !this.noneOptionValue;
+    return !this.noneOptionValue;
+  }
+  get manualInputConfig() {
+    return this._config.manualInput || {};
+  }
+  get manualInputValue() {
+    return Boolean(this.manualInputConfig.enabled);
+  }
+  get manualInputLabelValue() {
+    return this.manualInputConfig.label ?? "Other";
+  }
+  get manualInputMinLengthValue() {
+    return this.manualInputConfig.minLength ?? 0;
+  }
+  get manualInputMaxLengthValue() {
+    return this.manualInputConfig.maxLength ?? null;
+  }
+  get isManualInputDisabled() {
+    return !this.manualInputValue;
   }
   get noneOptionPositionTiles() {
     const active = this.noneOptionPositionValue;
@@ -115,6 +130,35 @@ export default class PflowOrganismPickerBehaviorConfig extends LightningElement 
     const value = event.detail?.value;
     if (value === "start" || value === "end")
       this._config = { ...this._config, noneOptionPosition: value };
+  }
+  handleManualInputToggle(event) {
+    const checked = event.detail?.checked ?? event.target?.checked ?? false;
+    this._config = {
+      ...this._config,
+      manualInput: {
+        ...this.manualInputConfig,
+        enabled: Boolean(checked)
+      }
+    };
+  }
+  handleManualInputLabelChange(event) {
+    this.patchManualInput("label", this.readValue(event));
+  }
+  handleManualInputMinLengthChange(event) {
+    this.patchManualInput("minLength", Number(event.target.value) || 0);
+  }
+  handleManualInputMaxLengthChange(event) {
+    const raw = event.target.value;
+    this.patchManualInput("maxLength", raw === "" ? null : Number(raw));
+  }
+  patchManualInput(key, value) {
+    this._config = {
+      ...this._config,
+      manualInput: {
+        ...this.manualInputConfig,
+        [key]: value
+      }
+    };
   }
 
   readValue(event) {

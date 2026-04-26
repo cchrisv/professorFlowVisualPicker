@@ -1,4 +1,5 @@
 const EMPTY = "";
+export const MANUAL_INPUT_VALUE = "__pflow_manual_input__";
 
 function safeGet(record, fieldPath) {
   if (!record || !fieldPath) return EMPTY;
